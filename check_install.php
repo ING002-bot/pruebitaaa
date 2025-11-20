@@ -183,7 +183,9 @@
             // Verificar Google Maps API Key
             if ($configOk) {
                 require_once $configFile;
-                $apiKeyOk = defined('GOOGLE_MAPS_API_KEY') && GOOGLE_MAPS_API_KEY !== 'TU_API_KEY_AQUI';
+                $apiKeyOk = defined('GOOGLE_MAPS_API_KEY') && 
+                            GOOGLE_MAPS_API_KEY !== 'TU_API_KEY_AQUI' && 
+                            strlen(GOOGLE_MAPS_API_KEY) > 20;
                 $checks[] = [
                     'name' => 'Google Maps API Key',
                     'status' => $apiKeyOk ? 'success' : 'warning',

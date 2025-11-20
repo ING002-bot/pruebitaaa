@@ -13,7 +13,7 @@ define('UPLOADS_DIR', __DIR__ . '/../uploads/');
 define('UPLOADS_URL', APP_URL . 'uploads/');
 
 // API de Google Maps (Reemplaza con tu API Key)
-define('GOOGLE_MAPS_API_KEY', 'TU_API_KEY_AQUI');
+define('GOOGLE_MAPS_API_KEY', 'AIzaSyAhKq8glWDGij47iJZy2_RB8jan9D1V-Sk');
 
 // Configuración de uploads
 define('MAX_UPLOAD_SIZE', 5242880); // 5MB
