@@ -444,3 +444,56 @@ tbody tr:hover {
 ::-webkit-scrollbar-thumb:hover {
     background: var(--secondary-color);
 }
+
+/* Notificaciones Dropdown */
+.notificaciones-dropdown {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: none;
+    border-radius: 8px;
+}
+
+.notificaciones-dropdown .dropdown-header {
+    background: #f8f9fa;
+    font-weight: 600;
+    padding: 12px 15px;
+}
+
+.notificacion-item {
+    padding: 12px 15px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.2s;
+}
+
+.notificacion-item:hover {
+    background-color: #f8f9fa;
+}
+
+.notificacion-item.leida {
+    opacity: 0.6;
+}
+
+.notificacion-item strong {
+    font-size: 14px;
+    margin-bottom: 4px;
+}
+
+.notificacion-item small {
+    font-size: 12px;
+}
+
+.notificaciones-dropdown .bi {
+    font-size: 18px;
+}
+
+.header-icon .badge {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: var(--danger-color);
+    color: white;
+    font-size: 10px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-weight: 600;
+    display: none;
+}

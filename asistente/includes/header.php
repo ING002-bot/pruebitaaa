@@ -1,4 +1,4 @@
-<!-- Header Include para Repartidor -->
+<!-- Header Include para Asistente -->
 <script>
 // Prevenir acceso mediante botón de retroceso después de logout
 (function() {
@@ -15,7 +15,10 @@
         <button class="menu-toggle" onclick="toggleSidebar()">
             <i class="bi bi-list"></i>
         </button>
-        <h4 class="mb-0">¡Bienvenido, <?php echo $_SESSION['nombre']; ?>!</h4>
+        <div class="header-search">
+            <i class="bi bi-search"></i>
+            <input type="text" placeholder="Buscar paquetes...">
+        </div>
     </div>
     
     <div class="header-right">
@@ -46,7 +49,7 @@
             <img src="<?php echo $foto_url; ?>" alt="Avatar" onerror="this.src='../assets/img/default-avatar.svg'">
             <div class="user-info">
                 <span class="user-name"><?php echo htmlspecialchars($_SESSION['nombre']); ?></span>
-                <span class="user-role">Repartidor</span>
+                <span class="user-role">Asistente</span>
             </div>
         </div>
     </div>

@@ -22,14 +22,33 @@
     </div>
     
     <div class="header-right">
-        <div class="header-icon" title="Notificaciones">
-            <i class="bi bi-bell"></i>
-            <span class="badge">0</span>
+        <div class="dropdown">
+            <div class="header-icon" id="notificacionesDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;" title="Notificaciones">
+                <i class="bi bi-bell"></i>
+                <span class="badge" id="notificaciones-count">0</span>
+            </div>
+            <ul class="dropdown-menu dropdown-menu-end notificaciones-dropdown" aria-labelledby="notificacionesDropdown" style="width: 350px; max-height: 400px; overflow-y: auto;">
+                <li class="dropdown-header d-flex justify-content-between align-items-center">
+                    <span>Notificaciones</span>
+                    <a href="#" class="text-primary small" onclick="marcarTodasLeidas(); return false;">Marcar todas como leídas</a>
+                </li>
+                <li><hr class="dropdown-divider"></li>
+                <div id="notificaciones-lista">
+                    <li class="dropdown-item text-center text-muted">
+                        <small>No hay notificaciones</small>
+                    </li>
+                </div>
+            </ul>
         </div>
         <div class="user-profile">
-            <img src="../assets/img/<?php echo $_SESSION['foto_perfil']; ?>" alt="Avatar" onerror="this.src='../assets/img/default-avatar.svg'">
+            <?php 
+            $foto_url = !empty($_SESSION['foto_perfil']) && $_SESSION['foto_perfil'] != 'default-avatar.svg' 
+                ? '../uploads/perfiles/' . $_SESSION['foto_perfil'] 
+                : '../assets/img/default-avatar.svg';
+            ?>
+            <img src="<?php echo $foto_url; ?>" alt="Avatar" onerror="this.src='../assets/img/default-avatar.svg'">
             <div class="user-info">
-                <span class="user-name"><?php echo $_SESSION['nombre']; ?></span>
+                <span class="user-name"><?php echo htmlspecialchars($_SESSION['nombre']); ?></span>
                 <span class="user-role">Administrador</span>
             </div>
         </div>

@@ -1,5 +1,6 @@
 <?php
 require_once '../config/config.php';
+require_once '../config/notificaciones_helper.php';
 requireRole('repartidor');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -162,6 +163,16 @@ try {
     
     // Registrar actividad
     logActivity('Registro de entrega', 'entregas', $paquete_id, "Tipo: $tipo_entrega");
+    
+    // Crear notificaciones
+    if ($tipo_entrega === 'exitosa') {
+        $admins = obtenerAdministradores();
+        $repartidor_nombre = $_SESSION['nombre'] . ' ' . $_SESSION['apellido'];
+        notificarEntregaExitosa($admins, $paquete['codigo_seguimiento'], $repartidor_nombre);
+    } elseif (in_array($tipo_entrega, ['rechazada', 'no_encontrado'])) {
+        $admins = obtenerAdministradores();
+        notificarPaqueteRezagado($admins, $paquete_id, $paquete['codigo_seguimiento']);
+    }
     
     // Commit
     $db->commit();
