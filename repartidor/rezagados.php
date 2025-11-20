@@ -10,7 +10,9 @@ $stmt = $db->prepare("
     SELECT p.*, pr.motivo, pr.descripcion_motivo, pr.fecha_rezago, pr.intentos_realizados, pr.proximo_intento
     FROM paquetes p
     INNER JOIN paquetes_rezagados pr ON p.id = pr.paquete_id
-    WHERE p.repartidor_id = ? AND pr.solucionado = 0
+    WHERE p.repartidor_id = ? 
+    AND pr.solucionado = 0
+    AND p.estado IN ('rezagado', 'pendiente', 'en_ruta')
     ORDER BY pr.fecha_rezago DESC
 ");
 $stmt->execute([$repartidor_id]);

@@ -9,7 +9,8 @@ $sql = "SELECT p.*, pr.*, u.nombre as repartidor_nombre, u.apellido as repartido
         FROM paquetes_rezagados pr
         INNER JOIN paquetes p ON pr.paquete_id = p.id
         LEFT JOIN usuarios u ON p.repartidor_id = u.id
-        WHERE pr.solucionado = 0
+        WHERE pr.solucionado = 0 
+        AND p.estado IN ('rezagado', 'pendiente', 'en_ruta')
         ORDER BY pr.fecha_rezago DESC";
 $rezagados = $db->query($sql)->fetchAll();
 ?>

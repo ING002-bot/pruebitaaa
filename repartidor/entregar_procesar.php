@@ -110,10 +110,19 @@ try {
     // Actualizar estado del paquete
     if ($tipo_entrega === 'exitosa') {
         $nuevo_estado = 'entregado';
+        
+        // Si el paquete estaba rezagado, marcarlo como solucionado
+        $sql_resolver_rezagado = "UPDATE paquetes_rezagados 
+                                  SET solucionado = 1, 
+                                      fecha_solucion = NOW() 
+                                  WHERE paquete_id = ? AND solucionado = 0";
+        $stmt_resolver = $db->prepare($sql_resolver_rezagado);
+        $stmt_resolver->execute([$paquete_id]);
+        
     } elseif ($tipo_entrega === 'no_encontrado' || $tipo_entrega === 'rechazada') {
         $nuevo_estado = 'rezagado';
         
-        // Registrar en tabla de rezagados
+        // Registrar en tabla de rezagados (nuevo intento fallido)
         $motivo = $tipo_entrega === 'no_encontrado' ? 'destinatario_ausente' : 'rechazo';
         $sql_rezagado = "INSERT INTO paquetes_rezagados (paquete_id, motivo, descripcion_motivo) 
                          VALUES (?, ?, ?)";
