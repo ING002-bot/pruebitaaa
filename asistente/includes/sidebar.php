@@ -1,5 +1,5 @@
 <!-- Sidebar Include para Asistente -->
-<div class="sidebar" id="sidebar">
+<div class="sidebar active" id="sidebar">
     <div class="sidebar-header">
         <i class="bi bi-box-seam"></i>
         <h3>HERMES EXPRESS</h3>

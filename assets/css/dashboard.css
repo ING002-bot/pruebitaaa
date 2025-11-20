@@ -420,7 +420,7 @@ tbody tr:hover {
     }
     
     .sidebar.active {
-        transform: translateX(0);
+        transform: translateX(0) !important;
     }
     
     .main-content {
@@ -434,6 +434,13 @@ tbody tr:hover {
     .header-search input {
         width: 200px;
     }
+}
+
+/* Forzar visibilidad del sidebar con clase active */
+.sidebar.active {
+    transform: translateX(0) !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 @media (max-width: 576px) {
