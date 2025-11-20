@@ -58,10 +58,6 @@ if (!$entrega) {
                 <th>DNI:</th>
                 <td><?php echo $entrega['receptor_dni'] ?: '-'; ?></td>
             </tr>
-            <tr>
-                <th>Relación:</th>
-                <td><?php echo $entrega['receptor_relacion'] ?: '-'; ?></td>
-            </tr>
         </table>
     </div>
 
@@ -90,10 +86,10 @@ if (!$entrega) {
                     <span class="badge bg-<?php echo $badge; ?>"><?php echo ucfirst($entrega['tipo_entrega']); ?></span>
                 </td>
             </tr>
-            <?php if ($entrega['motivo_rechazo']): ?>
+            <?php if (!empty($entrega['observaciones']) && $entrega['tipo_entrega'] == 'rechazada'): ?>
             <tr>
-                <th>Motivo Rechazo:</th>
-                <td class="text-danger"><?php echo $entrega['motivo_rechazo']; ?></td>
+                <th>Observaciones:</th>
+                <td class="text-danger"><?php echo $entrega['observaciones']; ?></td>
             </tr>
             <?php endif; ?>
         </table>
