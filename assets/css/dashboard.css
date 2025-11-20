@@ -32,11 +32,12 @@ body {
     height: 100vh;
     background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
     color: white;
-    overflow-y: auto;
+    overflow-y: auto !important;
     overflow-x: hidden;
     transition: all 0.3s ease;
     z-index: 1000;
     transform: translateX(0); /* Siempre visible por defecto */
+    display: block !important;
 }
 
 /* Scrollbar del sidebar */
@@ -83,6 +84,8 @@ body {
 .sidebar-menu {
     padding: 20px 0;
     padding-bottom: 50px; /* Espacio extra al final para ver todo el contenido */
+    min-height: min-content;
+    height: auto;
 }
 
 .menu-section {
