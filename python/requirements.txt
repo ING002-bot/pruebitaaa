@@ -1,0 +1,6 @@
+# Dependencias necesarias para el script de importación de SAVAR
+
+selenium==4.15.2
+mysql-connector-python==8.2.0
+requests==2.31.0
+python-dotenv==1.0.0

@@ -1,0 +1,58 @@
+<?php
+require_once '../config/config.php';
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $email = sanitize($_POST['email']);
+    $password = $_POST['password'];
+    
+    try {
+        $db = Database::getInstance()->getConnection();
+        $sql = "SELECT * FROM usuarios WHERE email = ? AND estado = 'activo'";
+        $stmt = $db->prepare($sql);
+        $stmt->execute([$email]);
+        $usuario = $stmt->fetch();
+        
+        if ($usuario && password_verify($password, $usuario['password'])) {
+            // Actualizar último acceso
+            $updateSql = "UPDATE usuarios SET ultimo_acceso = NOW() WHERE id = ?";
+            $updateStmt = $db->prepare($updateSql);
+            $updateStmt->execute([$usuario['id']]);
+            
+            // Crear sesión
+            $_SESSION['usuario_id'] = $usuario['id'];
+            $_SESSION['nombre'] = $usuario['nombre'];
+            $_SESSION['apellido'] = $usuario['apellido'];
+            $_SESSION['email'] = $usuario['email'];
+            $_SESSION['rol'] = $usuario['rol'];
+            $_SESSION['foto_perfil'] = $usuario['foto_perfil'];
+            
+            // Log de actividad
+            logActivity('Inicio de sesión exitoso', 'usuarios', $usuario['id']);
+            
+            // Redireccionar según el rol
+            switch ($usuario['rol']) {
+                case 'admin':
+                    redirect(APP_URL . 'admin/dashboard.php');
+                    break;
+                case 'asistente':
+                    redirect(APP_URL . 'asistente/dashboard.php');
+                    break;
+                case 'repartidor':
+                    redirect(APP_URL . 'repartidor/dashboard.php');
+                    break;
+                default:
+                    redirect(APP_URL . 'index.php');
+            }
+        } else {
+            setFlashMessage('danger', 'Email o contraseña incorrectos');
+            logActivity('Intento de inicio de sesión fallido - Email: ' . $email);
+            redirect(APP_URL . 'auth/login.php');
+        }
+    } catch (Exception $e) {
+        setFlashMessage('danger', 'Error al iniciar sesión. Por favor, intente nuevamente.');
+        error_log("Error en login: " . $e->getMessage());
+        redirect(APP_URL . 'auth/login.php');
+    }
+} else {
+    redirect(APP_URL . 'auth/login.php');
+}
