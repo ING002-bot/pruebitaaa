@@ -33,9 +33,28 @@ body {
     background: linear-gradient(180deg, var(--primary-color), var(--secondary-color));
     color: white;
     overflow-y: auto;
+    overflow-x: hidden;
     transition: all 0.3s ease;
     z-index: 1000;
     transform: translateX(0); /* Siempre visible por defecto */
+}
+
+/* Scrollbar del sidebar */
+.sidebar::-webkit-scrollbar {
+    width: 6px;
+}
+
+.sidebar::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.sidebar::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 3px;
+}
+
+.sidebar::-webkit-scrollbar-thumb:hover {
+    background: rgba(255, 255, 255, 0.5);
 }
 
 .sidebar-header {
@@ -63,6 +82,7 @@ body {
 
 .sidebar-menu {
     padding: 20px 0;
+    padding-bottom: 50px; /* Espacio extra al final para ver todo el contenido */
 }
 
 .menu-section {
