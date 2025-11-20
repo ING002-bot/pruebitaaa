@@ -43,14 +43,31 @@ $repartidores = $db->query("SELECT id, nombre, apellido FROM usuarios WHERE rol 
         </div>
         <div class="col-md-6 mb-3">
             <label class="form-label">Estado</label>
-            <select class="form-select" name="estado">
-                <option value="pendiente" <?php echo $paquete['estado'] === 'pendiente' ? 'selected' : ''; ?>>Pendiente</option>
-                <option value="en_ruta" <?php echo $paquete['estado'] === 'en_ruta' ? 'selected' : ''; ?>>En Ruta</option>
-                <option value="entregado" <?php echo $paquete['estado'] === 'entregado' ? 'selected' : ''; ?>>Entregado</option>
-                <option value="rezagado" <?php echo $paquete['estado'] === 'rezagado' ? 'selected' : ''; ?>>Rezagado</option>
-                <option value="devuelto" <?php echo $paquete['estado'] === 'devuelto' ? 'selected' : ''; ?>>Devuelto</option>
-                <option value="cancelado" <?php echo $paquete['estado'] === 'cancelado' ? 'selected' : ''; ?>>Cancelado</option>
-            </select>
+            <?php
+            $estados_labels = [
+                'pendiente' => 'Pendiente',
+                'en_ruta' => 'En Ruta',
+                'entregado' => 'Entregado',
+                'rezagado' => 'Rezagado',
+                'devuelto' => 'Devuelto',
+                'cancelado' => 'Cancelado'
+            ];
+            $estado_badges = [
+                'pendiente' => 'secondary',
+                'en_ruta' => 'primary',
+                'entregado' => 'success',
+                'rezagado' => 'warning',
+                'devuelto' => 'danger',
+                'cancelado' => 'dark'
+            ];
+            ?>
+            <div class="form-control bg-light" style="display: flex; align-items: center; height: 38px;">
+                <span class="badge bg-<?php echo $estado_badges[$paquete['estado']]; ?>">
+                    <?php echo $estados_labels[$paquete['estado']]; ?>
+                </span>
+                <small class="text-muted ms-2">(El estado cambia automáticamente según las entregas)</small>
+            </div>
+            <input type="hidden" name="estado" value="<?php echo $paquete['estado']; ?>">
         </div>
         <div class="col-12 mb-3">
             <label class="form-label">Dirección Completa</label>
