@@ -26,11 +26,11 @@ if (!$ruta) {
 }
 
 // Obtener paquetes asignados a la ruta
-$sql = "SELECT p.*, c.nombre as cliente_nombre, c.telefono as cliente_telefono
+$sql = "SELECT p.*, rp.orden_entrega, rp.estado as estado_ruta
         FROM paquetes p
-        LEFT JOIN clientes c ON p.cliente_id = c.id
-        WHERE p.ruta_id = ?
-        ORDER BY p.estado, p.id DESC";
+        INNER JOIN ruta_paquetes rp ON p.id = rp.paquete_id
+        WHERE rp.ruta_id = ?
+        ORDER BY rp.orden_entrega, p.estado, p.id DESC";
 $stmt = $db->prepare($sql);
 $stmt->execute([$ruta_id]);
 $paquetes = $stmt->fetchAll();
@@ -232,11 +232,11 @@ foreach ($paquetes as $paquete) {
                             <thead>
                                 <tr>
                                     <th>Código Seguimiento</th>
-                                    <th>Cliente</th>
+                                    <th>Destinatario</th>
                                     <th>Dirección</th>
-                                    <th>Ubicación</th>
-                                    <th>Tipo Servicio</th>
-                                    <th>Monto</th>
+                                    <th>Ciudad</th>
+                                    <th>Prioridad</th>
+                                    <th>Costo</th>
                                     <th>Estado</th>
                                 </tr>
                             </thead>
@@ -249,20 +249,20 @@ foreach ($paquetes as $paquete) {
                                         </a>
                                     </td>
                                     <td>
-                                        <?php echo $paquete['cliente_nombre']; ?><br>
-                                        <small class="text-muted"><?php echo $paquete['cliente_telefono']; ?></small>
+                                        <?php echo $paquete['destinatario_nombre']; ?><br>
+                                        <small class="text-muted"><?php echo $paquete['destinatario_telefono']; ?></small>
                                     </td>
-                                    <td><small><?php echo $paquete['direccion_destino']; ?></small></td>
-                                    <td><?php echo $paquete['ubicacion']; ?></td>
+                                    <td><small><?php echo substr($paquete['direccion_completa'], 0, 50) . (strlen($paquete['direccion_completa']) > 50 ? '...' : ''); ?></small></td>
+                                    <td><?php echo $paquete['ciudad'] ?? '-'; ?></td>
                                     <td>
                                         <?php
                                         $tipo_badges = ['normal' => 'secondary', 'express' => 'warning', 'urgente' => 'danger'];
                                         ?>
-                                        <span class="badge bg-<?php echo $tipo_badges[$paquete['tipo_servicio']] ?? 'secondary'; ?>">
-                                            <?php echo ucfirst($paquete['tipo_servicio']); ?>
+                                        <span class="badge bg-<?php echo $tipo_badges[$paquete['prioridad']] ?? 'secondary'; ?>">
+                                            <?php echo ucfirst($paquete['prioridad']); ?>
                                         </span>
                                     </td>
-                                    <td>S/ <?php echo number_format($paquete['monto_envio'], 2); ?></td>
+                                    <td>S/ <?php echo number_format($paquete['costo_envio'], 2); ?></td>
                                     <td>
                                         <?php
                                         $estado_badges = [
