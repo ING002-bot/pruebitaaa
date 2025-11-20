@@ -53,7 +53,7 @@ $usuarios = $db->query("SELECT * FROM usuarios ORDER BY fecha_registro DESC")->f
                                 <tr>
                                     <td><?php echo $user['id']; ?></td>
                                     <td>
-                                        <img src="../assets/img/<?php echo $user['foto_perfil']; ?>" width="30" height="30" class="rounded-circle me-2" onerror="this.src='../assets/img/default-avatar.svg'">
+                                        <img src="../uploads/perfiles/<?php echo $user['foto_perfil'] ?: 'default.png'; ?>" width="30" height="30" class="rounded-circle me-2" onerror="this.src='../uploads/perfiles/default.png'">
                                         <?php echo $user['nombre'] . ' ' . $user['apellido']; ?>
                                     </td>
                                     <td><?php echo $user['email']; ?></td>
