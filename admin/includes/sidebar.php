@@ -37,6 +37,10 @@
                 <i class="bi bi-people"></i>
                 <span>Usuarios</span>
             </a>
+            <a href="tarifas.php" class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'tarifas.php' ? 'active' : ''; ?>">
+                <i class="bi bi-cash-coin"></i>
+                <span>Tarifas por Zona</span>
+            </a>
             <a href="pagos.php" class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'pagos.php' ? 'active' : ''; ?>">
                 <i class="bi bi-cash-stack"></i>
                 <span>Pagos</span>

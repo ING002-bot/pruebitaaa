@@ -8,20 +8,23 @@ $repartidor_id = $_SESSION['usuario_id'];
 // Mes actual por defecto
 $mes = isset($_GET['mes']) ? $_GET['mes'] : date('Y-m');
 
-// Obtener entregas del mes
+// Obtener entregas del mes con tarifas
 $stmt = $db->prepare("
-    SELECT COUNT(*) as total_entregas,
-           SUM(CASE WHEN tipo_entrega = 'exitosa' THEN 1 ELSE 0 END) as entregas_exitosas,
-           SUM(CASE WHEN tipo_entrega != 'exitosa' THEN 1 ELSE 0 END) as entregas_fallidas
-    FROM entregas
-    WHERE repartidor_id = ? AND DATE_FORMAT(fecha_entrega, '%Y-%m') = ?
+    SELECT 
+        COUNT(e.id) as total_entregas,
+        SUM(CASE WHEN e.tipo_entrega = 'exitosa' THEN 1 ELSE 0 END) as entregas_exitosas,
+        SUM(CASE WHEN e.tipo_entrega != 'exitosa' THEN 1 ELSE 0 END) as entregas_fallidas,
+        SUM(CASE WHEN e.tipo_entrega = 'exitosa' THEN COALESCE(zt.tarifa_repartidor, 3.50) ELSE 0 END) as ingresos_base
+    FROM entregas e
+    INNER JOIN paquetes p ON e.paquete_id = p.id
+    LEFT JOIN zonas_tarifas zt ON p.zona_tarifa_id = zt.id
+    WHERE e.repartidor_id = ? AND DATE_FORMAT(e.fecha_entrega, '%Y-%m') = ?
 ");
 $stmt->execute([$repartidor_id, $mes]);
 $stats = $stmt->fetch();
 
-// Calcular ingresos
-$tarifa_base = TARIFA_POR_PAQUETE;
-$ingresos_base = $stats['entregas_exitosas'] * $tarifa_base;
+// Ingresos base ya calculados con tarifas reales
+$ingresos_base = (float)($stats['ingresos_base'] ?? 0);
 
 // Obtener bonificaciones y deducciones del mes
 $stmt = $db->prepare("

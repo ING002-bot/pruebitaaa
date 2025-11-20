@@ -18,11 +18,19 @@ $stmt = $db->prepare("SELECT COUNT(*) as total FROM paquetes WHERE repartidor_id
 $stmt->execute([$repartidor_id]);
 $rezagados = $stmt->fetch()['total'];
 
-// Ingresos del mes
-$stmt = $db->prepare("SELECT COUNT(*) as entregas FROM entregas WHERE repartidor_id = ? AND MONTH(fecha_entrega) = MONTH(CURDATE()) AND YEAR(fecha_entrega) = YEAR(CURDATE())");
+// Ingresos del mes - SOLO entregas exitosas con tarifa
+$stmt = $db->prepare("
+    SELECT SUM(COALESCE(zt.tarifa_repartidor, 3.50)) as total_ingresos
+    FROM entregas e
+    INNER JOIN paquetes p ON e.paquete_id = p.id
+    LEFT JOIN zonas_tarifas zt ON p.zona_tarifa_id = zt.id
+    WHERE e.repartidor_id = ? 
+      AND e.tipo_entrega = 'exitosa'
+      AND MONTH(e.fecha_entrega) = MONTH(CURDATE()) 
+      AND YEAR(e.fecha_entrega) = YEAR(CURDATE())
+");
 $stmt->execute([$repartidor_id]);
-$entregasMes = $stmt->fetch()['entregas'];
-$ingresosMes = $entregasMes * TARIFA_POR_PAQUETE;
+$ingresosMes = (float)($stmt->fetch()['total_ingresos'] ?? 0);
 
 // Ruta activa
 $stmt = $db->prepare("SELECT * FROM rutas WHERE repartidor_id = ? AND fecha_ruta = CURDATE() AND estado IN ('planificada', 'en_progreso') ORDER BY id DESC LIMIT 1");

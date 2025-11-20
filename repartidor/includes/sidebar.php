@@ -44,6 +44,10 @@
                 <i class="bi bi-cash-stack"></i>
                 <span>Mis Ingresos</span>
             </a>
+            <a href="tarifas.php" class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'tarifas.php' ? 'active' : ''; ?>">
+                <i class="bi bi-cash-coin"></i>
+                <span>Tarifas por Zona</span>
+            </a>
         </div>
         
         <div class="menu-section">
