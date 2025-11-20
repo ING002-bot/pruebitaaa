@@ -8,9 +8,9 @@ $db = Database::getInstance()->getConnection();
 $sql = "SELECT p.*, pr.*, u.nombre as repartidor_nombre, u.apellido as repartidor_apellido
         FROM paquetes_rezagados pr
         INNER JOIN paquetes p ON pr.paquete_id = p.id
-        LEFT JOIN usuarios u ON pr.repartidor_id = u.id
-        WHERE pr.reintento_exitoso = 0
-        ORDER BY pr.fecha_reintento DESC";
+        LEFT JOIN usuarios u ON p.repartidor_id = u.id
+        WHERE pr.solucionado = 0
+        ORDER BY pr.fecha_rezago DESC";
 $rezagados = $db->query($sql)->fetchAll();
 ?>
 
@@ -77,9 +77,9 @@ $rezagados = $db->query($sql)->fetchAll();
                                     <td><?php echo $rez['destinatario_nombre']; ?></td>
                                     <td class="small"><?php echo $rez['direccion_completa']; ?></td>
                                     <td><?php echo $rez['repartidor_nombre'] ? $rez['repartidor_nombre'] . ' ' . $rez['repartidor_apellido'] : '-'; ?></td>
-                                    <td><span class="badge bg-danger"><?php echo $rez['motivo']; ?></span></td>
-                                    <td><?php echo $rez['fecha_reintento'] ? formatDate($rez['fecha_reintento']) : '-'; ?></td>
-                                    <td><span class="badge bg-warning"><?php echo $rez['intentos']; ?></span></td>
+                                    <td><span class="badge bg-danger"><?php echo ucfirst(str_replace('_', ' ', $rez['motivo'])); ?></span></td>
+                                    <td><?php echo $rez['proximo_intento'] ? formatDate($rez['proximo_intento']) : '-'; ?></td>
+                                    <td><span class="badge bg-warning"><?php echo $rez['intentos_realizados']; ?></span></td>
                                     <td>
                                         <button class="btn btn-sm btn-primary" onclick="reasignar(<?php echo $rez['paquete_id']; ?>)">
                                             <i class="bi bi-arrow-repeat"></i> Reasignar

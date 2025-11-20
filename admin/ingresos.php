@@ -12,10 +12,10 @@ $fecha_hasta = $_GET['fecha_hasta'] ?? date('Y-m-d');
 
 $sql = "SELECT i.*, u.nombre, u.apellido, p.codigo_seguimiento, p.destinatario_nombre
         FROM ingresos i
-        LEFT JOIN usuarios u ON i.repartidor_id = u.id
+        LEFT JOIN usuarios u ON i.registrado_por = u.id
         LEFT JOIN paquetes p ON i.paquete_id = p.id
-        WHERE DATE(i.fecha_registro) BETWEEN ? AND ?
-        ORDER BY i.fecha_registro DESC";
+        WHERE DATE(i.fecha_ingreso) BETWEEN ? AND ?
+        ORDER BY i.fecha_ingreso DESC";
 $stmt = $db->prepare($sql);
 $stmt->execute([$fecha_desde, $fecha_hasta]);
 $ingresos = $stmt->fetchAll();
@@ -110,11 +110,11 @@ $total = array_sum(array_column($ingresos, 'monto'));
                             <tbody>
                                 <?php foreach ($ingresos as $ing): ?>
                                 <tr>
-                                    <td><?php echo formatDate($ing['fecha_registro']); ?></td>
+                                    <td><?php echo formatDate($ing['fecha_ingreso']); ?></td>
                                     <td><?php echo $ing['codigo_seguimiento'] ?: '-'; ?></td>
                                     <td><?php echo $ing['destinatario_nombre'] ?: '-'; ?></td>
-                                    <td><?php echo $ing['nombre'] . ' ' . $ing['apellido']; ?></td>
-                                    <td><?php echo $ing['concepto']; ?></td>
+                                    <td><?php echo ($ing['nombre'] && $ing['apellido']) ? $ing['nombre'] . ' ' . $ing['apellido'] : '-'; ?></td>
+                                    <td><span class="badge bg-info"><?php echo ucfirst($ing['tipo']); ?></span> - <?php echo $ing['concepto']; ?></td>
                                     <td><strong class="text-success"><?php echo formatCurrency($ing['monto']); ?></strong></td>
                                 </tr>
                                 <?php endforeach; ?>
