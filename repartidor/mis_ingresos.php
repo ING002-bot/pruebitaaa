@@ -117,7 +117,7 @@ $pageTitle = "Mis Ingresos";
                         <div class="card-body">
                             <h6 class="text-muted">Ingresos Base</h6>
                             <h2 class="text-primary"><?php echo formatCurrency($ingresos_base); ?></h2>
-                            <small class="text-muted"><?php echo formatCurrency($tarifa_base); ?> por entrega</small>
+                            <small class="text-muted">Según tarifas por zona</small>
                         </div>
                     </div>
                 </div>
