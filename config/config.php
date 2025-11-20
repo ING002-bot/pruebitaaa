@@ -47,6 +47,9 @@ function hasRole($roles) {
 
 function requireLogin() {
     if (!isLoggedIn()) {
+        // Headers para prevenir cache
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        header('Pragma: no-cache');
         header('Location: ' . APP_URL . 'auth/login.php');
         exit;
     }
@@ -55,9 +58,15 @@ function requireLogin() {
 function requireRole($roles) {
     requireLogin();
     if (!hasRole($roles)) {
+        // Headers para prevenir cache
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        header('Pragma: no-cache');
         header('Location: ' . APP_URL . 'auth/unauthorized.php');
         exit;
     }
+    // Prevenir cache en páginas protegidas
+    header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+    header('Pragma: no-cache');
 }
 
 function sanitize($data) {

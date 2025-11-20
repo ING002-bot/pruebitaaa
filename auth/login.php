@@ -10,6 +10,12 @@
     <link rel="stylesheet" href="../assets/css/login.css">
 </head>
 <body>
+    <script>
+        // Limpiar historial al cargar login
+        if (window.history.replaceState) {
+            window.history.replaceState(null, null, window.location.href);
+        }
+    </script>
     <div class="login-container">
         <div class="login-card">
             <div class="login-header">
