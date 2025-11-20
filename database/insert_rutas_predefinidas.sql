@@ -1,36 +1,25 @@
--- Insertar rutas predefinidas con zonas y ubicaciones
+-- Insertar rutas predefinidas con zonas y ubicaciones (una ruta por zona con todas sus ubicaciones)
 
--- RUTAS URBANAS
+-- RUTA URBANO (todas las ubicaciones urbanas)
 INSERT INTO rutas (nombre, zona, ubicaciones, descripcion, fecha_ruta, estado, creado_por) VALUES
-('URBANO - Chiclayo Centro', 'URBANO', 'Chiclayo', 'Ruta urbana principal de Chiclayo', CURDATE(), 'planificada', 1),
-('URBANO - Leonardo Ortiz', 'URBANO', 'Leonardo Ortiz', 'Zona Leonardo Ortiz', CURDATE(), 'planificada', 1),
-('URBANO - La Victoria', 'URBANO', 'La Victoria', 'Distrito La Victoria', CURDATE(), 'planificada', 1),
-('URBANO - Santa Victoria', 'URBANO', 'Santa Victoria', 'Zona Santa Victoria', CURDATE(), 'planificada', 1);
+('URBANO', 'URBANO', 'Chiclayo, Leonardo Ortiz, La Victoria, Santa Victoria', 'Cobertura completa zona urbana', CURDATE(), 'planificada', 1);
 
--- RUTAS PUEBLOS
+-- RUTA PUEBLOS (todos los pueblos)
 INSERT INTO rutas (nombre, zona, ubicaciones, descripcion, fecha_ruta, estado, creado_por) VALUES
-('PUEBLOS - Norte 1', 'PUEBLOS', 'Lambayeque, Mochumi, Tucume', 'Ruta norte de pueblos', CURDATE(), 'planificada', 1),
-('PUEBLOS - Norte 2', 'PUEBLOS', 'Illimo, Nueva Arica, Jayanca', 'Ruta norte secundaria', CURDATE(), 'planificada', 1),
-('PUEBLOS - Centro', 'PUEBLOS', 'Pucara, Morrope', 'Ruta central de pueblos', CURDATE(), 'planificada', 1),
-('PUEBLOS - Sur', 'PUEBLOS', 'Motupe, Olmos, Salas', 'Ruta sur de pueblos', CURDATE(), 'planificada', 1);
+('PUEBLOS', 'PUEBLOS', 'Lambayeque, Mochumi, Tucume, Illimo, Nueva Arica, Jayanca, Pucara, Morrope, Motupe, Olmos, Salas', 'Cobertura completa de pueblos', CURDATE(), 'planificada', 1);
 
--- RUTAS PLAYAS
+-- RUTA PLAYAS (todas las playas)
 INSERT INTO rutas (nombre, zona, ubicaciones, descripcion, fecha_ruta, estado, creado_por) VALUES
-('PLAYAS - Norte', 'PLAYAS', 'San Jose, Santa Rosa, Pimentel', 'Zona de playas norte', CURDATE(), 'planificada', 1),
-('PLAYAS - Centro', 'PLAYAS', 'Reque, Monsefu', 'Zona de playas centro', CURDATE(), 'planificada', 1),
-('PLAYAS - Sur', 'PLAYAS', 'Eten, Puerto Eten', 'Zona de playas sur', CURDATE(), 'planificada', 1);
+('PLAYAS', 'PLAYAS', 'San Jose, Santa Rosa, Pimentel, Reque, Monsefu, Eten, Puerto Eten', 'Cobertura completa zona de playas', CURDATE(), 'planificada', 1);
 
--- RUTAS COOPERATIVAS
+-- RUTA COOPERATIVAS (todas las cooperativas)
 INSERT INTO rutas (nombre, zona, ubicaciones, descripcion, fecha_ruta, estado, creado_por) VALUES
-('COOPERATIVAS - Norte', 'COOPERATIVAS', 'Pomalca, Tuman, Patapo', 'Cooperativas zona norte', CURDATE(), 'planificada', 1),
-('COOPERATIVAS - Sur', 'COOPERATIVAS', 'Pucala, Saltur, Chongoyape', 'Cooperativas zona sur', CURDATE(), 'planificada', 1);
+('COOPERATIVAS', 'COOPERATIVAS', 'Pomalca, Tuman, Patapo, Pucala, Saltur, Chongoyape', 'Cobertura completa de cooperativas', CURDATE(), 'planificada', 1);
 
--- RUTAS EXCOOPERATIVAS
+-- RUTA EXCOOPERATIVAS (todas las ex-cooperativas)
 INSERT INTO rutas (nombre, zona, ubicaciones, descripcion, fecha_ruta, estado, creado_por) VALUES
-('EXCOOPERATIVAS - Norte', 'EXCOOPERATIVAS', 'Ucupe, Mocupe, Zaña', 'Ex-cooperativas norte', CURDATE(), 'planificada', 1),
-('EXCOOPERATIVAS - Sur', 'EXCOOPERATIVAS', 'Cayalti, Oyotun, Lagunas', 'Ex-cooperativas sur', CURDATE(), 'planificada', 1);
+('EXCOOPERATIVAS', 'EXCOOPERATIVAS', 'Ucupe, Mocupe, Zaña, Cayalti, Oyotun, Lagunas', 'Cobertura completa de ex-cooperativas', CURDATE(), 'planificada', 1);
 
--- RUTAS FERREÑAFE
+-- RUTA FERREÑAFE (todas las ubicaciones de Ferreñafe)
 INSERT INTO rutas (nombre, zona, ubicaciones, descripcion, fecha_ruta, estado, creado_por) VALUES
-('FERREÑAFE - Principal', 'FERREÑAFE', 'Ferreñafe, Picsi, Pitipo', 'Ruta principal Ferreñafe', CURDATE(), 'planificada', 1),
-('FERREÑAFE - Secundaria', 'FERREÑAFE', 'Motupillo, Pueblo Nuevo', 'Ruta secundaria Ferreñafe', CURDATE(), 'planificada', 1);
+('FERREÑAFE', 'FERREÑAFE', 'Ferreñafe, Picsi, Pitipo, Motupillo, Pueblo Nuevo', 'Cobertura completa de Ferreñafe', CURDATE(), 'planificada', 1);
