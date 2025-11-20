@@ -18,7 +18,7 @@ $db = Database::getInstance()->getConnection();
 
 try {
     // Obtener usuarios de cada rol
-    $stmt = $db->prepare("SELECT id, rol, nombre FROM usuarios WHERE activo = 1");
+    $stmt = $db->prepare("SELECT id, rol, nombre FROM usuarios WHERE estado = 'activo'");
     $stmt->execute();
     $usuarios = $stmt->fetchAll();
     

@@ -43,7 +43,7 @@ function crearNotificacionPorRol($rol, $tipo, $titulo, $mensaje) {
         $db = Database::getInstance()->getConnection();
         
         // Obtener usuarios del rol especificado
-        $stmt = $db->prepare("SELECT id FROM usuarios WHERE rol = ? AND activo = 1");
+        $stmt = $db->prepare("SELECT id FROM usuarios WHERE rol = ? AND estado = 'activo'");
         $stmt->execute([$rol]);
         $usuarios = $stmt->fetchAll(PDO::FETCH_COLUMN);
         
@@ -140,7 +140,7 @@ function notificarPagoRegistrado($repartidor_id, $monto, $fecha) {
 function obtenerAdministradores() {
     try {
         $db = Database::getInstance()->getConnection();
-        $stmt = $db->prepare("SELECT id FROM usuarios WHERE rol = 'admin' AND activo = 1");
+        $stmt = $db->prepare("SELECT id FROM usuarios WHERE rol = 'admin' AND estado = 'activo'");
         $stmt->execute();
         return $stmt->fetchAll(PDO::FETCH_COLUMN);
     } catch (Exception $e) {
