@@ -284,7 +284,112 @@ $pageTitle = "Gestión de Paquetes";
         </div>
     </div>
     
+    <!-- Modal Ver Detalle -->
+    <div class="modal fade" id="modalDetalle" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Detalle del Paquete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="detalleContent">
+                    <div class="text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Editar Paquete -->
+    <div class="modal fade" id="modalEditar" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Editar Paquete</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body" id="editarContent">
+                    <div class="text-center">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Cargando...</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Asignar Repartidor -->
+    <div class="modal fade" id="modalAsignar" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Asignar Repartidor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="paquetes_asignar.php" method="POST">
+                    <div class="modal-body">
+                        <input type="hidden" name="paquete_id" id="asignar_paquete_id">
+                        <div class="mb-3">
+                            <label class="form-label">Seleccionar Repartidor</label>
+                            <select class="form-select" name="repartidor_id" required>
+                                <option value="">Seleccione...</option>
+                                <?php foreach($repartidores as $rep): ?>
+                                    <option value="<?php echo $rep['id']; ?>">
+                                        <?php echo $rep['nombre'] . ' ' . $rep['apellido']; ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">Asignar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../assets/js/dashboard.js"></script>
+    <script>
+        function verDetalle(id) {
+            const modal = new bootstrap.Modal(document.getElementById('modalDetalle'));
+            modal.show();
+            
+            fetch('paquete_detalle.php?id=' + id)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('detalleContent').innerHTML = html;
+                })
+                .catch(error => {
+                    document.getElementById('detalleContent').innerHTML = '<div class="alert alert-danger">Error al cargar los detalles</div>';
+                });
+        }
+
+        function editarPaquete(id) {
+            const modal = new bootstrap.Modal(document.getElementById('modalEditar'));
+            modal.show();
+            
+            fetch('paquete_editar.php?id=' + id)
+                .then(response => response.text())
+                .then(html => {
+                    document.getElementById('editarContent').innerHTML = html;
+                })
+                .catch(error => {
+                    document.getElementById('editarContent').innerHTML = '<div class="alert alert-danger">Error al cargar el formulario</div>';
+                });
+        }
+
+        function asignarRepartidor(id) {
+            document.getElementById('asignar_paquete_id').value = id;
+            const modal = new bootstrap.Modal(document.getElementById('modalAsignar'));
+            modal.show();
+        }
+    </script>
 </body>
 </html>
