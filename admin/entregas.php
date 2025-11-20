@@ -199,8 +199,8 @@ $statsHoy = $db->query($sqlStats)->fetch();
                                         <button class="btn btn-sm btn-primary" onclick="verDetalle(<?php echo $entrega['id']; ?>)">
                                             <i class="bi bi-eye"></i>
                                         </button>
-                                        <?php if ($entrega['ubicacion_lat'] && $entrega['ubicacion_lng']): ?>
-                                            <button class="btn btn-sm btn-success" onclick="verMapa(<?php echo $entrega['ubicacion_lat']; ?>, <?php echo $entrega['ubicacion_lng']; ?>)">
+                                        <?php if (!empty($entrega['latitud_entrega']) && !empty($entrega['longitud_entrega'])): ?>
+                                            <button class="btn btn-sm btn-success" onclick="verMapa(<?php echo $entrega['latitud_entrega']; ?>, <?php echo $entrega['longitud_entrega']; ?>)">
                                                 <i class="bi bi-geo-alt"></i>
                                             </button>
                                         <?php endif; ?>
