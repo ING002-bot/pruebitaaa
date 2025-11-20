@@ -35,6 +35,7 @@ body {
     overflow-y: auto;
     transition: all 0.3s ease;
     z-index: 1000;
+    transform: translateX(0); /* Siempre visible por defecto */
 }
 
 .sidebar-header {
@@ -385,6 +386,13 @@ tbody tr:hover {
 }
 
 /* Mobile Responsive */
+@media (min-width: 993px) {
+    /* En desktop, sidebar siempre visible */
+    .sidebar {
+        transform: translateX(0) !important;
+    }
+}
+
 @media (max-width: 992px) {
     .sidebar {
         transform: translateX(-100%);

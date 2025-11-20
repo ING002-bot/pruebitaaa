@@ -8,6 +8,22 @@ function toggleSidebar() {
     }
 }
 
+// Mostrar sidebar automáticamente en desktop
+document.addEventListener('DOMContentLoaded', function() {
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar && window.innerWidth > 992) {
+        sidebar.classList.add('active');
+    }
+});
+
+// Mantener sidebar visible en desktop al redimensionar
+window.addEventListener('resize', function() {
+    const sidebar = document.getElementById('sidebar');
+    if (sidebar && window.innerWidth > 992) {
+        sidebar.classList.add('active');
+    }
+});
+
 // Cerrar sidebar al hacer click fuera (móvil)
 document.addEventListener('click', function(event) {
     const sidebar = document.getElementById('sidebar');
