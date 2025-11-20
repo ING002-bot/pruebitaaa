@@ -83,6 +83,10 @@ $paquetes = $stmt->fetchAll();
                     <i class="bi bi-exclamation-triangle"></i>
                     <span>Rezagados</span>
                 </a>
+                <a href="caja_chica.php" class="menu-item">
+                    <i class="bi bi-wallet2"></i>
+                    <span>Caja Chica</span>
+                </a>
                 <a href="../auth/logout.php" class="menu-item">
                     <i class="bi bi-box-arrow-right"></i>
                     <span>Cerrar Sesión</span>

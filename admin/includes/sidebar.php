@@ -41,6 +41,10 @@
                 <i class="bi bi-cash-coin"></i>
                 <span>Tarifas por Zona</span>
             </a>
+            <a href="caja_chica.php" class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'caja_chica.php' ? 'active' : ''; ?>">
+                <i class="bi bi-wallet2"></i>
+                <span>Caja Chica</span>
+            </a>
             <a href="pagos.php" class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'pagos.php' ? 'active' : ''; ?>">
                 <i class="bi bi-cash-stack"></i>
                 <span>Pagos</span>

@@ -47,61 +47,9 @@ $pageTitle = "Dashboard Asistente";
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <!-- Sidebar Asistente -->
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <i class="bi bi-box-seam"></i>
-            <h3>HERMES EXPRESS</h3>
-            <p>ASISTENTE</p>
-        </div>
-        
-        <div class="sidebar-menu">
-            <div class="menu-section">
-                <a href="dashboard.php" class="menu-item active">
-                    <i class="bi bi-speedometer2"></i>
-                    <span>Dashboard</span>
-                </a>
-                <a href="../admin/paquetes.php" class="menu-item">
-                    <i class="bi bi-box"></i>
-                    <span>Paquetes</span>
-                </a>
-                <a href="../admin/rutas.php" class="menu-item">
-                    <i class="bi bi-map"></i>
-                    <span>Rutas</span>
-                </a>
-                <a href="../admin/entregas.php" class="menu-item">
-                    <i class="bi bi-check-circle"></i>
-                    <span>Entregas</span>
-                </a>
-                <a href="../admin/rezagados.php" class="menu-item">
-                    <i class="bi bi-exclamation-triangle"></i>
-                    <span>Rezagados</span>
-                </a>
-            </div>
-            
-            <div class="menu-section">
-                <div class="menu-section-title">Herramientas</div>
-                <a href="../admin/reportes.php" class="menu-item">
-                    <i class="bi bi-file-earmark-bar-graph"></i>
-                    <span>Reportes</span>
-                </a>
-                <a href="../admin/importar.php" class="menu-item">
-                    <i class="bi bi-cloud-upload"></i>
-                    <span>Importar SAVAR</span>
-                </a>
-            </div>
-            
-            <div class="menu-section">
-                <a href="../auth/logout.php" class="menu-item">
-                    <i class="bi bi-box-arrow-right"></i>
-                    <span>Cerrar Sesión</span>
-                </a>
-            </div>
-        </div>
-    </div>
+    <?php include 'includes/sidebar.php'; ?>
     
     <div class="main-content">
-        <!-- Header -->
         <?php include 'includes/header.php'; ?>
         
         <!-- Content -->
