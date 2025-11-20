@@ -60,13 +60,12 @@ $pageTitle = "Mi Perfil";
                 </nav>
             </div>
 
-            <?php if (isset($_SESSION['flash_message'])): ?>
-                <div class="alert alert-<?php echo $_SESSION['flash_type']; ?> alert-dismissible fade show">
-                    <?php 
-                    echo $_SESSION['flash_message']; 
-                    unset($_SESSION['flash_message']);
-                    unset($_SESSION['flash_type']);
-                    ?>
+            <?php if (isset($_SESSION['flash_message'])): 
+                $flash = $_SESSION['flash_message'];
+                unset($_SESSION['flash_message']);
+            ?>
+                <div class="alert alert-<?php echo htmlspecialchars($flash['type']); ?> alert-dismissible fade show">
+                    <?php echo htmlspecialchars($flash['message']); ?>
                     <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                 </div>
             <?php endif; ?>
