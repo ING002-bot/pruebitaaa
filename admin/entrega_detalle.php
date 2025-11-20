@@ -1,6 +1,6 @@
 <?php
 require_once '../config/config.php';
-requireRole(['admin', 'asistente']);
+requireRole(['admin', 'asistente', 'repartidor']);
 
 $id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
 
@@ -10,14 +10,24 @@ if (!$id) {
 }
 
 $db = Database::getInstance()->getConnection();
+
+// Si es repartidor, solo puede ver sus propias entregas
+$whereSql = "WHERE e.id = ?";
+$params = [$id];
+
+if ($_SESSION['rol'] === 'repartidor') {
+    $whereSql .= " AND e.repartidor_id = ?";
+    $params[] = $_SESSION['usuario_id'];
+}
+
 $sql = "SELECT e.*, p.codigo_seguimiento, p.destinatario_nombre, p.destinatario_telefono, p.direccion_completa,
         u.nombre as repartidor_nombre, u.apellido as repartidor_apellido, u.telefono as repartidor_telefono
         FROM entregas e
         LEFT JOIN paquetes p ON e.paquete_id = p.id
         LEFT JOIN usuarios u ON e.repartidor_id = u.id
-        WHERE e.id = ?";
+        $whereSql";
 $stmt = $db->prepare($sql);
-$stmt->execute([$id]);
+$stmt->execute($params);
 $entrega = $stmt->fetch();
 
 if (!$entrega) {
