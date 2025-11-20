@@ -108,15 +108,15 @@ if (!$entrega) {
     </div>
 </div>
 
-<?php if ($entrega['ubicacion_lat'] && $entrega['ubicacion_lng']): ?>
+<?php if (!empty($entrega['latitud_entrega']) && !empty($entrega['longitud_entrega'])): ?>
 <div class="row mt-3">
     <div class="col-12">
         <h6><i class="bi bi-geo-alt"></i> Ubicación GPS</h6>
         <p class="small text-muted">
-            Latitud: <?php echo $entrega['ubicacion_lat']; ?> | 
-            Longitud: <?php echo $entrega['ubicacion_lng']; ?>
+            Latitud: <?php echo $entrega['latitud_entrega']; ?> | 
+            Longitud: <?php echo $entrega['longitud_entrega']; ?>
         </p>
-        <a href="https://www.google.com/maps?q=<?php echo $entrega['ubicacion_lat']; ?>,<?php echo $entrega['ubicacion_lng']; ?>" 
+        <a href="https://www.google.com/maps?q=<?php echo $entrega['latitud_entrega']; ?>,<?php echo $entrega['longitud_entrega']; ?>" 
            target="_blank" class="btn btn-sm btn-success">
             <i class="bi bi-map"></i> Ver en Google Maps
         </a>
