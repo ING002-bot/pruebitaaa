@@ -9,14 +9,16 @@ $repartidor_id = $_SESSION['usuario_id'];
 $paquete_seleccionado = null;
 if(isset($_GET['paquete'])) {
     $stmt = $db->prepare("SELECT * FROM paquetes WHERE id = ? AND repartidor_id = ?");
-    $stmt->execute([$_GET['paquete'], $repartidor_id]);
-    $paquete_seleccionado = $stmt->fetch();
+    $stmt->bind_param("ii", $_GET['paquete'], $repartidor_id);
+    $stmt->execute();
+    $paquete_seleccionado = $stmt->get_result()->fetch_assoc();
 }
 
 // Obtener paquetes del repartidor que están en ruta
 $stmt = $db->prepare("SELECT * FROM paquetes WHERE repartidor_id = ? AND estado = 'en_ruta' ORDER BY prioridad DESC");
-$stmt->execute([$repartidor_id]);
-$paquetes_disponibles = $stmt->fetchAll();
+$stmt->bind_param("i", $repartidor_id);
+$stmt->execute();
+$paquetes_disponibles = Database::getInstance()->fetchAll($stmt->get_result());
 
 $pageTitle = "Registrar Entrega";
 ?>

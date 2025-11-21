@@ -20,8 +20,9 @@ try {
     
     // Validar email único
     $stmt = $db->prepare("SELECT id FROM usuarios WHERE email = ? AND id != ?");
-    $stmt->execute([$email, $repartidor_id]);
-    if ($stmt->fetch()) {
+    $stmt->bind_param("si", $email, $repartidor_id);
+    $stmt->execute();
+    if ($stmt->get_result()->fetch_assoc()) {
         setFlashMessage('danger', 'El email ya está en uso por otro usuario');
         redirect(APP_URL . 'repartidor/perfil.php');
     }
@@ -68,8 +69,9 @@ try {
             
             // Eliminar foto anterior si existe
             $stmt = $db->prepare("SELECT foto_perfil FROM usuarios WHERE id = ?");
-            $stmt->execute([$repartidor_id]);
-            $usuario_anterior = $stmt->fetch();
+            $stmt->bind_param("i", $repartidor_id);
+            $stmt->execute();
+            $usuario_anterior = $stmt->get_result()->fetch_assoc();
             
             if ($usuario_anterior && !empty($usuario_anterior['foto_perfil']) && 
                 $usuario_anterior['foto_perfil'] != 'default-avatar.svg') {

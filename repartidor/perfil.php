@@ -7,8 +7,9 @@ $repartidor_id = $_SESSION['usuario_id'];
 
 // Obtener información del repartidor
 $stmt = $db->prepare("SELECT * FROM usuarios WHERE id = ?");
-$stmt->execute([$repartidor_id]);
-$usuario = $stmt->fetch();
+$stmt->bind_param("i", $repartidor_id);
+$stmt->execute();
+$usuario = $stmt->get_result()->fetch_assoc();
 
 if (!$usuario) {
     setFlashMessage('danger', 'Usuario no encontrado');
@@ -28,8 +29,9 @@ $stmt_stats = $db->prepare("
     LEFT JOIN paquetes p ON u.id = p.repartidor_id
     WHERE u.id = ?
 ");
-$stmt_stats->execute([$repartidor_id]);
-$stats = $stmt_stats->fetch();
+$stmt_stats->bind_param("i", $repartidor_id);
+$stmt_stats->execute();
+$stats = $stmt_stats->get_result()->fetch_assoc();
 
 $pageTitle = "Mi Perfil";
 ?>

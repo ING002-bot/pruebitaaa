@@ -5,7 +5,7 @@ requireRole(['admin']);
 $pageTitle = 'Gestión de Usuarios';
 
 $db = Database::getInstance()->getConnection();
-$usuarios = $db->query("SELECT * FROM usuarios ORDER BY fecha_registro DESC")->fetchAll();
+$usuarios = Database::getInstance()->fetchAll($db->query("SELECT * FROM usuarios ORDER BY fecha_registro DESC"));
 ?>
 
 <!DOCTYPE html>

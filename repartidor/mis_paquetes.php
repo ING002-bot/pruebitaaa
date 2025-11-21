@@ -25,8 +25,9 @@ $stmt = $db->prepare("
         p.prioridad DESC,
         p.fecha_asignacion DESC
 ");
-$stmt->execute([$repartidor_id]);
-$paquetes = $stmt->fetchAll();
+$stmt->bind_param("i", $repartidor_id);
+$stmt->execute();
+$paquetes = Database::getInstance()->fetchAll($stmt->get_result());
 
 $pageTitle = "Mis Paquetes";
 ?>

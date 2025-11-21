@@ -110,17 +110,13 @@ function logActivity($accion, $tabla = null, $registro_id = null, $detalles = nu
     try {
         $db = Database::getInstance()->getConnection();
         $sql = "INSERT INTO logs_sistema (usuario_id, accion, tabla_afectada, registro_id, detalles, ip_address, user_agent) 
-                VALUES (:usuario_id, :accion, :tabla, :registro_id, :detalles, :ip, :user_agent)";
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
         $stmt = $db->prepare($sql);
-        $stmt->execute([
-            ':usuario_id' => $_SESSION['usuario_id'] ?? null,
-            ':accion' => $accion,
-            ':tabla' => $tabla,
-            ':registro_id' => $registro_id,
-            ':detalles' => $detalles,
-            ':ip' => $_SERVER['REMOTE_ADDR'],
-            ':user_agent' => $_SERVER['HTTP_USER_AGENT']
-        ]);
+        $usuario_id = $_SESSION['usuario_id'] ?? null;
+        $ip = $_SERVER['REMOTE_ADDR'];
+        $user_agent = $_SERVER['HTTP_USER_AGENT'];
+        $stmt->bind_param("isiiiss", $usuario_id, $accion, $tabla, $registro_id, $detalles, $ip, $user_agent);
+        $stmt->execute();
     } catch (Exception $e) {
         error_log("Error al registrar actividad: " . $e->getMessage());
     }
@@ -131,7 +127,8 @@ function createNotification($usuario_id, $tipo, $titulo, $mensaje) {
         $db = Database::getInstance()->getConnection();
         $sql = "INSERT INTO notificaciones (usuario_id, tipo, titulo, mensaje) VALUES (?, ?, ?, ?)";
         $stmt = $db->prepare($sql);
-        return $stmt->execute([$usuario_id, $tipo, $titulo, $mensaje]);
+        $stmt->bind_param("isss", $usuario_id, $tipo, $titulo, $mensaje);
+        return $stmt->execute();
     } catch (Exception $e) {
         error_log("Error al crear notificación: " . $e->getMessage());
         return false;

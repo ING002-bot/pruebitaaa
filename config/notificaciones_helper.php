@@ -21,7 +21,8 @@ function crearNotificacion($usuario_id, $tipo, $titulo, $mensaje) {
             VALUES (?, ?, ?, ?)
         ");
         
-        return $stmt->execute([$usuario_id, $tipo, $titulo, $mensaje]);
+        $stmt->bind_param("isss", $usuario_id, $tipo, $titulo, $mensaje);
+        return $stmt->execute();
         
     } catch (Exception $e) {
         error_log("Error al crear notificación: " . $e->getMessage());
@@ -44,8 +45,13 @@ function crearNotificacionPorRol($rol, $tipo, $titulo, $mensaje) {
         
         // Obtener usuarios del rol especificado
         $stmt = $db->prepare("SELECT id FROM usuarios WHERE rol = ? AND estado = 'activo'");
-        $stmt->execute([$rol]);
-        $usuarios = $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $stmt->bind_param("s", $rol);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $usuarios = [];
+        while ($row = $result->fetch_assoc()) {
+            $usuarios[] = $row['id'];
+        }
         
         $count = 0;
         foreach ($usuarios as $usuario_id) {

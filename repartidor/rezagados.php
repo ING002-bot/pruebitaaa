@@ -15,8 +15,9 @@ $stmt = $db->prepare("
     AND p.estado IN ('rezagado', 'pendiente', 'en_ruta')
     ORDER BY pr.fecha_rezago DESC
 ");
-$stmt->execute([$repartidor_id]);
-$paquetes_rezagados = $stmt->fetchAll();
+$stmt->bind_param("i", $repartidor_id);
+$stmt->execute();
+$paquetes_rezagados = Database::getInstance()->fetchAll($stmt->get_result());
 
 $pageTitle = "Paquetes Rezagados";
 ?>

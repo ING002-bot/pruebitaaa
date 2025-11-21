@@ -20,8 +20,9 @@ $stmt = $db->prepare("
     LEFT JOIN zonas_tarifas zt ON p.zona_tarifa_id = zt.id
     WHERE e.repartidor_id = ? AND DATE_FORMAT(e.fecha_entrega, '%Y-%m') = ?
 ");
-$stmt->execute([$repartidor_id, $mes]);
-$stats = $stmt->fetch();
+$stmt->bind_param("is", $repartidor_id, $mes);
+$stmt->execute();
+$stats = $stmt->get_result()->fetch_assoc();
 
 // Ingresos base ya calculados con tarifas reales
 $ingresos_base = (float)($stats['ingresos_base'] ?? 0);
@@ -34,8 +35,9 @@ $stmt = $db->prepare("
     FROM pagos
     WHERE repartidor_id = ? AND DATE_FORMAT(periodo_inicio, '%Y-%m') = ?
 ");
-$stmt->execute([$repartidor_id, $mes]);
-$ajustes = $stmt->fetch();
+$stmt->bind_param("is", $repartidor_id, $mes);
+$stmt->execute();
+$ajustes = $stmt->get_result()->fetch_assoc();
 
 $total_ingresos = $ingresos_base + $ajustes['bonificaciones'] - $ajustes['deducciones'];
 
@@ -46,8 +48,9 @@ $stmt = $db->prepare("
     ORDER BY fecha_generacion DESC
     LIMIT 12
 ");
-$stmt->execute([$repartidor_id]);
-$historial_pagos = $stmt->fetchAll();
+$stmt->bind_param("i", $repartidor_id);
+$stmt->execute();
+$historial_pagos = Database::getInstance()->fetchAll($stmt->get_result());
 
 // Entregas por día del mes
 $stmt = $db->prepare("
@@ -57,8 +60,9 @@ $stmt = $db->prepare("
     GROUP BY DATE(fecha_entrega)
     ORDER BY fecha
 ");
-$stmt->execute([$repartidor_id, $mes]);
-$entregas_por_dia = $stmt->fetchAll();
+$stmt->bind_param("is", $repartidor_id, $mes);
+$stmt->execute();
+$entregas_por_dia = Database::getInstance()->fetchAll($stmt->get_result());
 
 $pageTitle = "Mis Ingresos";
 ?>

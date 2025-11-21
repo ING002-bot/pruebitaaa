@@ -16,8 +16,9 @@ $stmt = $db->prepare("
     GROUP BY r.id
     ORDER BY r.fecha_ruta DESC, r.id DESC
 ");
-$stmt->execute([$repartidor_id]);
-$rutas = $stmt->fetchAll();
+$stmt->bind_param("i", $repartidor_id);
+$stmt->execute();
+$rutas = Database::getInstance()->fetchAll($stmt->get_result());
 
 $pageTitle = "Mis Rutas";
 ?>

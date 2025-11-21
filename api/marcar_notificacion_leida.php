@@ -22,7 +22,8 @@ try {
     if (isset($data['todas']) && $data['todas'] === true) {
         // Marcar todas como leídas
         $stmt = $db->prepare("UPDATE notificaciones SET leida = 1 WHERE usuario_id = ? AND leida = 0");
-        $stmt->execute([$usuario_id]);
+        $stmt->bind_param("i", $usuario_id);
+        $stmt->execute();
         
         echo json_encode([
             'success' => true,
@@ -31,7 +32,8 @@ try {
     } elseif (isset($data['notificacion_id'])) {
         // Marcar una específica como leída
         $stmt = $db->prepare("UPDATE notificaciones SET leida = 1 WHERE id = ? AND usuario_id = ?");
-        $stmt->execute([$data['notificacion_id'], $usuario_id]);
+        $stmt->bind_param("ii", $data['notificacion_id'], $usuario_id);
+        $stmt->execute();
         
         echo json_encode([
             'success' => true,

@@ -12,8 +12,9 @@ $offset = ($page - 1) * $limit;
 
 // Obtener total de entregas
 $stmt = $db->prepare("SELECT COUNT(*) as total FROM entregas WHERE repartidor_id = ?");
-$stmt->execute([$repartidor_id]);
-$totalEntregas = $stmt->fetch()['total'];
+$stmt->bind_param("i", $repartidor_id);
+$stmt->execute();
+$totalEntregas = $stmt->get_result()->fetch_assoc()['total'];
 $totalPages = ceil($totalEntregas / $limit);
 
 // Obtener historial de entregas
@@ -30,8 +31,9 @@ $stmt = $db->prepare("
     ORDER BY e.fecha_entrega DESC
     LIMIT ? OFFSET ?
 ");
-$stmt->execute([$repartidor_id, $limit, $offset]);
-$entregas = $stmt->fetchAll();
+$stmt->bind_param("iii", $repartidor_id, $limit, $offset);
+$stmt->execute();
+$entregas = Database::getInstance()->fetchAll($stmt->get_result());
 
 // Estadísticas del historial
 $stmt = $db->prepare("
@@ -45,8 +47,9 @@ $stmt = $db->prepare("
     INNER JOIN paquetes p ON e.paquete_id = p.id
     WHERE e.repartidor_id = ?
 ");
-$stmt->execute([$repartidor_id]);
-$stats = $stmt->fetch();
+$stmt->bind_param("i", $repartidor_id);
+$stmt->execute();
+$stats = $stmt->get_result()->fetch_assoc();
 
 $pageTitle = "Historial de Entregas";
 ?>

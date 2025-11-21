@@ -35,8 +35,9 @@ try {
         FROM caja_chica
         WHERE id = ? AND asignado_a = ? AND tipo = 'asignacion'
     ");
-    $stmt->execute([$asignacion_id, $asignacion_id, $asistente_id]);
-    $asignacion = $stmt->fetch();
+    $stmt->bind_param("iii", $asignacion_id, $asignacion_id, $asistente_id);
+    $stmt->execute();
+    $asignacion = $stmt->get_result()->fetch_assoc();
 
     if (!$asignacion) {
         throw new Exception('Asignación no encontrada o no autorizada');
@@ -79,9 +80,9 @@ try {
         (asignado_a, asignado_por, asignacion_padre_id, tipo, monto, concepto, descripcion, foto_comprobante, fecha_operacion, registrado_por)
         VALUES (?, ?, ?, 'gasto', ?, ?, ?, ?, ?, ?)
     ");
-    $stmt->execute([
+    $stmt->bind_param("iiiidssis", 
         $asistente_id,
-        null, // No hay asignado_por en gastos
+        $asignado_por, // null
         $asignacion_id,
         $monto,
         $concepto,
@@ -89,12 +90,17 @@ try {
         $foto_nombre,
         $fecha_operacion,
         $asistente_id
-    ]);
+    );
+    $asignado_por = null;
+    $stmt->execute();
 
     // Notificar al admin que asignó el dinero
     $stmt = $db->prepare("SELECT asignado_por FROM caja_chica WHERE id = ?");
-    $stmt->execute([$asignacion_id]);
-    $admin_id = $stmt->fetchColumn();
+    $stmt->bind_param("i", $asignacion_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    $admin_id = $row ? $row['asignado_por'] : null;
 
     if ($admin_id) {
         require_once '../config/notificaciones_helper.php';

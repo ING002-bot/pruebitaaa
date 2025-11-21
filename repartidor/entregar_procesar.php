@@ -22,8 +22,9 @@ try {
     
     // Verificar que el paquete pertenece al repartidor
     $stmt = $db->prepare("SELECT * FROM paquetes WHERE id = ? AND repartidor_id = ?");
-    $stmt->execute([$paquete_id, $repartidor_id]);
-    $paquete = $stmt->fetch();
+    $stmt->bind_param("ii", $paquete_id, $repartidor_id);
+    $stmt->execute();
+    $paquete = $stmt->get_result()->fetch_assoc();
     
     if (!$paquete) {
         setFlashMessage('danger', 'Paquete no encontrado o no autorizado');
@@ -94,7 +95,7 @@ try {
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     
     $stmt = $db->prepare($sql);
-    $stmt->execute([
+    $stmt->bind_param("iiisssddss", 
         $paquete_id,
         $repartidor_id,
         $receptor_nombre,
@@ -106,7 +107,8 @@ try {
         $longitud,
         $tipo_entrega,
         $observaciones
-    ]);
+    );
+    $stmt->execute();
     
     // Actualizar estado del paquete
     if ($tipo_entrega === 'exitosa') {
@@ -118,7 +120,8 @@ try {
                                       fecha_solucion = NOW() 
                                   WHERE paquete_id = ? AND solucionado = 0";
         $stmt_resolver = $db->prepare($sql_resolver_rezagado);
-        $stmt_resolver->execute([$paquete_id]);
+        $stmt_resolver->bind_param("i", $paquete_id);
+        $stmt_resolver->execute();
         
     } elseif ($tipo_entrega === 'no_encontrado' || $tipo_entrega === 'rechazada') {
         $nuevo_estado = 'rezagado';
@@ -128,7 +131,8 @@ try {
         $sql_rezagado = "INSERT INTO paquetes_rezagados (paquete_id, motivo, descripcion_motivo) 
                          VALUES (?, ?, ?)";
         $stmt_rezagado = $db->prepare($sql_rezagado);
-        $stmt_rezagado->execute([$paquete_id, $motivo, $observaciones]);
+        $stmt_rezagado->bind_param("iss", $paquete_id, $motivo, $observaciones);
+        $stmt_rezagado->execute();
     } else {
         $nuevo_estado = 'entregado';
     }
@@ -137,29 +141,27 @@ try {
                    intentos_entrega = intentos_entrega + 1 
                    WHERE id = ?";
     $stmt_update = $db->prepare($sql_update);
-    $stmt_update->execute([$nuevo_estado, $paquete_id]);
+    $stmt_update->bind_param("si", $nuevo_estado, $paquete_id);
+    $stmt_update->execute();
     
     // Registrar ingreso si la entrega fue exitosa
     if ($tipo_entrega === 'exitosa') {
         $sql_ingreso = "INSERT INTO ingresos (tipo, concepto, monto, paquete_id, registrado_por) 
                         VALUES ('envio', ?, ?, ?, ?)";
         $stmt_ingreso = $db->prepare($sql_ingreso);
-        $stmt_ingreso->execute([
-            'Entrega de paquete ' . $paquete['codigo_seguimiento'],
-            $paquete['costo_envio'] ?? TARIFA_POR_PAQUETE,
-            $paquete_id,
-            $repartidor_id
-        ]);
+        $concepto = 'Entrega de paquete ' . $paquete['codigo_seguimiento'];
+        $monto = $paquete['costo_envio'] ?? TARIFA_POR_PAQUETE;
+        $stmt_ingreso->bind_param("sdii", $concepto, $monto, $paquete_id, $repartidor_id);
+        $stmt_ingreso->execute();
     }
     
     // Actualizar ruta si existe
     $sql_ruta = "UPDATE ruta_paquetes SET estado = ? 
                  WHERE paquete_id = ? AND estado = 'pendiente'";
     $stmt_ruta = $db->prepare($sql_ruta);
-    $stmt_ruta->execute([
-        $tipo_entrega === 'exitosa' ? 'entregado' : 'fallido',
-        $paquete_id
-    ]);
+    $estado_ruta = $tipo_entrega === 'exitosa' ? 'entregado' : 'fallido';
+    $stmt_ruta->bind_param("si", $estado_ruta, $paquete_id);
+    $stmt_ruta->execute();
     
     // Registrar actividad
     logActivity('Registro de entrega', 'entregas', $paquete_id, "Tipo: $tipo_entrega");

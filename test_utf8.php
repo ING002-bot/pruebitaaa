@@ -26,7 +26,8 @@
         $db = Database::getInstance()->getConnection();
         
         // Verificar configuración de charset
-        $charset = $db->query("SELECT @@character_set_client, @@character_set_connection, @@character_set_results, @@character_set_database")->fetch();
+        $stmt = $db->query("SELECT @@character_set_client, @@character_set_connection, @@character_set_results, @@character_set_database");
+        $charset = $stmt->fetch_assoc();
         
         echo "<h2>Configuración de MySQL:</h2>";
         echo "<table style='width: auto;'>";
@@ -38,7 +39,7 @@
         echo "</table><br>";
         
         $stmt = $db->query("SELECT id, nombre, zona, ubicaciones FROM rutas ORDER BY id");
-        $rutas = $stmt->fetchAll();
+        $rutas = Database::getInstance()->fetchAll($stmt);
         
         echo "<h2>Rutas Registradas (" . count($rutas) . "):</h2>";
         echo "<table>";

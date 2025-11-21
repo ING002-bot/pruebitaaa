@@ -34,14 +34,15 @@ try {
             VALUES (?, ?, ?, ?, ?, ?)";
     
     $stmt = $db->prepare($sql);
-    $stmt->execute([
+    $stmt->bind_param("iidddd",
         $repartidor_id,
         $ruta_id,
         $latitud,
         $longitud,
         $precision,
         $velocidad
-    ]);
+    );
+    $stmt->execute();
     
     echo json_encode([
         'success' => true,

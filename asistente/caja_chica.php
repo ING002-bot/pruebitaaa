@@ -14,8 +14,9 @@ $stmt = $db->prepare("
     FROM caja_chica
     WHERE asignado_a = ?
 ");
-$stmt->execute([$asistente_id]);
-$saldoInfo = $stmt->fetch();
+$stmt->bind_param("i", $asistente_id);
+$stmt->execute();
+$saldoInfo = $stmt->get_result()->fetch_assoc();
 $saldo_actual = $saldoInfo['total_asignado'] - $saldoInfo['total_gastado'] - $saldoInfo['total_devuelto'];
 
 // Obtener asignaciones pendientes de gastar
@@ -38,8 +39,9 @@ $stmt = $db->prepare("
     HAVING disponible > 0
     ORDER BY cc.fecha_operacion DESC
 ");
-$stmt->execute([$asistente_id]);
-$asignaciones = $stmt->fetchAll();
+$stmt->bind_param("i", $asistente_id);
+$stmt->execute();
+$asignaciones = Database::getInstance()->fetchAll($stmt->get_result());
 
 // Obtener historial de gastos
 $stmt = $db->prepare("
@@ -52,8 +54,9 @@ $stmt = $db->prepare("
     ORDER BY cc.fecha_operacion DESC
     LIMIT 50
 ");
-$stmt->execute([$asistente_id]);
-$historial_gastos = $stmt->fetchAll();
+$stmt->bind_param("i", $asistente_id);
+$stmt->execute();
+$historial_gastos = Database::getInstance()->fetchAll($stmt->get_result());
 
 $pageTitle = "Caja Chica";
 ?>

@@ -13,13 +13,15 @@ try {
     
     // Obtener notificaciones no leídas
     $stmt = $db->prepare("SELECT * FROM notificaciones WHERE usuario_id = ? AND leida = 0 ORDER BY fecha_creacion DESC LIMIT 10");
-    $stmt->execute([$usuario_id]);
-    $notificaciones = $stmt->fetchAll();
+    $stmt->bind_param("i", $usuario_id);
+    $stmt->execute();
+    $notificaciones = Database::getInstance()->fetchAll($stmt->get_result());
     
     // Contar total no leídas
     $stmt = $db->prepare("SELECT COUNT(*) as count FROM notificaciones WHERE usuario_id = ? AND leida = 0");
-    $stmt->execute([$usuario_id]);
-    $count = $stmt->fetch()['count'];
+    $stmt->bind_param("i", $usuario_id);
+    $stmt->execute();
+    $count = $stmt->get_result()->fetch_assoc()['count'];
     
     echo json_encode([
         'success' => true,

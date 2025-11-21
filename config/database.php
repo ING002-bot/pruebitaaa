@@ -55,6 +55,37 @@ class Database {
             $this->connection->close();
         }
     }
+
+    public function fetchAll($result) {
+        $rows = [];
+        if ($result && is_object($result)) {
+            while ($row = $result->fetch_assoc()) {
+                $rows[] = $row;
+            }
+        } elseif (is_array($result)) {
+            // Si ya es un array, devolverlo
+            return $result;
+        }
+        return $rows;
+    }
+
+    public function fetch($result) {
+        if ($result && is_object($result)) {
+            return $result->fetch_assoc();
+        }
+        return null;
+    }
+
+    public function fetchColumn($result, $column = 0) {
+        if ($result && is_object($result)) {
+            $row = $result->fetch_assoc();
+            if ($row) {
+                $values = array_values($row);
+                return isset($values[$column]) ? $values[$column] : null;
+            }
+        }
+        return null;
+    }
 }
 
 // Crear instancia global de la conexión

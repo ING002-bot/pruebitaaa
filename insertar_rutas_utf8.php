@@ -59,12 +59,13 @@ try {
     
     $insertados = 0;
     foreach ($rutas as $ruta) {
-        $stmt->execute([
+        $stmt->bind_param("ssss",
             $ruta['nombre'],
             $ruta['zona'],
             $ruta['ubicaciones'],
             $ruta['descripcion']
-        ]);
+        );
+        $stmt->execute();
         $insertados++;
     }
     
@@ -95,7 +96,7 @@ try {
     
     // Verificar las rutas insertadas
     $stmt = $db->query("SELECT id, nombre, zona, ubicaciones FROM rutas ORDER BY id");
-    $rutas_verificadas = $stmt->fetchAll();
+    $rutas_verificadas = Database::getInstance()->fetchAll($stmt);
     
     echo "<div class='info'>";
     echo "<h2>Verificación de Rutas:</h2>";

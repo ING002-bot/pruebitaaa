@@ -18,8 +18,9 @@ echo "</pre>";
 echo "<h3>Información de Base de Datos</h3>";
 $db = Database::getInstance()->getConnection();
 $stmt = $db->prepare("SELECT id, nombre, apellido, foto_perfil, estado FROM usuarios WHERE id = ?");
-$stmt->execute([$_SESSION['usuario_id']]);
-$usuario = $stmt->fetch();
+$stmt->bind_param("i", $_SESSION['usuario_id']);
+$stmt->execute();
+$usuario = $stmt->get_result()->fetch_assoc();
 
 echo "<pre>";
 print_r($usuario);

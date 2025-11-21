@@ -7,47 +7,47 @@ $db = Database::getInstance()->getConnection();
 
 // Total de paquetes
 $stmt = $db->query("SELECT COUNT(*) as total FROM paquetes");
-$totalPaquetes = $stmt->fetch()['total'];
+$totalPaquetes = $stmt->fetch_assoc()['total'];
 
 // Paquetes entregados hoy
 $stmt = $db->query("SELECT COUNT(*) as total FROM paquetes WHERE DATE(fecha_entrega) = CURDATE() AND estado = 'entregado'");
-$paquetesHoy = $stmt->fetch()['total'];
+$paquetesHoy = $stmt->fetch_assoc()['total'];
 
 // Paquetes en ruta
 $stmt = $db->query("SELECT COUNT(*) as total FROM paquetes WHERE estado = 'en_ruta'");
-$paquetesEnRuta = $stmt->fetch()['total'];
+$paquetesEnRuta = $stmt->fetch_assoc()['total'];
 
 // Paquetes rezagados
 $stmt = $db->query("SELECT COUNT(*) as total FROM paquetes WHERE estado = 'rezagado'");
-$paquetesRezagados = $stmt->fetch()['total'];
+$paquetesRezagados = $stmt->fetch_assoc()['total'];
 
 // Ingresos del mes actual
 $stmt = $db->query("SELECT COALESCE(SUM(monto), 0) as total FROM ingresos WHERE MONTH(fecha_ingreso) = MONTH(CURDATE()) AND YEAR(fecha_ingreso) = YEAR(CURDATE())");
-$ingresosMes = $stmt->fetch()['total'];
+$ingresosMes = $stmt->fetch_assoc()['total'];
 
 // Gastos del mes actual
 $stmt = $db->query("SELECT COALESCE(SUM(monto), 0) as total FROM gastos WHERE MONTH(fecha_gasto) = MONTH(CURDATE()) AND YEAR(fecha_gasto) = YEAR(CURDATE())");
-$gastosMes = $stmt->fetch()['total'];
+$gastosMes = $stmt->fetch_assoc()['total'];
 
 // Repartidores activos
 $stmt = $db->query("SELECT COUNT(*) as total FROM usuarios WHERE rol = 'repartidor' AND estado = 'activo'");
-$repartidoresActivos = $stmt->fetch()['total'];
+$repartidoresActivos = $stmt->fetch_assoc()['total'];
 
 // Últimos paquetes
 $stmt = $db->query("SELECT p.*, u.nombre, u.apellido FROM paquetes p LEFT JOIN usuarios u ON p.repartidor_id = u.id ORDER BY p.fecha_recepcion DESC LIMIT 10");
-$ultimosPaquetes = $stmt->fetchAll();
+$ultimosPaquetes = Database::getInstance()->fetchAll($stmt);
 
 // Paquetes por estado (para gráfico)
 $stmt = $db->query("SELECT estado, COUNT(*) as total FROM paquetes GROUP BY estado");
-$paquetesPorEstado = $stmt->fetchAll();
+$paquetesPorEstado = Database::getInstance()->fetchAll($stmt);
 
 // Ingresos por día del mes actual (para gráfico)
 $stmt = $db->query("SELECT DATE(fecha_ingreso) as fecha, SUM(monto) as total FROM ingresos WHERE MONTH(fecha_ingreso) = MONTH(CURDATE()) AND YEAR(fecha_ingreso) = YEAR(CURDATE()) GROUP BY DATE(fecha_ingreso) ORDER BY fecha");
-$ingresosPorDia = $stmt->fetchAll();
+$ingresosPorDia = Database::getInstance()->fetchAll($stmt);
 
 // Repartidores con más entregas del mes
 $stmt = $db->query("SELECT u.nombre, u.apellido, COUNT(e.id) as entregas FROM entregas e JOIN usuarios u ON e.repartidor_id = u.id WHERE MONTH(e.fecha_entrega) = MONTH(CURDATE()) AND YEAR(e.fecha_entrega) = YEAR(CURDATE()) GROUP BY u.id ORDER BY entregas DESC LIMIT 5");
-$topRepartidores = $stmt->fetchAll();
+$topRepartidores = Database::getInstance()->fetchAll($stmt);
 
 $pageTitle = "Dashboard";
 ?>

@@ -13,7 +13,7 @@ $stmt = $db->query("
         FIELD(categoria, 'URBANO', 'PUEBLOS', 'PLAYAS', 'COOPERATIVAS', 'EXCOPERATIVAS', 'FERREÑAFE'),
         nombre_zona ASC
 ");
-$todasTarifas = $stmt->fetchAll();
+$todasTarifas = Database::getInstance()->fetchAll($stmt);
 
 // Agrupar por categoría
 $tarifasPorCategoria = [];
@@ -37,8 +37,9 @@ $stmt = $db->prepare("
     ORDER BY total_entregas DESC
     LIMIT 10
 ");
-$stmt->execute([$repartidor_id]);
-$misEstadisticas = $stmt->fetchAll();
+$stmt->bind_param("i", $repartidor_id);
+$stmt->execute();
+$misEstadisticas = Database::getInstance()->fetchAll($stmt->get_result());
 
 $pageTitle = "Tarifas por Zona";
 ?>

@@ -20,7 +20,7 @@ try {
     // Obtener usuarios de cada rol
     $stmt = $db->prepare("SELECT id, rol, nombre FROM usuarios WHERE estado = 'activo'");
     $stmt->execute();
-    $usuarios = $stmt->fetchAll();
+    $usuarios = Database::getInstance()->fetchAll($stmt->get_result());
     
     $creadas = 0;
     

@@ -31,8 +31,15 @@ if ($buscar) {
 $sql .= " ORDER BY p.fecha_recepcion DESC LIMIT 100";
 
 $stmt = $db->prepare($sql);
-$stmt->execute($params);
-$paquetes = $stmt->fetchAll();
+if (!empty($params)) {
+    $types = '';
+    foreach ($params as $param) {
+        $types .= is_int($param) ? 'i' : 's';
+    }
+    $stmt->bind_param($types, ...$params);
+}
+$stmt->execute();
+$paquetes = Database::getInstance()->fetchAll($stmt->get_result());
 ?>
 
 <!DOCTYPE html>

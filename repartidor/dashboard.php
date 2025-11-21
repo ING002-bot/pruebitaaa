@@ -7,16 +7,19 @@ $repartidor_id = $_SESSION['usuario_id'];
 
 // Estadísticas del repartidor
 $stmt = $db->prepare("SELECT COUNT(*) as total FROM paquetes WHERE repartidor_id = ? AND estado = 'en_ruta'");
-$stmt->execute([$repartidor_id]);
-$paquetesEnRuta = $stmt->fetch()['total'];
+$stmt->bind_param("i", $repartidor_id);
+$stmt->execute();
+$paquetesEnRuta = $stmt->get_result()->fetch_assoc()['total'];
 
 $stmt = $db->prepare("SELECT COUNT(*) as total FROM paquetes WHERE repartidor_id = ? AND DATE(fecha_entrega) = CURDATE() AND estado = 'entregado'");
-$stmt->execute([$repartidor_id]);
-$entregasHoy = $stmt->fetch()['total'];
+$stmt->bind_param("i", $repartidor_id);
+$stmt->execute();
+$entregasHoy = $stmt->get_result()->fetch_assoc()['total'];
 
 $stmt = $db->prepare("SELECT COUNT(*) as total FROM paquetes WHERE repartidor_id = ? AND estado = 'rezagado'");
-$stmt->execute([$repartidor_id]);
-$rezagados = $stmt->fetch()['total'];
+$stmt->bind_param("i", $repartidor_id);
+$stmt->execute();
+$rezagados = $stmt->get_result()->fetch_assoc()['total'];
 
 // Ingresos del mes - SOLO entregas exitosas con tarifa
 $stmt = $db->prepare("
@@ -29,18 +32,21 @@ $stmt = $db->prepare("
       AND MONTH(e.fecha_entrega) = MONTH(CURDATE()) 
       AND YEAR(e.fecha_entrega) = YEAR(CURDATE())
 ");
-$stmt->execute([$repartidor_id]);
-$ingresosMes = (float)($stmt->fetch()['total_ingresos'] ?? 0);
+$stmt->bind_param("i", $repartidor_id);
+$stmt->execute();
+$ingresosMes = (float)($stmt->get_result()->fetch_assoc()['total_ingresos'] ?? 0);
 
 // Ruta activa
 $stmt = $db->prepare("SELECT * FROM rutas WHERE repartidor_id = ? AND fecha_ruta = CURDATE() AND estado IN ('planificada', 'en_progreso') ORDER BY id DESC LIMIT 1");
-$stmt->execute([$repartidor_id]);
-$rutaActiva = $stmt->fetch();
+$stmt->bind_param("i", $repartidor_id);
+$stmt->execute();
+$rutaActiva = $stmt->get_result()->fetch_assoc();
 
 // Paquetes de hoy
 $stmt = $db->prepare("SELECT p.* FROM paquetes p WHERE p.repartidor_id = ? AND p.estado IN ('en_ruta', 'pendiente') ORDER BY p.prioridad DESC, p.fecha_asignacion");
-$stmt->execute([$repartidor_id]);
-$paquetesHoy = $stmt->fetchAll();
+$stmt->bind_param("i", $repartidor_id);
+$stmt->execute();
+$paquetesHoy = Database::getInstance()->fetchAll($stmt->get_result());
 
 $pageTitle = "Mi Dashboard";
 ?>

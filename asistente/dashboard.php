@@ -7,31 +7,31 @@ $db = Database::getInstance()->getConnection();
 
 // Total de paquetes
 $stmt = $db->query("SELECT COUNT(*) as total FROM paquetes");
-$totalPaquetes = $stmt->fetch()['total'];
+$totalPaquetes = $stmt->fetch_assoc()['total'];
 
 // Paquetes entregados hoy
 $stmt = $db->query("SELECT COUNT(*) as total FROM paquetes WHERE DATE(fecha_entrega) = CURDATE() AND estado = 'entregado'");
-$paquetesHoy = $stmt->fetch()['total'];
+$paquetesHoy = $stmt->fetch_assoc()['total'];
 
 // Paquetes en ruta
 $stmt = $db->query("SELECT COUNT(*) as total FROM paquetes WHERE estado = 'en_ruta'");
-$paquetesEnRuta = $stmt->fetch()['total'];
+$paquetesEnRuta = $stmt->fetch_assoc()['total'];
 
 // Paquetes rezagados
 $stmt = $db->query("SELECT COUNT(*) as total FROM paquetes WHERE estado = 'rezagado'");
-$paquetesRezagados = $stmt->fetch()['total'];
+$paquetesRezagados = $stmt->fetch_assoc()['total'];
 
 // Repartidores activos
 $stmt = $db->query("SELECT COUNT(*) as total FROM usuarios WHERE rol = 'repartidor' AND estado = 'activo'");
-$repartidoresActivos = $stmt->fetch()['total'];
+$repartidoresActivos = $stmt->fetch_assoc()['total'];
 
 // Últimos paquetes
 $stmt = $db->query("SELECT p.*, u.nombre, u.apellido FROM paquetes p LEFT JOIN usuarios u ON p.repartidor_id = u.id ORDER BY p.fecha_recepcion DESC LIMIT 10");
-$ultimosPaquetes = $stmt->fetchAll();
+$ultimosPaquetes = Database::getInstance()->fetchAll($stmt);
 
 // Paquetes por estado
 $stmt = $db->query("SELECT estado, COUNT(*) as total FROM paquetes GROUP BY estado");
-$paquetesPorEstado = $stmt->fetchAll();
+$paquetesPorEstado = Database::getInstance()->fetchAll($stmt);
 
 $pageTitle = "Dashboard Asistente";
 ?>

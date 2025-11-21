@@ -7,8 +7,9 @@ $repartidor_id = $_SESSION['usuario_id'];
 
 // Obtener ruta activa
 $stmt = $db->prepare("SELECT * FROM rutas WHERE repartidor_id = ? AND fecha_ruta = CURDATE() AND estado IN ('planificada', 'en_progreso') ORDER BY id DESC LIMIT 1");
-$stmt->execute([$repartidor_id]);
-$rutaActiva = $stmt->fetch();
+$stmt->bind_param("i", $repartidor_id);
+$stmt->execute();
+$rutaActiva = $stmt->get_result()->fetch_assoc();
 
 // Obtener paquetes en ruta
 $paquetes = [];
@@ -18,8 +19,9 @@ if ($rutaActiva) {
                           INNER JOIN ruta_paquetes rp ON p.id = rp.paquete_id 
                           WHERE rp.ruta_id = ? AND p.estado = 'en_ruta'
                           ORDER BY rp.orden_entrega");
-    $stmt->execute([$rutaActiva['id']]);
-    $paquetes = $stmt->fetchAll();
+    $stmt->bind_param("i", $rutaActiva['id']);
+    $stmt->execute();
+    $paquetes = Database::getInstance()->fetchAll($stmt->get_result());
 }
 
 $pageTitle = "Mapa en Tiempo Real";
