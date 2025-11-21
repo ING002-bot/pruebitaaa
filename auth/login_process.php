@@ -9,14 +9,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $db = Database::getInstance()->getConnection();
         $sql = "SELECT * FROM usuarios WHERE email = ? AND estado = 'activo'";
         $stmt = $db->prepare($sql);
-        $stmt->execute([$email]);
-        $usuario = $stmt->fetch();
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $usuario = $result->fetch_assoc();
         
         if ($usuario && password_verify($password, $usuario['password'])) {
             // Actualizar último acceso
             $updateSql = "UPDATE usuarios SET ultimo_acceso = NOW() WHERE id = ?";
             $updateStmt = $db->prepare($updateSql);
-            $updateStmt->execute([$usuario['id']]);
+            $updateStmt->bind_param("i", $usuario['id']);
+            $updateStmt->execute();
             
             // Crear sesión
             $_SESSION['usuario_id'] = $usuario['id'];

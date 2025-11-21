@@ -8,7 +8,7 @@ date_default_timezone_set('America/Lima');
 // Configuración de la aplicación
 define('APP_NAME', 'HERMES EXPRESS LOGISTIC');
 define('APP_VERSION', '1.0.0');
-define('APP_URL', 'http://localhost/NUEVOOO/');
+define('APP_URL', 'http://localhost/pruebitaaa/');
 define('UPLOADS_DIR', __DIR__ . '/../uploads/');
 define('UPLOADS_URL', APP_URL . 'uploads/');
 
