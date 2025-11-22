@@ -21,8 +21,9 @@ if (!$fecha_inicio || !$fecha_fin) {
 $db = Database::getInstance()->getConnection();
 $sql = "INSERT INTO importaciones_savar (total_registros, estado, procesado_por) VALUES (0, 'procesando', ?)";
 $stmt = $db->prepare($sql);
-$stmt->execute([$_SESSION['usuario_id']]);
-$importacion_id = $db->lastInsertId();
+$stmt->bind_param("i", $_SESSION['usuario_id']);
+$stmt->execute();
+$importacion_id = $db->insert_id;
 
 // Preparar comando Python
 $pythonPath = 'python'; // o 'python3' en algunos sistemas
@@ -41,7 +42,9 @@ if (!function_exists('exec')) {
     // Actualizar importación como error
     $sql = "UPDATE importaciones_savar SET estado = 'error', errores = ? WHERE id = ?";
     $stmt = $db->prepare($sql);
-    $stmt->execute(['La función exec() está deshabilitada en PHP. Ejecuta el script manualmente desde terminal.', $importacion_id]);
+    $error_msg = 'La función exec() está deshabilitada en PHP. Ejecuta el script manualmente desde terminal.';
+    $stmt->bind_param("si", $error_msg, $importacion_id);
+    $stmt->execute();
     
     setFlashMessage('danger', 'No se puede ejecutar el script desde el navegador. La función exec() está deshabilitada.<br>Por favor, ejecuta manualmente: <code>python python/savar_importer.py</code>');
     redirect(APP_URL . 'admin/importar.php');

@@ -27,8 +27,16 @@ $sql = "SELECT e.*, p.codigo_seguimiento, p.destinatario_nombre, p.destinatario_
         LEFT JOIN usuarios u ON e.repartidor_id = u.id
         $whereSql";
 $stmt = $db->prepare($sql);
-$stmt->execute($params);
-$entrega = $stmt->fetch();
+
+// Determinar tipos y vincular parámetros
+if (count($params) === 1) {
+    $stmt->bind_param("i", $params[0]);
+} else if (count($params) === 2) {
+    $stmt->bind_param("ii", $params[0], $params[1]);
+}
+
+$stmt->execute();
+$entrega = Database::getInstance()->fetch($stmt);
 
 if (!$entrega) {
     echo '<div class="alert alert-danger">Entrega no encontrada</div>';

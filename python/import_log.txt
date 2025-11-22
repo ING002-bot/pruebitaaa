@@ -1,0 +1,78 @@
+=== EXTRACCION DE DATOS SAVAR EXPRESS ===
+
+Configurando consulta para el rango de fechas: 2025-11-21 al 2025-11-22
+
+PASO 1: INICIANDO SESION...
+Iniciando sesión en SAVAR con usuario: CHI.HER
+Navegando a la página de inicio de sesión...
+Página cargada correctamente
+Screenshot guardado: screenshot_login_page.png
+Buscando campos de login...
+Elemento encontrado: css selector=input[type='text']
+Elemento encontrado: css selector=input[type='password']
+Campos de login encontrados, completando credenciales...
+Usuario ingresado
+Contraseña ingresada
+Elemento encontrado: css selector=button[type='submit']
+Haciendo clic en el botón de envío...
+Esperando a que se complete el inicio de sesión...
+URL después del login: https://app.savarexpress.com.pe/govari/#
+Screenshot guardado: screenshot_after_login.png
+Configurando rango de fechas (Recepción): 2025-11-21 a 2025-11-22
+Iniciando configuración de fechas para etiqueta: Fecha de Recepcion
+Buscando inputs de fecha asociados al label en su misma fila...
+No encontrados con label sin acento, probando con acento...
+Fallo al localizar los dos inputs de fecha asociados al label; aplicando fallback por checkbox marcado
+Reintentando con 'Fecha de Recepción' (con acento)...
+Iniciando configuración de fechas para etiqueta: Fecha de Recepción
+Buscando inputs de fecha asociados al label en su misma fila...
+No encontrados con label sin acento, probando con acento...
+Fallo al localizar los dos inputs de fecha asociados al label; aplicando fallback por checkbox marcado
+No fue posible configurar las fechas de 'Fecha de Recepción'
+Inicio de sesión exitoso
+Inicio de sesion exitoso
+
+PASO 2: NAVEGANDO A CONTROL DE ALMACENES...
+Control de Almacenes abierto
+
+PASO 3: CONFIGURANDO FECHAS Y CONSULTANDO...
+Configurando fechas: 2025-11-21 a 2025-11-22
+Iniciando configuración de fechas para etiqueta: Fecha de Recepcion
+Buscando inputs de fecha asociados al label en su misma fila...
+Inputs encontrados: 2 en misma fila/contenedor del label
+Configurando fecha de fin: 2025-11-22
+Configurando fecha: 2025-11-22
+Configurando fecha de inicio: 2025-11-21
+Configurando fecha: 2025-11-21
+Fechas configuradas correctamente
+Buscando botón 'Consultar'...
+Botón 'Consultar' clickeado por ID #btnBuscarCTRLALM
+Botón 'Consultar' clickeado (intento 1)
+Esperando a que termine el procesamiento...
+Advertencia: la página siguió procesando más de lo esperado
+Screenshot guardado: step_after_consultar.png
+Fechas configuradas y consulta ejecutada
+
+PASO 4: ABRIENDO MODAL Y EXTRAYENDO DATOS...
+Abriendo modal haciendo clic en columna: EN ALMACEN
+Clic en categoría 'TOTAL' exitoso
+Esperando a que aparezca el modal...
+Modal 'DETALLE DE PEDIDOS' abierto correctamente
+Screenshot del modal guardado: step_modal_opened.png
+Clic en 'Exportar Excel' y esperando descarga...
+
+==================================================
+RESULTADO DE DESCARGA DE EXCEL:
+==================================================
+Estado: error
+Mensaje: No se pudo descargar el Excel desde el modal
+
+==================================================
+PROCESO FINALIZADO
+==================================================
+Revisa los siguientes archivos:
+- datos_savar.json (datos extraídos)
+- downloads/ (archivos Excel descargados)
+- Screenshots (imágenes del proceso)
+
+Esperando 10 segundos antes de cerrar...

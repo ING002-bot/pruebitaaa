@@ -12,8 +12,9 @@ if (!$id) {
 $db = Database::getInstance()->getConnection();
 $sql = "SELECT * FROM importaciones_savar WHERE id = ?";
 $stmt = $db->prepare($sql);
-$stmt->execute([$id]);
-$importacion = $stmt->fetch();
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$importacion = Database::getInstance()->fetch($stmt);
 
 if (!$importacion) {
     echo '<div class="alert alert-danger">Importación no encontrada</div>';

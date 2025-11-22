@@ -8,7 +8,12 @@ $pageTitle = 'Importar desde SAVAR';
 $db = Database::getInstance()->getConnection();
 $sql = "SELECT * FROM importaciones_savar ORDER BY fecha_importacion DESC LIMIT 10";
 $stmt = $db->query($sql);
-$importaciones = Database::getInstance()->fetchAll($stmt);
+if ($stmt) {
+    $importaciones = Database::getInstance()->fetchAll($stmt);
+    $stmt->free_result();
+} else {
+    $importaciones = [];
+}
 ?>
 
 <!DOCTYPE html>
@@ -163,8 +168,9 @@ $importaciones = Database::getInstance()->fetchAll($stmt);
                                                         if ($imp['procesado_por']) {
                                                             $sqlUser = "SELECT nombre, apellido FROM usuarios WHERE id = ?";
                                                             $stmtUser = $db->prepare($sqlUser);
-                                                            $stmtUser->execute([$imp['procesado_por']]);
-                                                            $user = $stmtUser->fetch();
+                                                            $stmtUser->bind_param("i", $imp['procesado_por']);
+                                                            $stmtUser->execute();
+                                                            $user = Database::getInstance()->fetch($stmtUser);
                                                             echo $user ? $user['nombre'] . ' ' . $user['apellido'] : 'Sistema';
                                                         } else {
                                                             echo 'Sistema';
