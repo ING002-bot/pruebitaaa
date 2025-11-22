@@ -17,8 +17,9 @@ $sql = "SELECT r.*, u.nombre as repartidor_nombre, u.apellido as repartidor_apel
         LEFT JOIN usuarios uc ON r.creado_por = uc.id
         WHERE r.id = ?";
 $stmt = $db->prepare($sql);
-$stmt->execute([$ruta_id]);
-$ruta = $stmt->fetch();
+$stmt->bind_param("i", $ruta_id);
+$stmt->execute();
+$ruta = Database::getInstance()->fetch($stmt);
 
 if (!$ruta) {
     header('Location: rutas.php?error=no_encontrada');
@@ -32,8 +33,9 @@ $sql = "SELECT p.*, rp.orden_entrega, rp.estado as estado_ruta
         WHERE rp.ruta_id = ?
         ORDER BY rp.orden_entrega, p.estado, p.id DESC";
 $stmt = $db->prepare($sql);
-$stmt->execute([$ruta_id]);
-$paquetes = $stmt->fetchAll();
+$stmt->bind_param("i", $ruta_id);
+$stmt->execute();
+$paquetes = Database::getInstance()->fetchAll($stmt);
 
 // Estadísticas de paquetes
 $stats = [
