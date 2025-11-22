@@ -18,8 +18,9 @@ $stmt = $db->prepare("
     LEFT JOIN entregas e ON e.paquete_id = p.id
     WHERE p.id = ?
 ");
-$stmt->execute([$id]);
-$paquete = $stmt->fetch();
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$paquete = Database::getInstance()->fetch($stmt);
 
 if (!$paquete) {
     echo '<div class="alert alert-danger">Paquete no encontrado</div>';

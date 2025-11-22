@@ -37,11 +37,20 @@ if ($filtro_repartidor) {
 $sql .= " ORDER BY p.fecha_recepcion DESC LIMIT 100";
 
 $stmt = $db->prepare($sql);
-$stmt->execute($params);
-$paquetes = $stmt->fetchAll();
+if (!empty($params)) {
+    $types = '';
+    foreach ($params as $param) {
+        if (is_int($param)) $types .= 'i';
+        elseif (is_float($param)) $types .= 'd';
+        else $types .= 's';
+    }
+    $stmt->bind_param($types, ...$params);
+}
+$stmt->execute();
+$paquetes = Database::getInstance()->fetchAll($stmt->get_result());
 
 // Obtener repartidores para filtro
-$repartidores = $db->query("SELECT id, nombre, apellido FROM usuarios WHERE rol = 'repartidor' AND estado = 'activo' ORDER BY nombre")->fetchAll();
+$repartidores = Database::getInstance()->fetchAll($db->query("SELECT id, nombre, apellido FROM usuarios WHERE rol = 'repartidor' AND estado = 'activo' ORDER BY nombre"));
 
 $pageTitle = "Gestión de Paquetes";
 ?>

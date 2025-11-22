@@ -8,7 +8,7 @@ $pageTitle = 'Importar desde SAVAR';
 $db = Database::getInstance()->getConnection();
 $sql = "SELECT * FROM importaciones_savar ORDER BY fecha_importacion DESC LIMIT 10";
 $stmt = $db->query($sql);
-$importaciones = $stmt->fetchAll();
+$importaciones = Database::getInstance()->fetchAll($stmt);
 ?>
 
 <!DOCTYPE html>

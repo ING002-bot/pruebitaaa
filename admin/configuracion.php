@@ -58,9 +58,9 @@ $config = array_merge([
 
 // Estadísticas del sistema
 $stats_sistema = [
-    'total_usuarios' => $db->query("SELECT COUNT(*) FROM usuarios")->fetchColumn(),
-    'total_paquetes' => $db->query("SELECT COUNT(*) FROM paquetes")->fetchColumn(),
-    'total_entregas' => $db->query("SELECT COUNT(*) FROM entregas")->fetchColumn(),
+    'total_usuarios' => Database::getInstance()->fetchColumn($db->query("SELECT COUNT(*) FROM usuarios")),
+    'total_paquetes' => Database::getInstance()->fetchColumn($db->query("SELECT COUNT(*) FROM paquetes")),
+    'total_entregas' => Database::getInstance()->fetchColumn($db->query("SELECT COUNT(*) FROM entregas")),
     'tamano_bd' => 0, // Calcular si se necesita
 ];
 ?>

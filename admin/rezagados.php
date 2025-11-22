@@ -12,7 +12,7 @@ $sql = "SELECT p.*, pr.*, u.nombre as repartidor_nombre, u.apellido as repartido
         WHERE pr.solucionado = 0 
         AND p.estado IN ('rezagado', 'pendiente', 'en_ruta')
         ORDER BY pr.fecha_rezago DESC";
-$rezagados = $db->query($sql)->fetchAll();
+$rezagados = Database::getInstance()->fetchAll($db->query($sql));
 ?>
 
 <!DOCTYPE html>

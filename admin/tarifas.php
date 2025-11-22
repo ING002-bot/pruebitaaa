@@ -11,7 +11,7 @@ $stmt = $db->query("
         FIELD(categoria, 'URBANO', 'PUEBLOS', 'PLAYAS', 'COOPERATIVAS', 'EXCOPERATIVAS', 'FERREÑAFE'),
         nombre_zona ASC
 ");
-$todasTarifas = $stmt->fetchAll();
+$todasTarifas = Database::getInstance()->fetchAll($stmt);
 
 // Agrupar por categoría
 $tarifasPorCategoria = [];

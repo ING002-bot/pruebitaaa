@@ -17,8 +17,9 @@ $sql = "SELECT i.*, u.nombre, u.apellido, p.codigo_seguimiento, p.destinatario_n
         WHERE DATE(i.fecha_ingreso) BETWEEN ? AND ?
         ORDER BY i.fecha_ingreso DESC";
 $stmt = $db->prepare($sql);
-$stmt->execute([$fecha_desde, $fecha_hasta]);
-$ingresos = $stmt->fetchAll();
+$stmt->bind_param("ss", $fecha_desde, $fecha_hasta);
+$stmt->execute();
+$ingresos = Database::getInstance()->fetchAll($stmt);
 
 // Total
 $total = array_sum(array_column($ingresos, 'monto'));

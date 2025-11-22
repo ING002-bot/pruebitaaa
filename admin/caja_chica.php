@@ -6,26 +6,33 @@ $db = Database::getInstance()->getConnection();
 
 // Obtener asistentes
 $stmt = $db->query("SELECT id, nombre, apellido FROM usuarios WHERE rol = 'asistente' AND estado = 'activo'");
-$asistentes = $stmt->fetchAll();
+$asistentes = Database::getInstance()->fetchAll($stmt);
 
-// Obtener saldos
-$stmt = $db->query("SELECT * FROM saldo_caja_chica ORDER BY apellido, nombre");
-$saldos = $stmt->fetchAll();
+// Obtener saldos - Verificar si la tabla existe
+$saldos = [];
+$tableCheckResult = $db->query("SHOW TABLES LIKE 'caja_chica'");
+if ($tableCheckResult && $tableCheckResult->num_rows > 0) {
+    $stmt = $db->query("SELECT * FROM saldo_caja_chica ORDER BY apellido, nombre");
+    $saldos = Database::getInstance()->fetchAll($stmt);
+}
 
 // Obtener historial completo
-$stmt = $db->query("
-    SELECT cc.*, 
-           ua.nombre as admin_nombre, ua.apellido as admin_apellido,
-           uas.nombre as asistente_nombre, uas.apellido as asistente_apellido,
-           ur.nombre as registro_nombre, ur.apellido as registro_apellido
-    FROM caja_chica cc
-    LEFT JOIN usuarios ua ON cc.asignado_por = ua.id
-    LEFT JOIN usuarios uas ON cc.asignado_a = uas.id
-    INNER JOIN usuarios ur ON cc.registrado_por = ur.id
-    ORDER BY cc.fecha_operacion DESC, cc.id DESC
-    LIMIT 100
-");
-$historial = $stmt->fetchAll();
+$historial = [];
+if ($tableCheckResult && $tableCheckResult->num_rows > 0) {
+    $stmt = $db->query("
+        SELECT cc.*, 
+               ua.nombre as admin_nombre, ua.apellido as admin_apellido,
+               uas.nombre as asistente_nombre, uas.apellido as asistente_apellido,
+               ur.nombre as registro_nombre, ur.apellido as registro_apellido
+        FROM caja_chica cc
+        LEFT JOIN usuarios ua ON cc.asignado_por = ua.id
+        LEFT JOIN usuarios uas ON cc.asignado_a = uas.id
+        INNER JOIN usuarios ur ON cc.registrado_por = ur.id
+        ORDER BY cc.fecha_operacion DESC, cc.id DESC
+        LIMIT 100
+    ");
+    $historial = Database::getInstance()->fetchAll($stmt);
+}
 
 $pageTitle = "Caja Chica";
 ?>

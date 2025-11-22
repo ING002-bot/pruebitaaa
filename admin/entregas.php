@@ -52,13 +52,21 @@ if ($buscar) {
 $sql .= " ORDER BY e.fecha_entrega DESC LIMIT 100";
 
 $stmt = $db->prepare($sql);
-$stmt->execute($params);
-$entregas = $stmt->fetchAll();
+if (!empty($params)) {
+    $types = '';
+    foreach ($params as $param) {
+        if (is_int($param)) $types .= 'i';
+        elseif (is_float($param)) $types .= 'd';
+        else $types .= 's';
+    }
+    $stmt->bind_param($types, ...$params);
+}
+$stmt->execute();
+$entregas = Database::getInstance()->fetchAll($stmt->get_result());
 
 // Obtener repartidores para filtro
 $sqlRepartidores = "SELECT id, nombre, apellido FROM usuarios WHERE rol = 'repartidor' AND estado = 'activo' ORDER BY nombre";
-$stmtRepartidores = $db->query($sqlRepartidores);
-$repartidores = $stmtRepartidores->fetchAll();
+$repartidores = Database::getInstance()->fetchAll($db->query($sqlRepartidores));
 
 // Estadísticas
 $sqlStats = "SELECT 
@@ -68,7 +76,7 @@ $sqlStats = "SELECT
     SUM(CASE WHEN tipo_entrega = 'parcial' THEN 1 ELSE 0 END) as parciales
     FROM entregas 
     WHERE DATE(fecha_entrega) = CURDATE()";
-$statsHoy = $db->query($sqlStats)->fetch();
+$statsHoy = Database::getInstance()->fetch($db->query($sqlStats));
 ?>
 
 <!DOCTYPE html>

@@ -16,8 +16,9 @@ $sql = "SELECT g.*, u.nombre, u.apellido
         WHERE DATE(g.fecha_gasto) BETWEEN ? AND ?
         ORDER BY g.fecha_gasto DESC";
 $stmt = $db->prepare($sql);
-$stmt->execute([$fecha_desde, $fecha_hasta]);
-$gastos = $stmt->fetchAll();
+$stmt->bind_param("ss", $fecha_desde, $fecha_hasta);
+$stmt->execute();
+$gastos = Database::getInstance()->fetchAll($stmt);
 
 $total = array_sum(array_column($gastos, 'monto'));
 ?>

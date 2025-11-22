@@ -12,8 +12,9 @@ $db = Database::getInstance()->getConnection();
 // Obtener información de la ruta
 $sql = "SELECT * FROM rutas WHERE id = ?";
 $stmt = $db->prepare($sql);
-$stmt->execute([$ruta_id]);
-$ruta = $stmt->fetch();
+$stmt->bind_param("i", $ruta_id);
+$stmt->execute();
+$ruta = $stmt->get_result()->fetch_assoc();
 
 if (!$ruta) {
     header('Location: rutas.php?error=no_encontrada');
@@ -27,7 +28,7 @@ if ($ruta['estado'] != 'planificada') {
 }
 
 // Obtener repartidores activos
-$repartidores = $db->query("SELECT id, nombre, apellido FROM usuarios WHERE rol = 'repartidor' AND estado = 'activo'")->fetchAll();
+$repartidores = Database::getInstance()->fetchAll($db->query("SELECT id, nombre, apellido FROM usuarios WHERE rol = 'repartidor' AND estado = 'activo'));
 
 // Procesar array de ubicaciones
 $ubicaciones_array = !empty($ruta['ubicaciones']) ? explode(',', $ruta['ubicaciones']) : [];

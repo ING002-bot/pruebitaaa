@@ -13,10 +13,10 @@ $sql = "SELECT r.*, u.nombre as repartidor_nombre, u.apellido as repartidor_apel
         LEFT JOIN usuarios uc ON r.creado_por = uc.id
         ORDER BY r.fecha_ruta DESC, r.id DESC
         LIMIT 100";
-$rutas = $db->query($sql)->fetchAll();
+$rutas = Database::getInstance()->fetchAll($db->query($sql));
 
 // Repartidores activos
-$repartidores = $db->query("SELECT id, nombre, apellido FROM usuarios WHERE rol = 'repartidor' AND estado = 'activo'")->fetchAll();
+$repartidores = Database::getInstance()->fetchAll($db->query("SELECT id, nombre, apellido FROM usuarios WHERE rol = 'repartidor' AND estado = 'activo'"));
 ?>
 
 <!DOCTYPE html>

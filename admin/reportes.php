@@ -12,11 +12,11 @@ $fecha_hasta = $_GET['fecha_hasta'] ?? date('Y-m-d');
 
 // Estadísticas generales
 $stats = [
-    'total_paquetes' => $db->query("SELECT COUNT(*) FROM paquetes WHERE DATE(fecha_recepcion) BETWEEN '$fecha_desde' AND '$fecha_hasta'")->fetchColumn(),
-    'paquetes_entregados' => $db->query("SELECT COUNT(*) FROM paquetes WHERE estado='entregado' AND DATE(fecha_entrega) BETWEEN '$fecha_desde' AND '$fecha_hasta'")->fetchColumn(),
-    'paquetes_rezagados' => $db->query("SELECT COUNT(*) FROM paquetes_rezagados WHERE DATE(fecha_rezago) BETWEEN '$fecha_desde' AND '$fecha_hasta'")->fetchColumn(),
-    'total_ingresos' => $db->query("SELECT COALESCE(SUM(monto), 0) FROM ingresos WHERE DATE(fecha_ingreso) BETWEEN '$fecha_desde' AND '$fecha_hasta'")->fetchColumn(),
-    'total_gastos' => $db->query("SELECT COALESCE(SUM(monto), 0) FROM gastos WHERE DATE(fecha_gasto) BETWEEN '$fecha_desde' AND '$fecha_hasta'")->fetchColumn(),
+    'total_paquetes' => Database::getInstance()->fetchColumn($db->query("SELECT COUNT(*) FROM paquetes WHERE DATE(fecha_recepcion) BETWEEN '$fecha_desde' AND '$fecha_hasta'")),
+    'paquetes_entregados' => Database::getInstance()->fetchColumn($db->query("SELECT COUNT(*) FROM paquetes WHERE estado='entregado' AND DATE(fecha_entrega) BETWEEN '$fecha_desde' AND '$fecha_hasta'")),
+    'paquetes_rezagados' => Database::getInstance()->fetchColumn($db->query("SELECT COUNT(*) FROM paquetes_rezagados WHERE DATE(fecha_rezago) BETWEEN '$fecha_desde' AND '$fecha_hasta'")),
+    'total_ingresos' => Database::getInstance()->fetchColumn($db->query("SELECT COALESCE(SUM(monto), 0) FROM ingresos WHERE DATE(fecha_ingreso) BETWEEN '$fecha_desde' AND '$fecha_hasta'")),
+    'total_gastos' => Database::getInstance()->fetchColumn($db->query("SELECT COALESCE(SUM(monto), 0) FROM gastos WHERE DATE(fecha_gasto) BETWEEN '$fecha_desde' AND '$fecha_hasta'")),
 ];
 
 $stats['utilidad'] = $stats['total_ingresos'] - $stats['total_gastos'];
@@ -24,25 +24,25 @@ $stats['tasa_entrega'] = $stats['total_paquetes'] > 0 ? round(($stats['paquetes_
 
 // Datos para gráficos
 // Entregas por día
-$entregas_diarias = $db->query("
+$entregas_diarias = Database::getInstance()->fetchAll($db->query("
     SELECT DATE(fecha_entrega) as fecha, COUNT(*) as total
     FROM entregas
     WHERE DATE(fecha_entrega) BETWEEN '$fecha_desde' AND '$fecha_hasta'
     GROUP BY DATE(fecha_entrega)
     ORDER BY fecha
-")->fetchAll();
+"));
 
 // Ingresos por día
-$ingresos_diarios = $db->query("
+$ingresos_diarios = Database::getInstance()->fetchAll($db->query("
     SELECT DATE(fecha_ingreso) as fecha, SUM(monto) as total
     FROM ingresos
     WHERE DATE(fecha_ingreso) BETWEEN '$fecha_desde' AND '$fecha_hasta'
     GROUP BY DATE(fecha_ingreso)
     ORDER BY fecha
-")->fetchAll();
+"));
 
 // Top repartidores
-$top_repartidores = $db->query("
+$top_repartidores = Database::getInstance()->fetchAll($db->query("
     SELECT u.nombre, u.apellido, 
            COUNT(e.id) as total_entregas,
            SUM(CASE WHEN e.tipo_entrega='exitosa' THEN 1 ELSE 0 END) as exitosas,
@@ -54,24 +54,24 @@ $top_repartidores = $db->query("
     GROUP BY u.id
     ORDER BY total_entregas DESC
     LIMIT 10
-")->fetchAll();
+"));
 
 // Estados de paquetes
-$estados_paquetes = $db->query("
+$estados_paquetes = Database::getInstance()->fetchAll($db->query("
     SELECT estado, COUNT(*) as total
     FROM paquetes
     WHERE DATE(fecha_recepcion) BETWEEN '$fecha_desde' AND '$fecha_hasta'
     GROUP BY estado
-")->fetchAll();
+"));
 
 // Motivos de rechazo
-$motivos_rechazo = $db->query("
+$motivos_rechazo = Database::getInstance()->fetchAll($db->query("
     SELECT motivo, COUNT(*) as total
     FROM paquetes_rezagados
     WHERE DATE(fecha_rezago) BETWEEN '$fecha_desde' AND '$fecha_hasta'
     GROUP BY motivo
     ORDER BY total DESC
-")->fetchAll();
+"));
 ?>
 
 <!DOCTYPE html>

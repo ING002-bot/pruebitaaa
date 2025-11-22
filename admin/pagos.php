@@ -5,9 +5,10 @@ requireRole(['admin']);
 $pageTitle = 'Gestión de Pagos';
 
 $db = Database::getInstance()->getConnection();
-$pagos = $db->query("SELECT p.*, u.nombre, u.apellido FROM pagos p 
-                     LEFT JOIN usuarios u ON p.repartidor_id = u.id 
-                     ORDER BY p.fecha_pago DESC LIMIT 100")->fetchAll();
+$stmt = $db->query("SELECT p.*, u.nombre, u.apellido FROM pagos p 
+                    LEFT JOIN usuarios u ON p.repartidor_id = u.id 
+                    ORDER BY p.fecha_pago DESC LIMIT 100");
+$pagos = Database::getInstance()->fetchAll($stmt);
 ?>
 
 <!DOCTYPE html>
@@ -91,7 +92,7 @@ $pagos = $db->query("SELECT p.*, u.nombre, u.apellido FROM pagos p
                             <select name="repartidor_id" class="form-select" required>
                                 <option value="">Seleccionar...</option>
                                 <?php
-                                $reps = $db->query("SELECT id, nombre, apellido FROM usuarios WHERE rol = 'repartidor' AND estado = 'activo'")->fetchAll();
+                                $reps = Database::getInstance()->fetchAll($db->query("SELECT id, nombre, apellido FROM usuarios WHERE rol = 'repartidor' AND estado = 'activo'"));
                                 foreach ($reps as $rep):
                                 ?>
                                     <option value="<?php echo $rep['id']; ?>"><?php echo $rep['nombre'] . ' ' . $rep['apellido']; ?></option>

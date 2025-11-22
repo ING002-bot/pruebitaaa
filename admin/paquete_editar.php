@@ -6,15 +6,16 @@ $id = $_GET['id'] ?? 0;
 $db = Database::getInstance()->getConnection();
 
 $stmt = $db->prepare("SELECT * FROM paquetes WHERE id = ?");
-$stmt->execute([$id]);
-$paquete = $stmt->fetch();
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$paquete = $stmt->get_result()->fetch_assoc();
 
 if (!$paquete) {
     echo '<div class="alert alert-danger">Paquete no encontrado</div>';
     exit;
 }
 
-$repartidores = $db->query("SELECT id, nombre, apellido FROM usuarios WHERE rol = 'repartidor' AND estado = 'activo' ORDER BY nombre")->fetchAll();
+$repartidores = Database::getInstance()->fetchAll($db->query("SELECT id, nombre, apellido FROM usuarios WHERE rol = 'repartidor' AND estado = 'activo' ORDER BY nombre"));
 ?>
 
 <form action="paquete_actualizar.php" method="POST">

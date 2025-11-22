@@ -59,8 +59,16 @@ class Database {
     public function fetchAll($result) {
         $rows = [];
         if ($result && is_object($result)) {
-            while ($row = $result->fetch_assoc()) {
-                $rows[] = $row;
+            // Si es un mysqli_stmt, obtener el result_metadata primero
+            if ($result instanceof mysqli_stmt) {
+                $result = $result->get_result();
+            }
+            
+            // Ahora iterar sobre mysqli_result
+            if ($result instanceof mysqli_result) {
+                while ($row = $result->fetch_assoc()) {
+                    $rows[] = $row;
+                }
             }
         } elseif (is_array($result)) {
             // Si ya es un array, devolverlo
@@ -71,7 +79,15 @@ class Database {
 
     public function fetch($result) {
         if ($result && is_object($result)) {
-            return $result->fetch_assoc();
+            // Si es un mysqli_stmt, obtener el resultado
+            if ($result instanceof mysqli_stmt) {
+                $result = $result->get_result();
+            }
+            
+            // Ahora obtener una fila de mysqli_result
+            if ($result instanceof mysqli_result) {
+                return $result->fetch_assoc();
+            }
         }
         return null;
     }
