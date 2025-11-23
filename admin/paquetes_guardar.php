@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $db = Database::getInstance()->getConnection();
 
 try {
-    $db->beginTransaction();
+    $db->autocommit(false);
     
     $data = [
         'codigo_seguimiento' => sanitize($_POST['codigo_seguimiento']),
@@ -38,7 +38,8 @@ try {
     )";
     
     $stmt = $db->prepare($sql);
-    $stmt->execute([
+    $stmt->bind_param(
+        "ssssssssdddsisii",
         $data['codigo_seguimiento'],
         $data['codigo_savar'],
         $data['destinatario_nombre'],
@@ -55,9 +56,10 @@ try {
         $data['notas'],
         $data['repartidor_id'],
         $data['repartidor_id']
-    ]);
+    );
+    $stmt->execute();
     
-    $paquete_id = $db->lastInsertId();
+    $paquete_id = $db->insert_id;
     
     // Log
     logActivity('Creación de paquete', 'paquetes', $paquete_id, 'Código: ' . $data['codigo_seguimiento']);
@@ -73,12 +75,14 @@ try {
     }
     
     $db->commit();
+    $db->autocommit(true);
     
     setFlashMessage('success', 'Paquete registrado exitosamente');
     redirect(APP_URL . 'admin/paquetes.php');
     
 } catch (Exception $e) {
-    $db->rollBack();
+    $db->rollback();
+    $db->autocommit(true);
     error_log("Error al guardar paquete: " . $e->getMessage());
     setFlashMessage('danger', 'Error al guardar el paquete: ' . $e->getMessage());
     redirect(APP_URL . 'admin/paquetes.php');
