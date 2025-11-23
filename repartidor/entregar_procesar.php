@@ -95,7 +95,7 @@ try {
             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
     
     $stmt = $db->prepare($sql);
-    $stmt->bind_param("iiisssddss", 
+    $stmt->bind_param("iisssssddss", 
         $paquete_id,
         $repartidor_id,
         $receptor_nombre,
@@ -146,11 +146,62 @@ try {
     
     // Registrar ingreso si la entrega fue exitosa
     if ($tipo_entrega === 'exitosa') {
+        // Obtener tarifa según el distrito del paquete
+        $monto = TARIFA_POR_PAQUETE; // Valor por defecto
+        $tarifa_encontrada = false;
+        
+        // Primero intentar buscar por el campo distrito
+        if (!empty($paquete['distrito'])) {
+            $stmt_tarifa = $db->prepare("SELECT tarifa_repartidor FROM zonas_tarifas 
+                                         WHERE UPPER(TRIM(nombre_zona)) = UPPER(TRIM(?)) AND activo = 1 
+                                         LIMIT 1");
+            $stmt_tarifa->bind_param("s", $paquete['distrito']);
+            $stmt_tarifa->execute();
+            $result_tarifa = $stmt_tarifa->get_result();
+            
+            if ($tarifa_row = $result_tarifa->fetch_assoc()) {
+                $monto = $tarifa_row['tarifa_repartidor'];
+                $tarifa_encontrada = true;
+            }
+        }
+        
+        // Si no encuentra por distrito, intentar extraerlo de ciudad
+        if (!$tarifa_encontrada && !empty($paquete['ciudad'])) {
+            $partes_ciudad = array_map('trim', explode(' - ', $paquete['ciudad']));
+            $distrito_extraido = trim(end($partes_ciudad));
+            
+            $stmt_tarifa2 = $db->prepare("SELECT tarifa_repartidor FROM zonas_tarifas 
+                                         WHERE UPPER(TRIM(nombre_zona)) = UPPER(TRIM(?)) AND activo = 1 
+                                         LIMIT 1");
+            $stmt_tarifa2->bind_param("s", $distrito_extraido);
+            $stmt_tarifa2->execute();
+            $result_tarifa2 = $stmt_tarifa2->get_result();
+            
+            if ($tarifa_row2 = $result_tarifa2->fetch_assoc()) {
+                $monto = $tarifa_row2['tarifa_repartidor'];
+                $tarifa_encontrada = true;
+            }
+        }
+        
+        // Si aún no encuentra, buscar por provincia
+        if (!$tarifa_encontrada && !empty($paquete['provincia'])) {
+            $stmt_tarifa3 = $db->prepare("SELECT tarifa_repartidor FROM zonas_tarifas 
+                                          WHERE UPPER(TRIM(nombre_zona)) = UPPER(TRIM(?)) AND activo = 1 
+                                          LIMIT 1");
+            $stmt_tarifa3->bind_param("s", $paquete['provincia']);
+            $stmt_tarifa3->execute();
+            $result_tarifa3 = $stmt_tarifa3->get_result();
+            
+            if ($tarifa_row3 = $result_tarifa3->fetch_assoc()) {
+                $monto = $tarifa_row3['tarifa_repartidor'];
+            }
+        }
+        
         $sql_ingreso = "INSERT INTO ingresos (tipo, concepto, monto, paquete_id, registrado_por) 
                         VALUES ('envio', ?, ?, ?, ?)";
         $stmt_ingreso = $db->prepare($sql_ingreso);
-        $concepto = 'Entrega de paquete ' . $paquete['codigo_seguimiento'];
-        $monto = $paquete['costo_envio'] ?? TARIFA_POR_PAQUETE;
+        $zona_info = !empty($paquete['distrito']) ? $paquete['distrito'] : $paquete['ciudad'];
+        $concepto = 'Entrega de paquete ' . $paquete['codigo_seguimiento'] . ' - ' . $zona_info;
         $stmt_ingreso->bind_param("sdii", $concepto, $monto, $paquete_id, $repartidor_id);
         $stmt_ingreso->execute();
     }

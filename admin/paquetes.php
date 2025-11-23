@@ -136,17 +136,17 @@ $pageTitle = "Gestión de Paquetes";
                     </form>
                     
                     <!-- Tabla -->
-                    <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead>
+                    <div class="table-responsive" style="max-height: 600px; overflow-x: auto; overflow-y: auto;">
+                        <table class="table table-hover" style="min-width: 1200px;">
+                            <thead class="sticky-top bg-white">
                                 <tr>
-                                    <th>Código</th>
-                                    <th>Destinatario</th>
-                                    <th>Dirección</th>
-                                    <th>Repartidor</th>
-                                    <th>Estado</th>
-                                    <th>Fecha Recepción</th>
-                                    <th>Acciones</th>
+                                    <th style="min-width: 150px;">Código</th>
+                                    <th style="min-width: 200px;">Destinatario</th>
+                                    <th style="min-width: 250px;">Dirección</th>
+                                    <th style="min-width: 150px;">Repartidor</th>
+                                    <th style="min-width: 120px;">Estado</th>
+                                    <th style="min-width: 150px;">Fecha Recepción</th>
+                                    <th style="min-width: 150px;">Acciones</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -154,15 +154,21 @@ $pageTitle = "Gestión de Paquetes";
                                 <tr>
                                     <td><strong><?php echo $paquete['codigo_seguimiento']; ?></strong></td>
                                     <td>
-                                        <?php echo $paquete['destinatario_nombre']; ?><br>
+                                        <div class="text-truncate" style="max-width: 200px;" title="<?php echo htmlspecialchars($paquete['destinatario_nombre']); ?>">
+                                            <?php echo $paquete['destinatario_nombre']; ?>
+                                        </div>
                                         <small class="text-muted"><?php echo $paquete['destinatario_telefono']; ?></small>
                                     </td>
                                     <td>
-                                        <small><?php echo substr($paquete['direccion_completa'], 0, 50) . '...'; ?></small>
+                                        <div class="text-truncate" style="max-width: 250px;" title="<?php echo htmlspecialchars($paquete['direccion_completa']); ?>">
+                                            <?php echo $paquete['direccion_completa']; ?>
+                                        </div>
                                     </td>
                                     <td>
                                         <?php if($paquete['nombre']): ?>
-                                            <?php echo $paquete['nombre'] . ' ' . $paquete['apellido']; ?>
+                                            <div class="text-truncate" style="max-width: 150px;" title="<?php echo htmlspecialchars($paquete['nombre'] . ' ' . $paquete['apellido']); ?>">
+                                                <?php echo $paquete['nombre'] . ' ' . $paquete['apellido']; ?>
+                                            </div>
                                         <?php else: ?>
                                             <span class="badge bg-secondary">Sin asignar</span>
                                         <?php endif; ?>

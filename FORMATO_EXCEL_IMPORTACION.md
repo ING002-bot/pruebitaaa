@@ -2,113 +2,151 @@
 
 ## 📄 Estructura Requerida
 
-El archivo Excel debe tener **exactamente 6 columnas** en el siguiente orden:
+El archivo Excel debe tener las siguientes columnas en el orden especificado:
 
-| Columna | Nombre | Descripción | Ejemplo |
-|---------|--------|-------------|---------|
-| **A** | Código de Seguimiento | Código único del paquete | HE-2024-00123 |
-| **B** | Nombre del Destinatario | Nombre completo | Juan Pérez García |
-| **C** | Teléfono del Destinatario | Número con código de país | +591 70123456 o 70123456 |
-| **D** | Dirección de Entrega | Dirección completa | Av. Arce #2350, Edif. Torre Azul, Piso 5 |
-| **E** | Zona | Zona de entrega (debe existir en tarifas) | Zona Sur, Centro, Miraflores, etc. |
-| **F** | Descripción del Contenido | Qué contiene el paquete | Documentos, Ropa, Electrónicos, etc. |
+| Columna | Nombre | Se Usa | Descripción | Ejemplo |
+|---------|--------|--------|-------------|---------|
+| **A** | Código | ✅ SÍ | Código único del paquete | SVBFE00007 |
+| **B** | Cliente | ❌ NO | Cliente emisor | Yucan-fulfill |
+| **C** | Descripción | ❌ NO | Descripción del producto | Mobile power |
+| **D** | Departamento | ✅ SÍ | Departamento de entrega | LA PAZ |
+| **E** | Provincia | ✅ SÍ | Provincia de entrega | MURILLO |
+| **F** | Distrito | ✅ SÍ | Distrito/Zona de entrega | TUMAN |
+| **G** | Estado | ❌ NO | Estado del paquete | En almacén |
+| **H** | Fecha Creación | ❌ NO | Fecha de creación | 25/10/2025 |
+| **I** | Fecha Asignación | ❌ NO | Fecha de asignación | - |
+| **J** | Consignado | ✅ SÍ | Nombre del destinatario | GRODO JHON |
+| **K** | Dirección Consignado | ✅ SÍ | Dirección completa | Av. Yungas #123 |
+| **L** | Conductor | ❌ NO | Conductor asignado | SIN DRIVER |
+| **M** | Peso | ✅ SÍ | Peso del paquete en kg | 1.260 |
+| **N** | Teléfono | ✅ SÍ | Teléfono del destinatario | 917584939 |
+| **O+** | Otros | ❌ NO | Columnas adicionales | - |
 
-## ✅ Ejemplo de Datos Válidos
+## ✅ Datos que se Importan
+
+El sistema **solo importa** estos datos:
+
+1. **Código** (Columna A) → `codigo_seguimiento`
+2. **Departamento** (Columna D) → Parte de `ciudad`
+3. **Provincia** (Columna E) → `provincia`
+4. **Distrito** (Columna F) → Parte de `ciudad`
+5. **Consignado** (Columna J) → `destinatario_nombre`
+6. **Dirección Consignado** (Columna K) → `direccion_completa`
+7. **Peso** (Columna M) → `peso`
+8. **Teléfono** (Columna N) → `destinatario_telefono`
+
+## 📋 Ejemplo de Datos Válidos
 
 ```
-HE-2024-00001 | María López | 77889900 | Av. 6 de Agosto #1234 | Centro | Documentos legales
-HE-2024-00002 | Pedro Gómez | +591 71234567 | Calle Potosí #567 | Miraflores | Ropa deportiva
-HE-2024-00003 | Ana Torres | 60987654 | Zona Villa Victoria, Calle 8 #45 | Villa Victoria | Electrónicos
-HE-2024-00004 | Carlos Ruiz | +591 78456123 | Av. Ballivián #890, Torre B | Calacoto | Medicamentos
+Código: SVBFE00007
+Departamento: LA PAZ
+Provincia: MURILLO
+Distrito: CHICLAYO
+Consignado: María López García
+Dirección: Av. 6 de Agosto #1234, Edif. Central
+Peso: 1.260
+Teléfono: 70123456
 ```
+
+**Resultado en el sistema:**
+- Código de seguimiento: `SVBFE00007`
+- Destinatario: `María López García`
+- Teléfono: `70123456`
+- Dirección: `Av. 6 de Agosto #1234, Edif. Central`
+- Ciudad: `LA PAZ - MURILLO - CHICLAYO`
+- Provincia: `MURILLO`
+- Peso: `1.26 kg`
 
 ## ❌ Errores Comunes
 
 ### 1. Código de Seguimiento Duplicado
 ```
-❌ HE-2024-00001 (ya existe en la base de datos)
-✅ HE-2024-00999 (código único y nuevo)
+❌ SVBFE00007 (ya existe en la base de datos)
+✅ SVBFE00999 (código único y nuevo)
 ```
 
-### 2. Teléfono Inválido
+### 2. Teléfono Vacío o Inválido
 ```
-❌ 123 (muy corto)
+❌ (vacío)
 ❌ abc123 (contiene letras)
 ✅ 70123456
-✅ +591 71234567
+✅ 917584939
 ```
 
-### 3. Zona No Existe
+### 3. Nombre del Consignado Vacío
 ```
-❌ Zona Inexistente (no está en la tabla tarifas)
-✅ Centro (debe existir previamente en tarifas)
+❌ (vacío)
+✅ María López García
+✅ GRODO JHON
 ```
 
-**Importante:** Antes de importar, verifica que todas las zonas mencionadas en el Excel ya existan en el sistema (Gestión → Tarifas por Zona).
-
-### 4. Campos Vacíos
+### 4. Dirección Vacía
 ```
-❌ HE-2024-00001 |  | 70123456 | Dirección | Zona | Descripción
-                    ↑ nombre vacío
-✅ HE-2024-00001 | Juan Pérez | 70123456 | Dirección | Zona | Descripción
+❌ (vacío)
+✅ Av. 6 de Agosto #1234
+✅ Calle Potosí #567, Edif. Central
 ```
 
 ### 5. Formato de Archivo Incorrecto
 ```
 ❌ archivo.csv (debe ser .xlsx o .xls)
 ❌ archivo.txt (debe ser Excel)
-✅ paquetes_enero_2024.xlsx
-✅ importacion_savar.xls
+✅ paquetes_savar.xlsx
+✅ importacion_20250115.xls
 ```
 
 ## 📊 Ejemplo Completo de Archivo
 
-Crea un archivo Excel con esta estructura:
+El archivo Excel debe tener esta estructura (las columnas que no se usan pueden tener cualquier dato):
 
-| A | B | C | D | E | F |
-|---|---|---|---|---|---|
-| HE-2024-00001 | María López Vega | 77889900 | Av. 6 de Agosto #1234, Edif. Central | Centro | Documentos legales |
-| HE-2024-00002 | Pedro Gómez Ríos | +591 71234567 | Calle Potosí #567, Casa Azul | Miraflores | Ropa deportiva |
-| HE-2024-00003 | Ana Torres Cruz | 60987654 | Zona Villa Victoria, Calle 8 #45 | Villa Victoria | Electrónicos varios |
-| HE-2024-00004 | Carlos Ruiz Mendoza | +591 78456123 | Av. Ballivián #890, Torre B Piso 10 | Calacoto | Medicamentos |
-| HE-2024-00005 | Sofía Flores Luna | 69871234 | Calle Comercio #234, Local 5 | Sopocachi | Libros y revistas |
+| A | B | C | D | E | F | G | H | I | J | K | L | M | N |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| SVBFE00001 | Yucan-fulfill | Mobile power | LA PAZ | MURILLO | TUMAN | En almacén | 27/10/2025 | - | GRODO JHON | Av. Yungas #123 | SIN DRIVER | 1.260 | 917584939 |
+| SVBFE00002 | Yucan-fulfill | Wireless charger | LA PAZ | MURILLO | CAYATLI | En almacén | 27/10/2025 | - | Jackeline Yul | Calle Santa María | SIN DRIVER | 0.160 | 921144804 |
+| SVBFE00003 | Yucan-fulfill | Photo paper | LA PAZ | LAMBAYEQUE | POMALCA | En almacén | 27/10/2025 | - | María Magdalena | Calle Chiclayo | SIN DRIVER | 0.620 | 980194970 |
+
+**Nota:** Solo las columnas A, D, E, F, J, K, M, N son obligatorias. Las demás pueden estar vacías o con cualquier valor.
 
 ## 🎯 Recomendaciones
 
 ### Preparación del Archivo
 
-1. **Usa la primera fila para encabezados** (opcional, será ignorada automáticamente si no es un código válido)
-2. **Evita celdas fusionadas** - cada celda debe tener un solo valor
+1. **El archivo puede tener encabezados en la primera fila** (serán ignorados automáticamente)
+2. **Solo importa las columnas necesarias** - el resto puede tener cualquier dato
 3. **No uses fórmulas** - solo valores de texto planos
 4. **Guarda como .xlsx** - formato moderno de Excel
 5. **Prueba con pocos registros primero** - importa 5-10 paquetes para verificar
 
-### Zonas Válidas
+### Columnas Obligatorias
 
-Antes de importar, ve a **Gestión → Tarifas por Zona** y anota las zonas disponibles. Algunos ejemplos comunes:
+Estas columnas **deben** tener datos:
 
-- Centro
-- Zona Sur
-- Miraflores
-- Calacoto
-- Sopocachi
-- Villa Victoria
-- San Miguel
-- Obrajes
-- Achumani
+- **Columna A:** Código (único)
+- **Columna J:** Consignado (nombre del destinatario)
+- **Columna K:** Dirección Consignado
+
+### Columnas Opcionales
+
+Estas columnas pueden estar vacías:
+
+- **Columna D:** Departamento
+- **Columna E:** Provincia  
+- **Columna F:** Distrito
+- **Columna M:** Peso (si está vacío se asigna 0)
+- **Columna N:** Teléfono
 
 ### Códigos de Seguimiento
 
-- **Prefijo recomendado:** HE-AAAA-NNNNN
-  - HE = Hermes Express
-  - AAAA = Año (2024, 2025, etc.)
-  - NNNNN = Número secuencial (00001, 00002, etc.)
+- **Formato del cliente:** SVBFE + número
+  - SVBFE00001
+  - SVBFE00002
+  - SVBFE99999
 
-- **Ejemplos válidos:**
+- **Otros formatos aceptados:**
   - HE-2024-00001
-  - SAVAR-2024-123
   - PKG-JAN-2024-001
   - LP-240115-001
+  - Cualquier código único
 
 ### Teléfonos
 
@@ -127,30 +165,40 @@ Antes de importar, ve a **Gestión → Tarifas por Zona** y anota las zonas disp
 
 El sistema verificará automáticamente:
 
-1. ✅ Que el código de seguimiento no exista en la BD
-2. ✅ Que todos los campos estén completos
-3. ✅ Que el teléfono tenga al menos 7 caracteres numéricos
-4. ✅ Que la zona exista en la tabla de tarifas
+1. ✅ Que el código de seguimiento (columna A) no esté vacío
+2. ✅ Que el código no exista previamente en la base de datos
+3. ✅ Que el nombre del consignado (columna J) no esté vacío
+4. ✅ Que la dirección (columna K) no esté vacía
 5. ✅ Que el archivo sea Excel válido (.xlsx o .xls)
+
+**Nota:** El teléfono, departamento, provincia, distrito y peso son opcionales.
 
 ## 📥 Pasos para Importar
 
-1. **Preparar archivo Excel** según la estructura descrita
-2. **Ir a:** Admin → Sistema → Importar Excel
-3. **Click en** "Subir Nuevo Archivo"
-4. **Seleccionar archivo** desde tu computadora
-5. **Click en** "Procesar Importación"
-6. **Revisar resultados:**
+1. **Obtener archivo Excel** desde SAVAR o sistema externo
+2. **Verificar columnas:** A, D, E, F, J, K, M, N con datos
+3. **Ir a:** Admin → Sistema → Importar Excel
+4. **Click en** "Subir Nuevo Archivo"
+5. **Seleccionar archivo** desde tu computadora
+6. **Click en** "Procesar Importación"
+7. **Revisar resultados:**
    - ✅ Registros exitosos (aparecerán en la tabla de paquetes)
    - ❌ Errores (se mostrarán en pantalla con la razón del fallo)
 
 ## 💾 Archivo de Ejemplo
 
-Puedes descargar un archivo de ejemplo desde:
+Puedes usar el archivo que te envía SAVAR directamente. El sistema está configurado para leer:
 
-**[Próximamente: plantilla_importacion.xlsx]**
+- **Columna A:** Código
+- **Columna D:** Departamento
+- **Columna E:** Provincia
+- **Columna F:** Distrito
+- **Columna J:** Consignado
+- **Columna K:** Dirección Consignado
+- **Columna M:** Peso
+- **Columna N:** Teléfono
 
-O crear uno manualmente siguiendo la estructura de la tabla anterior.
+**Las demás columnas se ignoran automáticamente.**
 
 ## 🆘 Solución de Problemas
 
@@ -162,21 +210,24 @@ O crear uno manualmente siguiendo la estructura de la tabla anterior.
 ### "Código de seguimiento duplicado"
 - Cambia el código de seguimiento por uno único
 - Verifica en la tabla de paquetes si ya existe
+- Elimina filas duplicadas en el Excel
 
-### "Zona no encontrada en tarifas"
-- Ve a Gestión → Tarifas por Zona
-- Agrega la zona faltante con su tarifa correspondiente
-- O corrige el nombre de la zona en el Excel para que coincida exactamente
+### "Código de seguimiento vacío"
+- Verifica que la columna A tenga datos
+- No debe haber filas con columna A vacía
 
-### "Teléfono inválido"
-- Verifica que tenga al menos 7 dígitos
-- Quita espacios, guiones o caracteres especiales innecesarios
-- Formato recomendado: 70123456 o +591 70123456
+### "Nombre del consignado vacío"
+- Verifica que la columna J tenga datos
+- Debe tener el nombre del destinatario
+
+### "Dirección vacía"
+- Verifica que la columna K tenga datos
+- Debe tener la dirección completa de entrega
 
 ### "Importación procesada pero 0 registros exitosos"
 - Revisa el historial de importaciones para ver los errores específicos
-- Verifica que la primera fila no sea un encabezado mal formado
-- Asegúrate de que todas las columnas tengan datos
+- Verifica que las columnas estén en el orden correcto
+- Asegúrate de que la primera fila sea de encabezados o datos válidos
 
 ## 📞 Notificaciones WhatsApp
 

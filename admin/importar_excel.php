@@ -62,17 +62,41 @@ $importaciones = Database::getInstance()->fetchAll($db->query(
             <!-- Instrucciones -->
             <div class="card mb-4">
                 <div class="card-header bg-info text-white">
-                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Instrucciones</h5>
+                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Instrucciones de Importación</h5>
                 </div>
                 <div class="card-body">
-                    <ol class="mb-0">
-                        <li>El archivo Excel debe tener las siguientes columnas: <code>codigo_seguimiento, destinatario_nombre, telefono, direccion, ciudad, provincia</code></li>
-                        <li>Formatos soportados: <strong>.xlsx, .xls</strong></li>
-                        <li>Los paquetes se importarán con estado <strong>pendiente</strong></li>
-                        <li>Al asignar a un repartidor, se establecerá automáticamente un tiempo de entrega de <strong>2 días</strong></li>
-                        <li>Se enviará notificación WhatsApp al cliente cuando se asigne el paquete</li>
-                        <li>24 horas antes del vencimiento se enviará alerta al repartidor</li>
-                    </ol>
+                    <h6 class="fw-bold">📋 Formato del Archivo Excel de SAVAR:</h6>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>Columnas que se importan:</strong></p>
+                            <ul class="small">
+                                <li><strong>Columna A:</strong> Código (ej: SVBFE00007)</li>
+                                <li><strong>Columna D:</strong> Departamento</li>
+                                <li><strong>Columna E:</strong> Provincia</li>
+                                <li><strong>Columna F:</strong> Distrito</li>
+                                <li><strong>Columna J:</strong> Consignado (nombre)</li>
+                                <li><strong>Columna K:</strong> Dirección Consignado</li>
+                                <li><strong>Columna M:</strong> Peso</li>
+                                <li><strong>Columna N:</strong> Teléfono</li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <p class="mb-2"><strong>Datos que se muestran en el sistema:</strong></p>
+                            <ul class="small">
+                                <li>Código de seguimiento</li>
+                                <li>Departamento, Provincia y Distrito</li>
+                                <li>Nombre del consignado</li>
+                                <li>Dirección completa</li>
+                                <li>Peso en kg</li>
+                                <li>Teléfono del destinatario</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="alert alert-warning small mb-0">
+                        <i class="bi bi-exclamation-triangle"></i> 
+                        <strong>Importante:</strong> El archivo Excel puede tener todas las columnas de SAVAR. 
+                        El sistema solo lee las columnas A, D, E, F, J, K, M, N y las demás se ignoran.
+                    </div>
                 </div>
             </div>
 

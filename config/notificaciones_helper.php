@@ -148,7 +148,12 @@ function obtenerAdministradores() {
         $db = Database::getInstance()->getConnection();
         $stmt = $db->prepare("SELECT id FROM usuarios WHERE rol = 'admin' AND estado = 'activo'");
         $stmt->execute();
-        return $stmt->fetchAll(PDO::FETCH_COLUMN);
+        $result = $stmt->get_result();
+        $ids = [];
+        while ($row = $result->fetch_assoc()) {
+            $ids[] = $row['id'];
+        }
+        return $ids;
     } catch (Exception $e) {
         error_log("Error al obtener administradores: " . $e->getMessage());
         return [];

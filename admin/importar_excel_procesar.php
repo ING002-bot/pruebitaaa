@@ -69,16 +69,27 @@ try {
     // Procesar filas (asumiendo que fila 1 es cabecera)
     for ($row = 2; $row <= $highestRow; $row++) {
         try {
-            $codigo_seguimiento = trim($worksheet->getCell('A' . $row)->getValue());
-            $destinatario_nombre = trim($worksheet->getCell('B' . $row)->getValue());
-            $telefono = trim($worksheet->getCell('C' . $row)->getValue());
-            $direccion = trim($worksheet->getCell('D' . $row)->getValue());
-            $ciudad = trim($worksheet->getCell('E' . $row)->getValue() ?? '');
-            $provincia = trim($worksheet->getCell('F' . $row)->getValue() ?? '');
+            // Leer columnas según el formato del Excel
+            $codigo_seguimiento = trim($worksheet->getCell('A' . $row)->getValue() ?? '');
+            $departamento = trim($worksheet->getCell('D' . $row)->getValue() ?? '');
+            $provincia = trim($worksheet->getCell('E' . $row)->getValue() ?? '');
+            $distrito = trim($worksheet->getCell('F' . $row)->getValue() ?? '');
+            $destinatario_nombre = trim($worksheet->getCell('J' . $row)->getValue() ?? '');
+            $direccion = trim($worksheet->getCell('K' . $row)->getValue() ?? '');
+            $peso = trim($worksheet->getCell('M' . $row)->getValue() ?? '0');
+            $telefono = trim($worksheet->getCell('N' . $row)->getValue() ?? '');
             
             // Validaciones básicas
-            if (empty($codigo_seguimiento) || empty($destinatario_nombre) || empty($direccion)) {
-                throw new Exception("Fila $row: Datos incompletos");
+            if (empty($codigo_seguimiento)) {
+                throw new Exception("Fila $row: Código de seguimiento vacío");
+            }
+            
+            if (empty($destinatario_nombre)) {
+                throw new Exception("Fila $row: Nombre del consignado vacío");
+            }
+            
+            if (empty($direccion)) {
+                throw new Exception("Fila $row: Dirección vacía");
             }
             
             // Verificar si el código ya existe
@@ -89,6 +100,15 @@ try {
                 throw new Exception("Fila $row: Código $codigo_seguimiento ya existe");
             }
             
+            // Limpiar y convertir peso
+            $peso_decimal = floatval(str_replace(',', '.', $peso));
+            
+            // Construir ciudad completa (Departamento - Provincia - Distrito)
+            $ciudad_completa = trim("$departamento - $provincia - $distrito", ' -');
+            if (empty($ciudad_completa)) {
+                $ciudad_completa = $departamento;
+            }
+            
             // Insertar paquete
             $stmt = $db->prepare("INSERT INTO paquetes (
                 codigo_seguimiento, 
@@ -96,19 +116,23 @@ try {
                 destinatario_telefono, 
                 direccion_completa, 
                 ciudad, 
-                provincia, 
+                provincia,
+                distrito, 
+                peso,
                 archivo_importacion,
                 estado, 
                 prioridad
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, 'pendiente', 'normal')");
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendiente', 'normal')");
             
-            $stmt->bind_param("sssssss", 
+            $stmt->bind_param("sssssssds", 
                 $codigo_seguimiento,
                 $destinatario_nombre,
                 $telefono,
                 $direccion,
-                $ciudad,
+                $ciudad_completa,
                 $provincia,
+                $distrito,
+                $peso_decimal,
                 $nombre_archivo
             );
             
