@@ -11,7 +11,7 @@ $sql = "SELECT r.*, u.nombre as repartidor_nombre, u.apellido as repartidor_apel
         FROM rutas r
         LEFT JOIN usuarios u ON r.repartidor_id = u.id
         LEFT JOIN usuarios uc ON r.creado_por = uc.id
-        ORDER BY r.fecha_ruta DESC, r.id DESC
+        ORDER BY r.id ASC
         LIMIT 100";
 $rutas = Database::getInstance()->fetchAll($db->query($sql));
 
