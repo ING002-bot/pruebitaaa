@@ -65,6 +65,10 @@
                 <i class="bi bi-cloud-upload"></i>
                 <span>Importar de SAVAR</span>
             </a>
+            <a href="importar_excel.php" class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'importar_excel.php' ? 'active' : ''; ?>">
+                <i class="bi bi-file-earmark-excel"></i>
+                <span>Importar Excel</span>
+            </a>
             <a href="reportes.php" class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'reportes.php' ? 'active' : ''; ?>">
                 <i class="bi bi-file-earmark-bar-graph"></i>
                 <span>Reportes</span>

@@ -1,5 +1,6 @@
 <?php
 require_once '../config/config.php';
+require_once '../config/whatsapp_helper.php';
 requireRole(['admin']);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -8,13 +9,18 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $db = Database::getInstance()->getConnection();
+$whatsapp = new WhatsAppNotificaciones();
 
 try {
+    // Calcular fecha límite de entrega (2 días desde ahora)
+    $fecha_limite = date('Y-m-d H:i:s', strtotime('+2 days'));
+    
     $stmt = $db->prepare("
         UPDATE paquetes SET
             repartidor_id = ?,
             estado = 'en_ruta',
-            fecha_asignacion = NOW()
+            fecha_asignacion = NOW(),
+            fecha_limite_entrega = ?
         WHERE id = ?
     ");
     if (!$stmt) {
@@ -23,12 +29,15 @@ try {
     
     $repartidor_id = (int)$_POST['repartidor_id'];
     $paquete_id = (int)$_POST['paquete_id'];
-    $stmt->bind_param("ii", $repartidor_id, $paquete_id);
+    $stmt->bind_param("isi", $repartidor_id, $fecha_limite, $paquete_id);
     
     if (!$stmt->execute()) {
         throw new Exception("Error al ejecutar consulta: " . $stmt->error);
     }
     $stmt->close();
+    
+    // Enviar notificación WhatsApp al cliente
+    $notificacion_enviada = $whatsapp->notificarAsignacion($paquete_id);
     
     // Obtener info del paquete
     $paquete = $db->prepare("SELECT codigo_seguimiento FROM paquetes WHERE id = ?");
@@ -48,7 +57,7 @@ try {
         throw new Exception("Error al preparar consulta: " . $db->error);
     }
     $titulo = 'Nuevo paquete asignado';
-    $mensaje = 'Se te ha asignado el paquete ' . $codigo;
+    $mensaje = 'Se te ha asignado el paquete ' . $codigo . '. Fecha límite de entrega: ' . date('d/m/Y H:i', strtotime($fecha_limite));
     $notif_stmt->bind_param("iss", $repartidor_id, $titulo, $mensaje);
     $notif_stmt->execute();
     $notif_stmt->close();
