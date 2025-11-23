@@ -17,22 +17,38 @@ try {
     
     // Verificar si ya existe la zona
     $stmt = $db->prepare("SELECT id FROM zonas_tarifas WHERE categoria = ? AND nombre_zona = ?");
-    $stmt->execute([$categoria, $nombre_zona]);
+    if (!$stmt) {
+        throw new Exception("Error al preparar consulta: " . $db->error);
+    }
+    $stmt->bind_param("ss", $categoria, $nombre_zona);
+    $stmt->execute();
+    $stmt->store_result();
     
-    if ($stmt->fetch()) {
+    if ($stmt->num_rows > 0) {
+        $stmt->close();
         setFlashMessage('danger', 'Ya existe una zona con ese nombre en esta categoría');
         redirect(APP_URL . 'admin/tarifas.php');
     }
+    $stmt->close();
     
     // Insertar nueva tarifa
     $stmt = $db->prepare("
         INSERT INTO zonas_tarifas (categoria, nombre_zona, tipo_envio, tarifa_repartidor, activo)
         VALUES (?, ?, ?, ?, ?)
     ");
+    if (!$stmt) {
+        throw new Exception("Error al preparar consulta: " . $db->error);
+    }
     
-    $stmt->execute([$categoria, $nombre_zona, $tipo_envio, $tarifa_repartidor, $activo]);
+    $stmt->bind_param("sssdi", $categoria, $nombre_zona, $tipo_envio, $tarifa_repartidor, $activo);
+    if (!$stmt->execute()) {
+        throw new Exception("Error al ejecutar consulta: " . $stmt->error);
+    }
     
-    logActivity('Crear tarifa', 'zonas_tarifas', $db->lastInsertId(), "Zona: $nombre_zona, Tarifa: S/ $tarifa_repartidor");
+    $tarifa_id = $db->insert_id;
+    $stmt->close();
+    
+    logActivity('Crear tarifa', 'zonas_tarifas', $tarifa_id, "Zona: $nombre_zona, Tarifa: S/ $tarifa_repartidor");
     
     setFlashMessage('success', 'Zona creada exitosamente');
     redirect(APP_URL . 'admin/tarifas.php');

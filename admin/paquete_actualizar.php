@@ -31,9 +31,15 @@ try {
         WHERE id = ?
     ");
     
-    $repartidor_id = $_POST['repartidor_id'] ?: null;
+    if (!$stmt) {
+        throw new Exception("Error al preparar consulta: " . $db->error);
+    }
     
-    $stmt->execute([
+    $repartidor_id = $_POST['repartidor_id'] ?: null;
+    $paquete_id = (int)$_POST['id'];
+    
+    $stmt->bind_param(
+        "ssssssssdddssisi",
         $_POST['codigo_seguimiento'],
         $_POST['codigo_savar'],
         $_POST['destinatario_nombre'],
@@ -50,24 +56,34 @@ try {
         $_POST['prioridad'],
         $repartidor_id,
         $_POST['notas'],
-        $_POST['id']
-    ]);
+        $paquete_id
+    );
+    
+    if (!$stmt->execute()) {
+        throw new Exception("Error al ejecutar consulta: " . $stmt->error);
+    }
+    $stmt->close();
     
     // Si se asignó un repartidor, actualizar fecha de asignación
     if ($repartidor_id && $_POST['estado'] !== 'pendiente') {
-        $db->prepare("UPDATE paquetes SET fecha_asignacion = NOW() WHERE id = ? AND fecha_asignacion IS NULL")
-           ->execute([$_POST['id']]);
+        $asig_stmt = $db->prepare("UPDATE paquetes SET fecha_asignacion = NOW() WHERE id = ? AND fecha_asignacion IS NULL");
+        if ($asig_stmt) {
+            $asig_stmt->bind_param("i", $paquete_id);
+            $asig_stmt->execute();
+            $asig_stmt->close();
+        }
     }
     
     // Registrar log
-    $db->prepare("INSERT INTO logs_sistema (usuario_id, accion, tabla_afectada, registro_id, detalles) VALUES (?, ?, ?, ?, ?)")
-       ->execute([
-           $_SESSION['usuario_id'],
-           'actualizar',
-           'paquetes',
-           $_POST['id'],
-           'Paquete actualizado: ' . $_POST['codigo_seguimiento']
-       ]);
+    $log_stmt = $db->prepare("INSERT INTO logs_sistema (usuario_id, accion, tabla_afectada, registro_id, detalles) VALUES (?, ?, ?, ?, ?)");
+    if ($log_stmt) {
+        $accion = 'actualizar';
+        $tabla = 'paquetes';
+        $detalles = 'Paquete actualizado: ' . $_POST['codigo_seguimiento'];
+        $log_stmt->bind_param("issis", $_SESSION['usuario_id'], $accion, $tabla, $paquete_id, $detalles);
+        $log_stmt->execute();
+        $log_stmt->close();
+    }
     
     $_SESSION['flash_message'] = [
         'type' => 'success',

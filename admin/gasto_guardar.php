@@ -27,12 +27,48 @@ if (isset($_FILES['comprobante']) && $_FILES['comprobante']['error'] === 0) {
 
 try {
     $db = Database::getInstance()->getConnection();
-    $sql = "INSERT INTO gastos (fecha_gasto, categoria, descripcion, monto, numero_comprobante, comprobante_archivo, registrado_por) 
-            VALUES (?, ?, ?, ?, ?, ?, ?)";
-    $stmt = $db->prepare($sql);
-    $stmt->execute([$fecha_gasto, $categoria, $descripcion, $monto, $numero_comprobante, $comprobante_archivo, $_SESSION['usuario_id']]);
     
-    logActivity("Gasto registrado: $descripcion - " . formatCurrency($monto), 'gastos', $db->lastInsertId());
+    // Verificar si existe la columna 'descripcion'
+    $check_column = $db->query("SHOW COLUMNS FROM gastos LIKE 'descripcion'");
+    $tiene_descripcion = ($check_column && $check_column->num_rows > 0);
+    
+    if ($tiene_descripcion) {
+        // Estructura nueva con descripcion, numero_comprobante, comprobante_archivo
+        $sql = "INSERT INTO gastos (fecha_gasto, categoria, descripcion, monto, numero_comprobante, comprobante_archivo, registrado_por) 
+                VALUES (?, ?, ?, ?, ?, ?, ?)";
+        $stmt = $db->prepare($sql);
+        if (!$stmt) {
+            throw new Exception("Error al preparar consulta: " . $db->error);
+        }
+        
+        $stmt->bind_param("sssdssi", $fecha_gasto, $categoria, $descripcion, $monto, $numero_comprobante, $comprobante_archivo, $_SESSION['usuario_id']);
+        if (!$stmt->execute()) {
+            throw new Exception("Error al ejecutar consulta: " . $stmt->error);
+        }
+    } else {
+        // Estructura antigua - usar campo 'concepto' y 'notas'
+        $notas = "Comprobante: " . ($numero_comprobante ?: 'N/A');
+        if ($comprobante_archivo) {
+            $notas .= " | Archivo: " . $comprobante_archivo;
+        }
+        
+        $sql = "INSERT INTO gastos (fecha_gasto, categoria, concepto, monto, notas, registrado_por) 
+                VALUES (?, ?, ?, ?, ?, ?)";
+        $stmt = $db->prepare($sql);
+        if (!$stmt) {
+            throw new Exception("Error al preparar consulta: " . $db->error);
+        }
+        
+        $stmt->bind_param("sssdsi", $fecha_gasto, $categoria, $descripcion, $monto, $notas, $_SESSION['usuario_id']);
+        if (!$stmt->execute()) {
+            throw new Exception("Error al ejecutar consulta: " . $stmt->error);
+        }
+    }
+    
+    $gasto_id = $db->insert_id;
+    $stmt->close();
+    
+    logActivity("Gasto registrado: $descripcion - " . formatCurrency($monto), 'gastos', $gasto_id);
     setFlashMessage('success', 'Gasto registrado exitosamente');
     
 } catch (Exception $e) {

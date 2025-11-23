@@ -5,9 +5,26 @@ requireRole(['admin']);
 $pageTitle = 'Gestión de Pagos';
 
 $db = Database::getInstance()->getConnection();
-$stmt = $db->query("SELECT p.*, u.nombre, u.apellido FROM pagos p 
-                    LEFT JOIN usuarios u ON p.repartidor_id = u.id 
-                    ORDER BY p.fecha_pago DESC LIMIT 100");
+
+// Verificar si existe la columna 'concepto' para determinar qué estructura usar
+$check_column = $db->query("SHOW COLUMNS FROM pagos LIKE 'concepto'");
+$tiene_concepto = ($check_column && $check_column->num_rows > 0);
+
+if ($tiene_concepto) {
+    // Estructura nueva con concepto
+    $stmt = $db->query("SELECT p.*, u.nombre, u.apellido FROM pagos p 
+                        LEFT JOIN usuarios u ON p.repartidor_id = u.id 
+                        ORDER BY p.fecha_pago DESC LIMIT 100");
+} else {
+    // Estructura antigua - adaptar campos
+    $stmt = $db->query("SELECT p.*, u.nombre, u.apellido,
+                        CONCAT('Pago del ', DATE_FORMAT(p.periodo_inicio, '%d/%m/%Y'), ' al ', DATE_FORMAT(p.periodo_fin, '%d/%m/%Y')) as concepto,
+                        DATE_FORMAT(p.periodo_inicio, '%M %Y') as periodo,
+                        p.total_pagar as monto
+                        FROM pagos p 
+                        LEFT JOIN usuarios u ON p.repartidor_id = u.id 
+                        ORDER BY p.fecha_pago DESC LIMIT 100");
+}
 $pagos = Database::getInstance()->fetchAll($stmt);
 ?>
 

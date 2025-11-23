@@ -11,7 +11,7 @@ $db = Database::getInstance()->getConnection();
 $asistente_id = $_SESSION['usuario_id'];
 
 try {
-    $db->beginTransaction();
+    $db->autocommit(false);
 
     // Validar datos
     $asignacion_id = filter_input(INPUT_POST, 'asignacion_id', FILTER_VALIDATE_INT);
@@ -117,6 +117,7 @@ try {
     logActivity($asistente_id, 'gasto_caja_chica', 'Se registró gasto: ' . $concepto . ' - S/ ' . number_format($monto, 2));
 
     $db->commit();
+    $db->autocommit(true);
 
     $_SESSION['flash_message'] = [
         'type' => 'success',
@@ -124,7 +125,8 @@ try {
     ];
 
 } catch (Exception $e) {
-    $db->rollBack();
+    $db->rollback();
+    $db->autocommit(true);
     
     // Eliminar foto si se subió pero hubo error
     if (isset($foto_nombre) && file_exists('../uploads/caja_chica/' . $foto_nombre)) {

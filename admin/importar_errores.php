@@ -12,8 +12,15 @@ if (!$id) {
 $db = Database::getInstance()->getConnection();
 $sql = "SELECT errores FROM importaciones_savar WHERE id = ?";
 $stmt = $db->prepare($sql);
-$stmt->execute([$id]);
-$importacion = $stmt->fetch();
+if (!$stmt) {
+    echo '<div class="alert alert-danger">Error en la consulta</div>';
+    exit;
+}
+$stmt->bind_param("i", $id);
+$stmt->execute();
+$result = $stmt->get_result();
+$importacion = $result->fetch_assoc();
+$stmt->close();
 
 if (!$importacion) {
     echo '<div class="alert alert-danger">Importación no encontrada</div>';

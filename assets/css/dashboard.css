@@ -21,6 +21,12 @@ body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
     background: #f4f6f9;
     color: #333;
+    overflow-x: hidden;
+}
+
+.dashboard-container {
+    display: flex;
+    min-height: 100vh;
 }
 
 /* Sidebar */
@@ -35,8 +41,8 @@ body {
     overflow-y: auto !important;
     overflow-x: hidden;
     transition: all 0.3s ease;
-    z-index: 1000;
-    transform: translateX(0); /* Siempre visible por defecto */
+    z-index: 999;
+    transform: translateX(0);
     display: block !important;
 }
 
@@ -134,7 +140,11 @@ body {
 /* Main Content */
 .main-content {
     margin-left: var(--sidebar-width);
-    min-height: 100vh;
+    margin-top: var(--header-height);
+    min-height: calc(100vh - var(--header-height));
+    width: calc(100% - var(--sidebar-width));
+    flex: 1;
+    padding: 0;
 }
 
 /* Top Header */
@@ -146,14 +156,19 @@ body {
     justify-content: space-between;
     padding: 0 30px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-    position: sticky;
+    position: fixed;
     top: 0;
-    z-index: 999;
+    left: var(--sidebar-width);
+    right: 0;
+    z-index: 1000;
 }
 
 .header-left {
     display: flex;
     align-items: center;
+    gap: 20px;
+    flex: 1;
+    min-width: 0;
 }
 
 .menu-toggle {
@@ -162,8 +177,8 @@ body {
     background: none;
     border: none;
     cursor: pointer;
-    margin-right: 20px;
     display: none;
+    flex-shrink: 0;
 }
 
 .header-search {
@@ -186,10 +201,33 @@ body {
     color: #999;
 }
 
+/* Mensaje de bienvenida */
+.welcome-message {
+    display: flex;
+    align-items: center;
+    padding: 0;
+    position: relative;
+    z-index: 2;
+    flex-shrink: 0;
+    white-space: nowrap;
+    overflow: hidden;
+}
+
+.welcome-message h5 {
+    color: var(--dark-color);
+    font-size: 18px;
+    font-weight: 600;
+    margin: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
 .header-right {
     display: flex;
     align-items: center;
     gap: 20px;
+    flex-shrink: 0;
 }
 
 .header-icon {
@@ -428,6 +466,11 @@ tbody tr:hover {
     
     .main-content {
         margin-left: 0;
+        width: 100%;
+    }
+    
+    .top-header {
+        left: 0;
     }
     
     .menu-toggle {
@@ -452,6 +495,10 @@ tbody tr:hover {
     }
     
     .header-search {
+        display: none;
+    }
+    
+    .welcome-message {
         display: none;
     }
     

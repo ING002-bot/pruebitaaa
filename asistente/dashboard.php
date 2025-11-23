@@ -1,6 +1,6 @@
 <?php
 require_once '../config/config.php';
-requireRole(['admin', 'asistente']);
+requireRole(['asistente']);
 
 // Obtener estadísticas (similar a admin pero sin ingresos totales)
 $db = Database::getInstance()->getConnection();
@@ -120,7 +120,7 @@ $pageTitle = "Dashboard Asistente";
                     <div class="card">
                         <div class="card-header d-flex justify-content-between">
                             <h5 class="card-title">Últimos Paquetes</h5>
-                            <a href="../admin/paquetes.php" class="btn btn-sm btn-primary">Ver Todos</a>
+                            <a href="paquetes.php" class="btn btn-sm btn-primary">Ver Todos</a>
                         </div>
                         <div class="card-body">
                             <div class="table-responsive">

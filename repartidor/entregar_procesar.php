@@ -86,7 +86,7 @@ try {
     }
     
     // Iniciar transacción
-    $db->beginTransaction();
+    $db->autocommit(false);
     
     // Registrar entrega
     $sql = "INSERT INTO entregas (paquete_id, repartidor_id, receptor_nombre, receptor_dni, 
@@ -178,14 +178,14 @@ try {
     
     // Commit
     $db->commit();
+    $db->autocommit(true);
     
     setFlashMessage('success', 'Entrega registrada exitosamente');
     redirect(APP_URL . 'repartidor/dashboard.php');
     
 } catch (Exception $e) {
-    if ($db->inTransaction()) {
-        $db->rollBack();
-    }
+    $db->rollback();
+    $db->autocommit(true);
     
     error_log("Error al registrar entrega: " . $e->getMessage());
     setFlashMessage('danger', 'Error al registrar la entrega. Por favor, intente nuevamente.');

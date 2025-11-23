@@ -53,53 +53,10 @@ $paquetes = Database::getInstance()->fetchAll($stmt->get_result());
     <link rel="stylesheet" href="../assets/css/dashboard.css">
 </head>
 <body>
-    <div class="dashboard-header">
-        <button class="btn btn-link" onclick="toggleSidebar()">
-            <i class="bi bi-list"></i>
-        </button>
-        <h2><?php echo APP_NAME; ?></h2>
-        <div class="user-profile">
-            <img src="../assets/img/<?php echo $_SESSION['foto_perfil']; ?>" alt="Avatar" onerror="this.src='../assets/img/default-avatar.svg'">
-            <div class="user-info">
-                <span class="user-name"><?php echo $_SESSION['nombre']; ?></span>
-                <span class="user-role">Asistente</span>
-            </div>
-        </div>
-    </div>
+    <?php include 'includes/header.php'; ?>
     
     <div class="dashboard-container">
-        <div class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <i class="bi bi-box-seam"></i>
-                <h3>HERMES EXPRESS</h3>
-            </div>
-            <div class="sidebar-menu">
-                <a href="dashboard.php" class="menu-item">
-                    <i class="bi bi-speedometer2"></i>
-                    <span>Dashboard</span>
-                </a>
-                <a href="paquetes.php" class="menu-item active">
-                    <i class="bi bi-box"></i>
-                    <span>Paquetes</span>
-                </a>
-                <a href="entregas.php" class="menu-item">
-                    <i class="bi bi-check-circle"></i>
-                    <span>Entregas</span>
-                </a>
-                <a href="rezagados.php" class="menu-item">
-                    <i class="bi bi-exclamation-triangle"></i>
-                    <span>Rezagados</span>
-                </a>
-                <a href="caja_chica.php" class="menu-item">
-                    <i class="bi bi-wallet2"></i>
-                    <span>Caja Chica</span>
-                </a>
-                <a href="../auth/logout.php" class="menu-item">
-                    <i class="bi bi-box-arrow-right"></i>
-                    <span>Cerrar Sesión</span>
-                </a>
-            </div>
-        </div>
+        <?php include 'includes/sidebar.php'; ?>
         
         <main class="main-content">
             <div class="content-header">
@@ -161,7 +118,7 @@ $paquetes = Database::getInstance()->fetchAll($stmt->get_result());
                                         </span>
                                     </td>
                                     <td>
-                                        <button class="btn btn-sm btn-info" onclick="alert('Ver detalle próximamente')">
+                                        <button class="btn btn-sm btn-info" onclick="verDetalle(<?php echo $paq['id']; ?>)">
                                             <i class="bi bi-eye"></i>
                                         </button>
                                     </td>
@@ -183,20 +140,45 @@ $paquetes = Database::getInstance()->fetchAll($stmt->get_result());
                     <h5 class="modal-title">Nuevo Paquete</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                 </div>
-                <form method="POST" action="../admin/paquetes_guardar.php">
+                <form method="POST" action="paquetes_guardar.php">
                     <div class="modal-body">
-                        <p class="text-muted">Formulario idéntico al de admin</p>
-                        <div class="mb-3">
-                            <label class="form-label">Código de Seguimiento *</label>
-                            <input type="text" name="codigo_seguimiento" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Destinatario *</label>
-                            <input type="text" name="destinatario_nombre" class="form-control" required>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Dirección *</label>
-                            <textarea name="direccion_completa" class="form-control" required></textarea>
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Código de Seguimiento</label>
+                                <input type="text" name="codigo_seguimiento" class="form-control" placeholder="Auto-generado si se deja vacío">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Código SAVAR</label>
+                                <input type="text" name="codigo_savar" class="form-control">
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Destinatario *</label>
+                                <input type="text" name="destinatario_nombre" class="form-control" required>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Teléfono</label>
+                                <input type="text" name="destinatario_telefono" class="form-control">
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Email</label>
+                                <input type="email" name="destinatario_email" class="form-control">
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <label class="form-label">Dirección *</label>
+                                <textarea name="direccion_completa" class="form-control" rows="2" required></textarea>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Prioridad</label>
+                                <select name="prioridad" class="form-select">
+                                    <option value="normal">Normal</option>
+                                    <option value="urgente">Urgente</option>
+                                    <option value="express">Express</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Costo de Envío</label>
+                                <input type="number" name="costo_envio" class="form-control" step="0.01" min="0">
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -210,5 +192,10 @@ $paquetes = Database::getInstance()->fetchAll($stmt->get_result());
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../assets/js/dashboard.js"></script>
+    <script>
+        function verDetalle(id) {
+            window.location.href = 'paquete_detalle.php?id=' + id;
+        }
+    </script>
 </body>
 </html>

@@ -6,6 +6,92 @@ $pageTitle = 'Configuración del Sistema';
 
 $db = Database::getInstance()->getConnection();
 
+// Obtener información del admin
+$admin_id = $_SESSION['usuario_id'];
+$stmt = $db->prepare("SELECT * FROM usuarios WHERE id = ?");
+$stmt->bind_param("i", $admin_id);
+$stmt->execute();
+$admin = $stmt->get_result()->fetch_assoc();
+
+// Actualizar perfil del admin
+if (isset($_POST['actualizar_perfil'])) {
+    $nombre = trim($_POST['nombre'] ?? '');
+    $apellido = trim($_POST['apellido'] ?? '');
+    $email = trim($_POST['email'] ?? '');
+    $telefono = trim($_POST['telefono'] ?? '');
+    $nueva_password = trim($_POST['nueva_password'] ?? '');
+    
+    $db->autocommit(false);
+    try {
+        // Verificar email único
+        $stmt = $db->prepare("SELECT id FROM usuarios WHERE email = ? AND id != ?");
+        $stmt->bind_param("si", $email, $admin_id);
+        $stmt->execute();
+        if ($stmt->get_result()->num_rows > 0) {
+            throw new Exception('El email ya está en uso');
+        }
+        
+        // Procesar foto de perfil
+        $foto_perfil = null;
+        if (isset($_FILES['foto_perfil']) && $_FILES['foto_perfil']['error'] === UPLOAD_ERR_OK) {
+            $upload_dir = '../uploads/perfiles/';
+            if (!is_dir($upload_dir)) {
+                mkdir($upload_dir, 0777, true);
+            }
+            
+            $extension = strtolower(pathinfo($_FILES['foto_perfil']['name'], PATHINFO_EXTENSION));
+            if (!in_array($extension, ['jpg', 'jpeg', 'png', 'gif'])) {
+                throw new Exception('Formato de imagen no permitido');
+            }
+            
+            if ($_FILES['foto_perfil']['size'] > 2 * 1024 * 1024) {
+                throw new Exception('La imagen es demasiado grande');
+            }
+            
+            $foto_perfil = 'perfil_' . $admin_id . '_' . time() . '.' . $extension;
+            if (!move_uploaded_file($_FILES['foto_perfil']['tmp_name'], $upload_dir . $foto_perfil)) {
+                throw new Exception('Error al subir la foto');
+            }
+        }
+        
+        // Actualizar datos
+        if (!empty($nueva_password)) {
+            $password_hash = password_hash($nueva_password, PASSWORD_DEFAULT);
+            if ($foto_perfil) {
+                $stmt = $db->prepare("UPDATE usuarios SET nombre = ?, apellido = ?, email = ?, telefono = ?, foto_perfil = ?, password = ? WHERE id = ?");
+                $stmt->bind_param("ssssssi", $nombre, $apellido, $email, $telefono, $foto_perfil, $password_hash, $admin_id);
+            } else {
+                $stmt = $db->prepare("UPDATE usuarios SET nombre = ?, apellido = ?, email = ?, telefono = ?, password = ? WHERE id = ?");
+                $stmt->bind_param("sssssi", $nombre, $apellido, $email, $telefono, $password_hash, $admin_id);
+            }
+        } else {
+            if ($foto_perfil) {
+                $stmt = $db->prepare("UPDATE usuarios SET nombre = ?, apellido = ?, email = ?, telefono = ?, foto_perfil = ? WHERE id = ?");
+                $stmt->bind_param("sssssi", $nombre, $apellido, $email, $telefono, $foto_perfil, $admin_id);
+            } else {
+                $stmt = $db->prepare("UPDATE usuarios SET nombre = ?, apellido = ?, email = ?, telefono = ? WHERE id = ?");
+                $stmt->bind_param("ssssi", $nombre, $apellido, $email, $telefono, $admin_id);
+            }
+        }
+        
+        $stmt->execute();
+        $db->commit();
+        
+        $_SESSION['usuario_nombre'] = $nombre . ' ' . $apellido;
+        $_SESSION['success_message'] = 'Perfil actualizado correctamente';
+        header('Location: configuracion.php');
+        exit;
+        
+    } catch (Exception $e) {
+        $db->rollback();
+        $_SESSION['error_message'] = 'Error: ' . $e->getMessage();
+        if ($foto_perfil && file_exists('../uploads/perfiles/' . $foto_perfil)) {
+            unlink('../uploads/perfiles/' . $foto_perfil);
+        }
+    }
+    $db->autocommit(true);
+}
+
 // Guardar configuración
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $config_data = [
@@ -93,7 +179,116 @@ $stats_sistema = [
             </div>
             <?php endif; ?>
 
-            <form method="POST">
+            <?php if (isset($_SESSION['error_message'])): ?>
+            <div class="alert alert-danger alert-dismissible fade show">
+                <i class="bi bi-x-circle"></i> <?php echo $_SESSION['error_message']; unset($_SESSION['error_message']); ?>
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+            <?php endif; ?>
+
+            <!-- Tabs de Navegación -->
+            <ul class="nav nav-tabs mb-4" id="configTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="perfil-tab" data-bs-toggle="tab" data-bs-target="#perfil" type="button">
+                        <i class="bi bi-person-circle"></i> Mi Perfil
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="sistema-tab" data-bs-toggle="tab" data-bs-target="#sistema" type="button">
+                        <i class="bi bi-gear"></i> Configuración del Sistema
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="configTabsContent">
+                <!-- Tab Mi Perfil -->
+                <div class="tab-pane fade show active" id="perfil" role="tabpanel">
+                    <form method="POST" enctype="multipart/form-data">
+                        <div class="row">
+                            <div class="col-md-4 mb-4">
+                                <div class="card">
+                                    <div class="card-body text-center">
+                                        <div class="mb-3">
+                                            <?php if (!empty($admin['foto_perfil']) && file_exists("../uploads/perfiles/{$admin['foto_perfil']}")): ?>
+                                                <img src="../uploads/perfiles/<?php echo $admin['foto_perfil']; ?>" 
+                                                     class="rounded-circle" 
+                                                     style="width: 150px; height: 150px; object-fit: cover;"
+                                                     alt="Foto de perfil">
+                                            <?php else: ?>
+                                                <div class="rounded-circle bg-danger text-white d-inline-flex align-items-center justify-content-center"
+                                                     style="width: 150px; height: 150px; font-size: 3rem;">
+                                                    <?php echo strtoupper(substr($admin['nombre'], 0, 1) . substr($admin['apellido'], 0, 1)); ?>
+                                                </div>
+                                            <?php endif; ?>
+                                        </div>
+                                        <h4><?php echo $admin['nombre'] . ' ' . $admin['apellido']; ?></h4>
+                                        <p class="text-muted mb-2">
+                                            <i class="bi bi-shield-check"></i> Administrador
+                                        </p>
+                                        <span class="badge bg-success">Activo</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-md-8 mb-4">
+                                <div class="card">
+                                    <div class="card-header">
+                                        <h5 class="mb-0"><i class="bi bi-person-lines-fill"></i> Datos Personales</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Nombre *</label>
+                                                <input type="text" class="form-control" name="nombre" value="<?php echo htmlspecialchars($admin['nombre']); ?>" required>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Apellido *</label>
+                                                <input type="text" class="form-control" name="apellido" value="<?php echo htmlspecialchars($admin['apellido']); ?>" required>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Email *</label>
+                                                <input type="email" class="form-control" name="email" value="<?php echo htmlspecialchars($admin['email']); ?>" required>
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Teléfono</label>
+                                                <input type="text" class="form-control" name="telefono" value="<?php echo htmlspecialchars($admin['telefono'] ?? ''); ?>">
+                                            </div>
+                                            <div class="col-md-12 mb-3">
+                                                <label class="form-label">Foto de Perfil</label>
+                                                <input type="file" class="form-control" name="foto_perfil" accept="image/*">
+                                                <small class="text-muted">Formatos: JPG, PNG, GIF. Máximo 2MB</small>
+                                            </div>
+                                        </div>
+
+                                        <hr class="my-4">
+
+                                        <h6 class="mb-3"><i class="bi bi-key"></i> Cambiar Contraseña</h6>
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Nueva Contraseña</label>
+                                                <input type="password" class="form-control" name="nueva_password" minlength="6" placeholder="Dejar en blanco para no cambiar">
+                                            </div>
+                                            <div class="col-md-6 mb-3">
+                                                <label class="form-label">Confirmar Contraseña</label>
+                                                <input type="password" class="form-control" name="confirmar_password" placeholder="Repetir contraseña">
+                                            </div>
+                                        </div>
+
+                                        <div class="d-flex justify-content-end gap-2 mt-3">
+                                            <button type="submit" name="actualizar_perfil" class="btn btn-primary">
+                                                <i class="bi bi-save"></i> Guardar Cambios
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Tab Configuración del Sistema -->
+                <div class="tab-pane fade" id="sistema" role="tabpanel">
+                    <form method="POST">
                 <!-- Información de la Empresa -->
                 <div class="card mb-4">
                     <div class="card-header">
@@ -131,39 +326,16 @@ $stats_sistema = [
                         <h5><i class="bi bi-cash-stack"></i> Tarifas de Envío</h5>
                     </div>
                     <div class="card-body">
-                        <div class="row g-3">
-                            <div class="col-md-3">
-                                <label class="form-label">Entrega Normal</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">S/</span>
-                                    <input type="number" step="0.01" name="tarifa_entrega_normal" class="form-control" value="<?php echo $config['tarifa_entrega_normal']; ?>" required>
-                                </div>
-                                <small class="text-muted">24-48 horas</small>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label">Entrega Urgente</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">S/</span>
-                                    <input type="number" step="0.01" name="tarifa_entrega_urgente" class="form-control" value="<?php echo $config['tarifa_entrega_urgente']; ?>" required>
-                                </div>
-                                <small class="text-muted">12-24 horas</small>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label">Entrega Express</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">S/</span>
-                                    <input type="number" step="0.01" name="tarifa_entrega_express" class="form-control" value="<?php echo $config['tarifa_entrega_express']; ?>" required>
-                                </div>
-                                <small class="text-muted">Mismo día</small>
-                            </div>
-                            <div class="col-md-3">
-                                <label class="form-label">Km Adicional</label>
-                                <div class="input-group">
-                                    <span class="input-group-text">S/</span>
-                                    <input type="number" step="0.01" name="tarifa_km_adicional" class="form-control" value="<?php echo $config['tarifa_km_adicional']; ?>" required>
-                                </div>
-                                <small class="text-muted">Fuera del radio base</small>
-                            </div>
+                        <p class="text-muted mb-3">
+                            <i class="bi bi-info-circle"></i> Las tarifas de envío están gestionadas por zonas. 
+                            <a href="tarifas.php" class="btn btn-sm btn-primary">
+                                <i class="bi bi-tags"></i> Gestionar Tarifas por Zona
+                            </a>
+                        </p>
+                        
+                        <div class="alert alert-info">
+                            <strong>Sistema de Tarifas por Zona Activo</strong>
+                            <p class="mb-0 mt-2">El sistema utiliza tarifas diferenciadas según la zona de entrega. Puedes configurar las tarifas para cada repartidor por zona en el módulo de <strong>Tarifas por Zona</strong>.</p>
                         </div>
                     </div>
                 </div>
@@ -284,6 +456,8 @@ $stats_sistema = [
                     </div>
                 </div>
             </form>
+                </div>
+            </div>
 
         </main>
     </div>
@@ -298,13 +472,15 @@ $stats_sistema = [
         }
 
         function limpiarCache() {
-            if (confirm('¿Limpiar todos los archivos de caché temporales?')) {
-                alert('Caché limpiado correctamente');
+            if (confirm('¿Limpiar todos los archivos de caché temporales?\n\nEsto eliminará archivos temporales, sesiones antiguas y liberará espacio en disco.')) {
+                window.location.href = 'limpiar_cache.php';
             }
         }
 
         function verificarIntegridad() {
-            alert('Verificación de integridad en desarrollo');
+            if (confirm('¿Verificar la integridad del sistema?\n\nEsto comprobará la base de datos, permisos de directorios y optimizará las tablas.')) {
+                window.location.href = 'verificar_integridad.php';
+            }
         }
     </script>
 </body>

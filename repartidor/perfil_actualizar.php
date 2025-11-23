@@ -101,7 +101,18 @@ try {
     $params[] = $repartidor_id;
     
     $stmt = $db->prepare($sql);
-    $stmt->execute($params);
+    if (!$stmt) {
+        throw new Exception("Error al preparar consulta: " . $db->error);
+    }
+    
+    // Bind dinámico de parámetros
+    $types = str_repeat('s', count($params));
+    $stmt->bind_param($types, ...$params);
+    
+    if (!$stmt->execute()) {
+        throw new Exception("Error al ejecutar consulta: " . $stmt->error);
+    }
+    $stmt->close();
     
     // Actualizar sesión
     $_SESSION['nombre'] = $nombre;

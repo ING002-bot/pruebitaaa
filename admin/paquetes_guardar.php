@@ -38,6 +38,10 @@ try {
     )";
     
     $stmt = $db->prepare($sql);
+    if (!$stmt) {
+        throw new Exception("Error al preparar consulta: " . $db->error);
+    }
+    
     $stmt->bind_param(
         "ssssssssdddsisii",
         $data['codigo_seguimiento'],
@@ -57,9 +61,13 @@ try {
         $data['repartidor_id'],
         $data['repartidor_id']
     );
-    $stmt->execute();
+    
+    if (!$stmt->execute()) {
+        throw new Exception("Error al ejecutar consulta: " . $stmt->error);
+    }
     
     $paquete_id = $db->insert_id;
+    $stmt->close();
     
     // Log
     logActivity('Creación de paquete', 'paquetes', $paquete_id, 'Código: ' . $data['codigo_seguimiento']);

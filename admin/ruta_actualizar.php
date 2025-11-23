@@ -19,8 +19,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         
         // Verificar que la ruta existe y está en estado planificada
         $stmt = $db->prepare("SELECT estado FROM rutas WHERE id = ?");
-        $stmt->execute([$id]);
-        $ruta = $stmt->fetch();
+        if (!$stmt) {
+            throw new Exception("Error al preparar consulta: " . $db->error);
+        }
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $ruta = $result->fetch_assoc();
+        $stmt->close();
         
         if (!$ruta) {
             header('Location: rutas.php?error=no_encontrada');
@@ -43,7 +49,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 WHERE id = ?";
         
         $stmt = $db->prepare($sql);
-        $stmt->execute([
+        if (!$stmt) {
+            throw new Exception("Error al preparar consulta: " . $db->error);
+        }
+        
+        $stmt->bind_param(
+            "ssssiis",
             $zona,
             $ubicaciones,
             $nombre,
@@ -51,12 +62,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $repartidor_id,
             $descripcion,
             $id
-        ]);
+        );
+        
+        if (!$stmt->execute()) {
+            throw new Exception("Error al ejecutar consulta: " . $stmt->error);
+        }
+        $stmt->close();
         
         header('Location: ruta_detalle.php?id=' . $id . '&success=actualizada');
         exit;
         
-    } catch (PDOException $e) {
+    } catch (Exception $e) {
         error_log("Error al actualizar ruta: " . $e->getMessage());
         header('Location: ruta_editar.php?id=' . $id . '&error=db');
         exit;

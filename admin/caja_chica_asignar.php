@@ -18,8 +18,14 @@ try {
     
     // Validar que el asistente existe
     $stmt = $db->prepare("SELECT * FROM usuarios WHERE id = ? AND rol = 'asistente' AND estado = 'activo'");
-    $stmt->execute([$asignado_a]);
-    $asistente = $stmt->fetch();
+    if (!$stmt) {
+        throw new Exception("Error al preparar consulta: " . $db->error);
+    }
+    $stmt->bind_param("i", $asignado_a);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $asistente = $result->fetch_assoc();
+    $stmt->close();
     
     if (!$asistente) {
         setFlashMessage('danger', 'Asistente no válido');
@@ -36,7 +42,13 @@ try {
         )
     ");
     
-    $stmt->execute([
+    if (!$stmt) {
+        throw new Exception("Error al preparar consulta: " . $db->error);
+    }
+    
+    $tipo = 'asignacion';
+    $stmt->bind_param(
+        "dssiis",
         $monto,
         $concepto,
         $descripcion,
@@ -44,9 +56,14 @@ try {
         $asignado_a,
         $_SESSION['usuario_id'], // registrado_por
         $fecha_operacion
-    ]);
+    );
     
-    $asignacion_id = $db->lastInsertId();
+    if (!$stmt->execute()) {
+        throw new Exception("Error al ejecutar consulta: " . $stmt->error);
+    }
+    
+    $asignacion_id = $db->insert_id;
+    $stmt->close();
     
     // Crear notificación para el asistente
     crearNotificacion(

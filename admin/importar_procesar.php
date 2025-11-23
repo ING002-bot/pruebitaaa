@@ -76,7 +76,12 @@ try {
     // Error al ejecutar
     $sql = "UPDATE importaciones_savar SET estado = 'error', errores = ? WHERE id = ?";
     $stmt = $db->prepare($sql);
-    $stmt->execute(['Error al ejecutar script: ' . $e->getMessage(), $importacion_id]);
+    if ($stmt) {
+        $error_msg = 'Error al ejecutar script: ' . $e->getMessage();
+        $stmt->bind_param("si", $error_msg, $importacion_id);
+        $stmt->execute();
+        $stmt->close();
+    }
     
     setFlashMessage('danger', 'Error al ejecutar la importación: ' . $e->getMessage() . '<br>Intenta ejecutar manualmente: <code>python python/savar_importer.py</code>');
 }

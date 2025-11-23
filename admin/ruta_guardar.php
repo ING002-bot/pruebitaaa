@@ -19,9 +19,19 @@ try {
     $sql = "INSERT INTO rutas (nombre, zona, ubicaciones, descripcion, repartidor_id, fecha_ruta, estado, creado_por) 
             VALUES (?, ?, ?, ?, ?, ?, 'planificada', ?)";
     $stmt = $db->prepare($sql);
-    $stmt->execute([$nombre, $zona, $ubicaciones, $descripcion, $repartidor_id, $fecha_ruta, $_SESSION['usuario_id']]);
+    if (!$stmt) {
+        throw new Exception("Error al preparar consulta: " . $db->error);
+    }
     
-    $ruta_id = $db->lastInsertId();
+    $estado = 'planificada';
+    $stmt->bind_param("ssssiis", $nombre, $zona, $ubicaciones, $descripcion, $repartidor_id, $fecha_ruta, $_SESSION['usuario_id']);
+    if (!$stmt->execute()) {
+        throw new Exception("Error al ejecutar consulta: " . $stmt->error);
+    }
+    
+    $ruta_id = $db->insert_id;
+    $stmt->close();
+    
     logActivity("Ruta creada: $nombre - Zona: $zona", 'rutas', $ruta_id);
     
     setFlashMessage('success', 'Ruta creada exitosamente');

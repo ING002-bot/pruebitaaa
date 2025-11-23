@@ -18,8 +18,14 @@ try {
     
     // Verificar que la tarifa existe
     $stmt = $db->prepare("SELECT * FROM zonas_tarifas WHERE id = ?");
-    $stmt->execute([$id]);
-    $tarifaActual = $stmt->fetch();
+    if (!$stmt) {
+        throw new Exception("Error al preparar consulta: " . $db->error);
+    }
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $tarifaActual = $result->fetch_assoc();
+    $stmt->close();
     
     if (!$tarifaActual) {
         setFlashMessage('danger', 'Tarifa no encontrada');
@@ -37,7 +43,16 @@ try {
         WHERE id = ?
     ");
     
-    $stmt->execute([$categoria, $nombre_zona, $tipo_envio, $tarifa_repartidor, $activo, $id]);
+    if (!$stmt) {
+        throw new Exception("Error al preparar consulta: " . $db->error);
+    }
+    
+    $stmt->bind_param("sssdii", $categoria, $nombre_zona, $tipo_envio, $tarifa_repartidor, $activo, $id);
+    
+    if (!$stmt->execute()) {
+        throw new Exception("Error al ejecutar consulta: " . $stmt->error);
+    }
+    $stmt->close();
     
     $cambios = [];
     if ($tarifaActual['tarifa_repartidor'] != $tarifa_repartidor) {

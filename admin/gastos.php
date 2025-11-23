@@ -6,15 +6,30 @@ $pageTitle = 'Gestión de Gastos';
 
 $db = Database::getInstance()->getConnection();
 
+// Verificar si existe la columna 'descripcion'
+$check_column = $db->query("SHOW COLUMNS FROM gastos LIKE 'descripcion'");
+$tiene_descripcion = ($check_column && $check_column->num_rows > 0);
+
 // Filtros
 $fecha_desde = $_GET['fecha_desde'] ?? date('Y-m-01');
 $fecha_hasta = $_GET['fecha_hasta'] ?? date('Y-m-d');
 
-$sql = "SELECT g.*, u.nombre, u.apellido
-        FROM gastos g
-        LEFT JOIN usuarios u ON g.registrado_por = u.id
-        WHERE DATE(g.fecha_gasto) BETWEEN ? AND ?
-        ORDER BY g.fecha_gasto DESC";
+if ($tiene_descripcion) {
+    // Estructura nueva
+    $sql = "SELECT g.*, u.nombre, u.apellido
+            FROM gastos g
+            LEFT JOIN usuarios u ON g.registrado_por = u.id
+            WHERE DATE(g.fecha_gasto) BETWEEN ? AND ?
+            ORDER BY g.fecha_gasto DESC";
+} else {
+    // Estructura antigua - usar 'concepto' como 'descripcion'
+    $sql = "SELECT g.*, u.nombre, u.apellido, g.concepto as descripcion, '' as numero_comprobante, '' as comprobante_archivo
+            FROM gastos g
+            LEFT JOIN usuarios u ON g.registrado_por = u.id
+            WHERE DATE(g.fecha_gasto) BETWEEN ? AND ?
+            ORDER BY g.fecha_gasto DESC";
+}
+
 $stmt = $db->prepare($sql);
 $stmt->bind_param("ss", $fecha_desde, $fecha_hasta);
 $stmt->execute();

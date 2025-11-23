@@ -15,9 +15,8 @@
         <button class="menu-toggle" onclick="toggleSidebar()">
             <i class="bi bi-list"></i>
         </button>
-        <div class="header-search">
-            <i class="bi bi-search"></i>
-            <input type="text" placeholder="Buscar paquetes...">
+        <div class="welcome-message">
+            <h5 class="mb-0">Bienvenido, <?php echo htmlspecialchars($_SESSION['nombre'] . ' ' . ($_SESSION['apellido'] ?? '')); ?></h5>
         </div>
     </div>
     

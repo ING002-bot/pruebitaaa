@@ -19,19 +19,37 @@ try {
     
     // Verificar email único
     $check = $db->prepare("SELECT id FROM usuarios WHERE email = ?");
-    $check->execute([$email]);
-    if ($check->fetch()) {
+    if (!$check) {
+        throw new Exception("Error al preparar consulta: " . $db->error);
+    }
+    $check->bind_param("s", $email);
+    $check->execute();
+    $check->store_result();
+    
+    if ($check->num_rows > 0) {
+        $check->close();
         setFlashMessage('danger', 'El email ya está registrado');
         redirect(APP_URL . 'admin/usuarios.php');
         exit;
     }
+    $check->close();
     
     $sql = "INSERT INTO usuarios (nombre, apellido, email, telefono, password, rol, estado) 
             VALUES (?, ?, ?, ?, ?, ?, 'activo')";
     $stmt = $db->prepare($sql);
-    $stmt->execute([$nombre, $apellido, $email, $telefono, $password, $rol]);
+    if (!$stmt) {
+        throw new Exception("Error al preparar consulta: " . $db->error);
+    }
     
-    logActivity("Usuario creado: $email", 'usuarios', $db->lastInsertId());
+    $stmt->bind_param("ssssss", $nombre, $apellido, $email, $telefono, $password, $rol);
+    if (!$stmt->execute()) {
+        throw new Exception("Error al ejecutar consulta: " . $stmt->error);
+    }
+    
+    $usuario_id = $db->insert_id;
+    $stmt->close();
+    
+    logActivity("Usuario creado: $email", 'usuarios', $usuario_id);
     setFlashMessage('success', 'Usuario creado exitosamente');
     
 } catch (Exception $e) {
