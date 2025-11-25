@@ -5,12 +5,15 @@
 Tu sistema **ya está enviando WhatsApp reales** usando Twilio.
 
 ```
-ANTES                          DESPUÉS
-═════════════════════════════════════════════════════════════
-Simulado ❌                    Twilio Real ✅
-Sin costo 💰                   $0.002-0.01 USD/msg 💳
-Desarrollo 🔧                  Producción 🚀
-Fake 📝                        VERDADERO 📱
+1. SID en config.php:
+   Valor: [Configurar desde variables de entorno]
+   Longitud: 34 caracteres
+   Comienza con AC: SÍ
+   
+2. Token en config.php:
+   Valor: [Configurar desde variables de entorno]
+   Longitud: 32 caracteres
+   Válido: SÍ
 ```
 
 ---
@@ -285,10 +288,10 @@ Mucho más barato que SMS ($0.08-0.15)
 | Elemento | Valor |
 |----------|-------|
 | Tipo API | `twilio` |
-| Account SID | `AC8ccfd5ecd15ff03826bb86724f5747e6` |
-| Número Twilio | `+14155238886` |
-| Estado | ✅ Activo |
-| Endpoint | `https://api.twilio.com/2010-04-01/Accounts/...` |
+| Account SID | Configurar desde env |
+| Número Twilio | Configurar según cuenta |
+| Estado | ✅ Listo para producción |
+| Endpoint | `https://api.twilio.com/2010-04-01/Accounts/.../Messages.json` |
 
 ---
 

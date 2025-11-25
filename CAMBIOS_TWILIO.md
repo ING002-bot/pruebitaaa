@@ -8,20 +8,22 @@ Se configuró el sistema para enviar **mensajes WhatsApp REALES** usando la API 
 ## 🔄 Archivos Modificados
 
 ### 1. `config/config.php`
-**Cambio:** Agregadas credenciales de Twilio
+**Cambio:** Agregadas credenciales de Twilio (mediante variables de entorno)
 
 ```php
 // ANTES: No había configuración de Twilio
 // ❌ WHATSAPP_API_TYPE no estaba definido
 
 // DESPUÉS:
-define('WHATSAPP_API_TYPE', 'twilio');
-define('TWILIO_ACCOUNT_SID', 'AC8ccfd5ecd15ff03826bb86724f5747e6');
-define('TWILIO_AUTH_TOKEN', '23ea2f2d07def6bb9b9f1b9fa7b02b3b');
-define('TWILIO_WHATSAPP_FROM', 'whatsapp:+14155238886');
+define('WHATSAPP_API_TYPE', getenv('WHATSAPP_API_TYPE') ?: 'simulado');
+define('TWILIO_ACCOUNT_SID', getenv('TWILIO_ACCOUNT_SID') ?: '');
+define('TWILIO_AUTH_TOKEN', getenv('TWILIO_AUTH_TOKEN') ?: '');
+define('TWILIO_WHATSAPP_FROM', getenv('TWILIO_WHATSAPP_FROM') ?: 'whatsapp:+14155238886');
 ```
 
 **Ubicación:** Línea ~18 (después de GOOGLE_MAPS_API_KEY)
+
+**Nota:** Las credenciales se cargan desde variables de entorno por seguridad
 
 ---
 
