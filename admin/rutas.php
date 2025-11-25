@@ -292,5 +292,9 @@ $repartidores = Database::getInstance()->fetchAll($db->query("SELECT id, nombre,
             }
         });
     </script>
+    
+    <!-- Chatbot Widget -->
+    <?php include 'includes/chatbot_widget.php'; ?>
 </body>
 </html>
+

@@ -156,9 +156,8 @@ $pageTitle = "Dashboard";
                 <button class="menu-toggle" onclick="toggleSidebar()">
                     <i class="bi bi-list"></i>
                 </button>
-                <div class="header-search">
-                    <i class="bi bi-search"></i>
-                    <input type="text" placeholder="Buscar paquetes, rutas...">
+                <div style="margin-left: 20px; font-size: 16px; font-weight: 600; color: #333;">
+                    Bienvenido, Admin Sistema
                 </div>
             </div>
             
@@ -446,5 +445,8 @@ $pageTitle = "Dashboard";
             }
         });
     </script>
+    
+    <!-- Chatbot Widget -->
+    <?php include 'includes/chatbot_widget.php'; ?>
 </body>
 </html>

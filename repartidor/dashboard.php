@@ -74,10 +74,6 @@ $pageTitle = "Mi Dashboard";
                     <i class="bi bi-speedometer2"></i>
                     <span>Dashboard</span>
                 </a>
-                <a href="mis_rutas.php" class="menu-item">
-                    <i class="bi bi-map"></i>
-                    <span>Mis Rutas</span>
-                </a>
                 <a href="mis_paquetes.php" class="menu-item">
                     <i class="bi bi-box"></i>
                     <span>Mis Paquetes</span>
@@ -97,10 +93,6 @@ $pageTitle = "Mi Dashboard";
             
             <div class="menu-section">
                 <div class="menu-section-title">Herramientas</div>
-                <a href="mapa.php" class="menu-item">
-                    <i class="bi bi-geo-alt"></i>
-                    <span>Mapa en Tiempo Real</span>
-                </a>
                 <a href="rezagados.php" class="menu-item">
                     <i class="bi bi-exclamation-triangle"></i>
                     <span>Paquetes Rezagados</span>
@@ -213,13 +205,6 @@ $pageTitle = "Mi Dashboard";
                             </p>
                         </div>
                         <div class="col-md-4 text-end">
-                            <a href="mapa.php?ruta=<?php echo $rutaActiva['id']; ?>" class="btn btn-primary btn-lg mb-2">
-                                <i class="bi bi-geo-alt"></i> Ver en Mapa
-                            </a>
-                            <br>
-                            <a href="mis_rutas.php?ruta=<?php echo $rutaActiva['id']; ?>" class="btn btn-outline-primary">
-                                <i class="bi bi-list-check"></i> Ver Detalles
-                            </a>
                         </div>
                     </div>
                 </div>

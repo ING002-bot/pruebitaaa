@@ -325,5 +325,9 @@ $pageTitle = "Caja Chica";
             new bootstrap.Modal(document.getElementById('detalleModal')).show();
         }
     </script>
+    
+    <!-- Chatbot Widget -->
+    <?php include 'includes/chatbot_widget.php'; ?>
 </body>
 </html>
+

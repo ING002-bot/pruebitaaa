@@ -272,5 +272,9 @@ $pageTitle = "Tarifas por Zona";
             modal.show();
         }
     </script>
+    
+    <!-- Chatbot Widget -->
+    <?php include 'includes/chatbot_widget.php'; ?>
 </body>
 </html>
+

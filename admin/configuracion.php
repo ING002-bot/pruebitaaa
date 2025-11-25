@@ -488,5 +488,9 @@ $stats_sistema = [
             }
         }
     </script>
+    
+    <!-- Chatbot Widget -->
+    <?php include 'includes/chatbot_widget.php'; ?>
 </body>
 </html>
+

@@ -61,6 +61,65 @@ $pageTitle = "Registrar Entrega";
             border-radius: 8px;
             margin: 10px 0;
         }
+        
+        /* Notificaciones Emergentes */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 10000;
+            max-width: 400px;
+            animation: slideIn 0.3s ease-out;
+            font-size: 14px;
+            border-left: 4px solid;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideOut {
+            from {
+                transform: translateX(0);
+                opacity: 1;
+            }
+            to {
+                transform: translateX(400px);
+                opacity: 0;
+            }
+        }
+        
+        .notification.success {
+            background-color: #d4edda;
+            color: #155724;
+            border-left-color: #28a745;
+        }
+        
+        .notification.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border-left-color: #dc3545;
+        }
+        
+        .notification.warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border-left-color: #ffc107;
+        }
+        
+        .notification.remove {
+            animation: slideOut 0.3s ease-out;
+        }
     </style>
 </head>
 <body>
@@ -277,6 +336,19 @@ $pageTitle = "Registrar Entrega";
             });
         }
         
+        // Mostrar notificación emergente
+        function mostrarNotificacion(mensaje, tipo = 'success') {
+            const container = document.createElement('div');
+            container.className = `notification ${tipo}`;
+            container.textContent = mensaje;
+            document.body.appendChild(container);
+            
+            setTimeout(() => {
+                container.classList.add('remove');
+                setTimeout(() => container.remove(), 300);
+            }, 4000);
+        }
+        
         // Obtener ubicación actual
         function obtenerUbicacion() {
             if (navigator.geolocation) {
@@ -294,12 +366,12 @@ $pageTitle = "Registrar Entrega";
                         initMap(lat, lng);
                     }
                     
-                    alert('Ubicación obtenida correctamente');
+                    mostrarNotificacion('✅ Ubicación capturada correctamente. Coordenadas: ' + lat.toFixed(4) + ', ' + lng.toFixed(4), 'success');
                 }, function(error) {
-                    alert('Error al obtener ubicación: ' + error.message);
+                    mostrarNotificacion('❌ Error al obtener ubicación: ' + error.message, 'error');
                 });
             } else {
-                alert('Tu navegador no soporta geolocalización');
+                mostrarNotificacion('⚠️ Tu navegador no soporta geolocalización', 'warning');
             }
         }
         

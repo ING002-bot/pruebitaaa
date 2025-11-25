@@ -254,5 +254,9 @@ $usuarios = Database::getInstance()->fetchAll($db->query("SELECT * FROM usuarios
             }
         }
     </script>
+    
+    <!-- Chatbot Widget -->
+    <?php include 'includes/chatbot_widget.php'; ?>
 </body>
 </html>
+

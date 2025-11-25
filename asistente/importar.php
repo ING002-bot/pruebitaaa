@@ -34,7 +34,14 @@ if ($stmt) {
         
         <main class="main-content">
             <div class="content-header">
-                <h1><i class="bi bi-file-earmark-arrow-up"></i> <?php echo $pageTitle; ?></h1>
+                <div>
+                    <h1><i class="bi bi-file-earmark-arrow-up"></i> <?php echo $pageTitle; ?></h1>
+                </div>
+                <div>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#modalImportar">
+                        <i class="bi bi-upload"></i> Nueva Importación
+                    </button>
+                </div>
             </div>
 
             <?php if (isset($_SESSION['success'])): ?>
@@ -138,5 +145,45 @@ if ($stmt) {
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../assets/js/dashboard.js"></script>
+    
+    <!-- Modal Nueva Importación -->
+    <div class="modal fade" id="modalImportar" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header bg-primary text-white">
+                    <h5 class="modal-title"><i class="bi bi-file-earmark-excel"></i> Nueva Importación</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="../admin/importar_excel_procesar.php" method="POST" enctype="multipart/form-data">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label"><strong>Selecciona archivo Excel *</strong></label>
+                            <input type="file" name="archivo" class="form-control" accept=".xlsx,.xls" required>
+                            <small class="text-muted">Formatos soportados: .xlsx, .xls</small>
+                        </div>
+                        <div class="alert alert-info">
+                            <h6><strong>📋 Formato esperado:</strong></h6>
+                            <ul class="small mb-0">
+                                <li><strong>Columna A:</strong> Código SAVAR</li>
+                                <li><strong>Columna D:</strong> Departamento</li>
+                                <li><strong>Columna E:</strong> Provincia</li>
+                                <li><strong>Columna F:</strong> Distrito</li>
+                                <li><strong>Columna J:</strong> Consignado (nombre)</li>
+                                <li><strong>Columna K:</strong> Dirección</li>
+                                <li><strong>Columna M:</strong> Peso</li>
+                                <li><strong>Columna N:</strong> Teléfono</li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-upload"></i> Importar Archivo
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
 </body>
 </html>

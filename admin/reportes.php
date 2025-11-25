@@ -393,5 +393,9 @@ $motivos_rechazo = Database::getInstance()->fetchAll($db->query("
             window.location.href = 'reportes_export.php?tipo=excel&' + params.toString();
         }
     </script>
+    
+    <!-- Chatbot Widget -->
+    <?php include 'includes/chatbot_widget.php'; ?>
 </body>
 </html>
+

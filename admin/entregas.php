@@ -359,5 +359,8 @@ $statsHoy = Database::getInstance()->fetch($db->query($sqlStats));
             }, 500);
         }
     </script>
+    
+    <!-- Chatbot Widget -->
+    <?php include 'includes/chatbot_widget.php'; ?>
 </body>
 </html>

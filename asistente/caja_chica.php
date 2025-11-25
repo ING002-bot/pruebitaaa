@@ -321,13 +321,19 @@ $pageTitle = "Caja Chica";
             document.getElementById('gastoDisponible').textContent = disponible.toFixed(2);
             document.getElementById('gastoConceptoAsignacion').textContent = concepto;
             document.getElementById('gastoMonto').max = disponible;
+            document.getElementById('gastoMonto').value = '';
             
-            new bootstrap.Modal(document.getElementById('registrarGastoModal')).show();
+            // Obtener el modal y mostrarlo
+            const modalElement = document.getElementById('registrarGastoModal');
+            const modal = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
+            modal.show();
         }
 
         function verComprobante(foto) {
             document.getElementById('comprobanteImg').src = '../uploads/caja_chica/' + foto;
-            new bootstrap.Modal(document.getElementById('comprobanteModal')).show();
+            const modalElement = document.getElementById('comprobanteModal');
+            const modal = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
+            modal.show();
         }
     </script>
 </body>

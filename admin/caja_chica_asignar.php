@@ -48,7 +48,7 @@ try {
     
     $tipo = 'asignacion';
     $stmt->bind_param(
-        "dssiis",
+        "dssiiis",
         $monto,
         $concepto,
         $descripcion,

@@ -12,10 +12,6 @@
                 <i class="bi bi-speedometer2"></i>
                 <span>Dashboard</span>
             </a>
-            <a href="mis_rutas.php" class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'mis_rutas.php' ? 'active' : ''; ?>">
-                <i class="bi bi-map"></i>
-                <span>Mis Rutas</span>
-            </a>
             <a href="mis_paquetes.php" class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'mis_paquetes.php' ? 'active' : ''; ?>">
                 <i class="bi bi-box"></i>
                 <span>Mis Paquetes</span>
@@ -32,10 +28,6 @@
         
         <div class="menu-section">
             <div class="menu-section-title">Herramientas</div>
-            <a href="mapa.php" class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'mapa.php' ? 'active' : ''; ?>">
-                <i class="bi bi-geo-alt"></i>
-                <span>Mapa en Tiempo Real</span>
-            </a>
             <a href="rezagados.php" class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'rezagados.php' ? 'active' : ''; ?>">
                 <i class="bi bi-exclamation-triangle"></i>
                 <span>Paquetes Rezagados</span>

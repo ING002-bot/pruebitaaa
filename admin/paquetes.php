@@ -406,5 +406,8 @@ $pageTitle = "Gestión de Paquetes";
             modal.show();
         }
     </script>
+    
+    <!-- Chatbot Widget -->
+    <?php include 'includes/chatbot_widget.php'; ?>
 </body>
 </html>
