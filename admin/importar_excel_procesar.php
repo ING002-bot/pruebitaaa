@@ -1,8 +1,6 @@
 <?php
 require_once '../config/config.php';
-require_once '../vendor/autoload.php'; // PhpSpreadsheet
-
-use PhpOffice\PhpSpreadsheet\IOFactory;
+require_once '../lib/SimpleXLSX.php'; // Lector de Excel ligero
 
 requireRole(['admin', 'asistente']);
 
@@ -53,99 +51,113 @@ try {
     $stmt->execute();
     $importacion_id = $db->insert_id;
     
-    // Procesar Excel
-    $spreadsheet = IOFactory::load($ruta_destino);
-    $worksheet = $spreadsheet->getActiveSheet();
-    $highestRow = $worksheet->getHighestRow();
-    
-    $total_registros = $highestRow - 1; // -1 por la cabecera
-    $importados = 0;
-    $fallidos = 0;
-    $errores = [];
-    
-    // Actualizar total de registros
-    $db->query("UPDATE importaciones_archivos SET total_registros = $total_registros WHERE id = $importacion_id");
-    
-    // Procesar filas (asumiendo que fila 1 es cabecera)
-    for ($row = 2; $row <= $highestRow; $row++) {
-        try {
-            // Leer columnas según el formato del Excel
-            $codigo_seguimiento = trim($worksheet->getCell('A' . $row)->getValue() ?? '');
-            $departamento = trim($worksheet->getCell('D' . $row)->getValue() ?? '');
-            $provincia = trim($worksheet->getCell('E' . $row)->getValue() ?? '');
-            $distrito = trim($worksheet->getCell('F' . $row)->getValue() ?? '');
-            $destinatario_nombre = trim($worksheet->getCell('J' . $row)->getValue() ?? '');
-            $direccion = trim($worksheet->getCell('K' . $row)->getValue() ?? '');
-            $peso = trim($worksheet->getCell('M' . $row)->getValue() ?? '0');
-            $telefono = trim($worksheet->getCell('N' . $row)->getValue() ?? '');
-            
-            // Validaciones básicas
-            if (empty($codigo_seguimiento)) {
-                throw new Exception("Fila $row: Código de seguimiento vacío");
-            }
-            
-            if (empty($destinatario_nombre)) {
-                throw new Exception("Fila $row: Nombre del consignado vacío");
-            }
-            
-            if (empty($direccion)) {
-                throw new Exception("Fila $row: Dirección vacía");
-            }
-            
-            // Verificar si el código ya existe
-            $check = $db->prepare("SELECT id FROM paquetes WHERE codigo_seguimiento = ?");
-            $check->bind_param("s", $codigo_seguimiento);
-            $check->execute();
-            if ($check->get_result()->num_rows > 0) {
-                throw new Exception("Fila $row: Código $codigo_seguimiento ya existe");
-            }
-            
-            // Limpiar y convertir peso
-            $peso_decimal = floatval(str_replace(',', '.', $peso));
-            
-            // Construir ciudad completa (Departamento - Provincia - Distrito)
-            $ciudad_completa = trim("$departamento - $provincia - $distrito", ' -');
-            if (empty($ciudad_completa)) {
-                $ciudad_completa = $departamento;
-            }
-            
-            // Insertar paquete
-            $stmt = $db->prepare("INSERT INTO paquetes (
-                codigo_seguimiento, 
-                destinatario_nombre, 
-                destinatario_telefono, 
-                direccion_completa, 
-                ciudad, 
-                provincia,
-                distrito, 
-                peso,
-                archivo_importacion,
-                estado, 
-                prioridad
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 'pendiente', 'normal')");
-            
-            $stmt->bind_param("sssssssds", 
-                $codigo_seguimiento,
-                $destinatario_nombre,
-                $telefono,
-                $direccion,
-                $ciudad_completa,
-                $provincia,
-                $distrito,
-                $peso_decimal,
-                $nombre_archivo
-            );
-            
-            if ($stmt->execute()) {
-                $importados++;
-            } else {
-                throw new Exception("Fila $row: Error al insertar - " . $stmt->error);
-            }
-            
-        } catch (Exception $e) {
-            $fallidos++;
-            $errores[] = $e->getMessage();
+    // Procesar Excel con SimpleXLSX
+    try {
+        $xlsx = new SimpleXLSX($ruta_destino);
+        $rows = $xlsx->rows();
+        
+        if (empty($rows)) {
+            throw new Exception('El archivo Excel está vacío');
         }
+        
+        $total_registros = count($rows) - 1; // -1 por la cabecera
+        $importados = 0;
+        $fallidos = 0;
+        $errores = [];
+        
+        // Actualizar total de registros
+        $db->query("UPDATE importaciones_archivos SET total_registros = $total_registros WHERE id = $importacion_id");
+        
+        // Procesar filas (asumiendo que fila 1 es cabecera)
+        $rowNum = 1;
+        foreach ($rows as $rowIndex => $rowData) {
+            $rowNum++;
+            
+            // Saltar la cabecera (primera fila)
+            if ($rowNum <= 2) {
+                continue;
+            }
+            
+            try {
+                // Leer columnas según el formato del Excel
+                $codigo_seguimiento = trim($xlsx->getCell($rowIndex, 'A') ?? '');
+                $departamento = trim($xlsx->getCell($rowIndex, 'D') ?? '');
+                $provincia = trim($xlsx->getCell($rowIndex, 'E') ?? '');
+                $distrito = trim($xlsx->getCell($rowIndex, 'F') ?? '');
+                $destinatario_nombre = trim($xlsx->getCell($rowIndex, 'J') ?? '');
+                $direccion = trim($xlsx->getCell($rowIndex, 'K') ?? '');
+                $peso = trim($xlsx->getCell($rowIndex, 'M') ?? '0');
+                $telefono = trim($xlsx->getCell($rowIndex, 'N') ?? '');
+                
+                // Validaciones básicas
+                if (empty($codigo_seguimiento)) {
+                    throw new Exception("Fila $rowNum: Código de seguimiento vacío");
+                }
+                
+                if (empty($destinatario_nombre)) {
+                    throw new Exception("Fila $rowNum: Nombre del consignado vacío");
+                }
+                
+                if (empty($direccion)) {
+                    throw new Exception("Fila $rowNum: Dirección vacía");
+                }
+                
+                // Verificar si el código ya existe
+                $check = $db->prepare("SELECT id FROM paquetes WHERE codigo_seguimiento = ?");
+                $check->bind_param("s", $codigo_seguimiento);
+                $check->execute();
+                if ($check->get_result()->num_rows > 0) {
+                    throw new Exception("Fila $rowNum: Código $codigo_seguimiento ya existe");
+                }
+                
+                // Limpiar y convertir peso
+                $peso_decimal = floatval(str_replace(',', '.', $peso));
+                
+                // Construir ciudad completa (Departamento - Provincia - Distrito)
+                $ciudad_completa = trim("$departamento - $provincia - $distrito", ' -');
+                if (empty($ciudad_completa)) {
+                    $ciudad_completa = $departamento;
+                }
+                
+                // Insertar paquete
+                $stmt = $db->prepare("INSERT INTO paquetes (
+                    codigo_seguimiento, 
+                    destinatario_nombre, 
+                    destinatario_telefono, 
+                    direccion_completa, 
+                    ciudad, 
+                    provincia,
+                    peso,
+                    archivo_importacion,
+                    estado, 
+                    prioridad
+                ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, 'pendiente', 'normal')");
+                
+                $stmt->bind_param("ssssssds", 
+                    $codigo_seguimiento,
+                    $destinatario_nombre,
+                    $telefono,
+                    $direccion,
+                    $ciudad_completa,
+                    $provincia,
+                    $peso_decimal,
+                    $nombre_archivo
+                );
+                
+                if ($stmt->execute()) {
+                    $importados++;
+                } else {
+                    throw new Exception("Fila $rowNum: Error al insertar - " . $stmt->error);
+                }
+                
+            } catch (Exception $e) {
+                $fallidos++;
+                $errores[] = $e->getMessage();
+            }
+        }
+        
+    } catch (Exception $e) {
+        throw new Exception('Error al procesar Excel: ' . $e->getMessage());
     }
     
     // Actualizar estado de importación

@@ -31,6 +31,54 @@ try {
         redirect(APP_URL . 'repartidor/entregar.php');
     }
     
+    // CALCULAR Y ACTUALIZAR costo_envio si no existe o es 0
+    if (empty($paquete['costo_envio']) || $paquete['costo_envio'] == 0) {
+        $costo_calculado = 3.50; // Valor por defecto
+        
+        // Extraer distrito de ciudad (última parte después del último " - ")
+        if (!empty($paquete['ciudad'])) {
+            $partes = array_map('trim', explode(' - ', $paquete['ciudad']));
+            $distrito = trim(end($partes));
+            
+            // Buscar tarifa por distrito
+            $stmt_tarifa = $db->prepare("SELECT tarifa_repartidor FROM zonas_tarifas 
+                                         WHERE UPPER(TRIM(nombre_zona)) = UPPER(TRIM(?)) AND activo = 1 
+                                         LIMIT 1");
+            if ($stmt_tarifa) {
+                $stmt_tarifa->bind_param("s", $distrito);
+                $stmt_tarifa->execute();
+                $result = $stmt_tarifa->get_result();
+                if ($row = $result->fetch_assoc()) {
+                    $costo_calculado = $row['tarifa_repartidor'];
+                }
+            }
+        }
+        
+        // Si no encontró, buscar por provincia
+        if ($costo_calculado == 3.50 && !empty($paquete['provincia'])) {
+            $stmt_tarifa2 = $db->prepare("SELECT tarifa_repartidor FROM zonas_tarifas 
+                                          WHERE UPPER(TRIM(nombre_zona)) = UPPER(TRIM(?)) AND activo = 1 
+                                          LIMIT 1");
+            if ($stmt_tarifa2) {
+                $stmt_tarifa2->bind_param("s", $paquete['provincia']);
+                $stmt_tarifa2->execute();
+                $result2 = $stmt_tarifa2->get_result();
+                if ($row2 = $result2->fetch_assoc()) {
+                    $costo_calculado = $row2['tarifa_repartidor'];
+                }
+            }
+        }
+        
+        // Actualizar el paquete con el costo calculado
+        $stmt_update_costo = $db->prepare("UPDATE paquetes SET costo_envio = ? WHERE id = ?");
+        if ($stmt_update_costo) {
+            $stmt_update_costo->bind_param("di", $costo_calculado, $paquete_id);
+            $stmt_update_costo->execute();
+            // Actualizar el array local para usar el valor correcto
+            $paquete['costo_envio'] = $costo_calculado;
+        }
+    }
+    
     // Procesar foto principal
     $foto_entrega = null;
     if (!empty($_POST['foto_entrega_data'])) {
@@ -50,39 +98,57 @@ try {
         file_put_contents($filepath, $data);
         $foto_entrega = $filename;
     } elseif (isset($_FILES['foto_entrega']) && $_FILES['foto_entrega']['error'] === UPLOAD_ERR_OK) {
-        // Foto desde archivo
+        // Foto desde archivo con validación mejorada
         $file = $_FILES['foto_entrega'];
-        $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-        $filename = 'entrega_' . $paquete_id . '_' . time() . '.' . $ext;
-        $filepath = UPLOADS_DIR . 'entregas/' . $filename;
         
-        if (!file_exists(UPLOADS_DIR . 'entregas/')) {
-            mkdir(UPLOADS_DIR . 'entregas/', 0777, true);
+        try {
+            // Validar imagen
+            validar_imagen($file);
+            
+            // Generar nombre único y seguro
+            $filename = generate_unique_filename($file['name'], 'entrega_' . $paquete_id);
+            $filepath = UPLOADS_DIR . 'entregas/' . $filename;
+            
+            if (!file_exists(UPLOADS_DIR . 'entregas/')) {
+                mkdir(UPLOADS_DIR . 'entregas/', 0777, true);
+            }
+            
+            move_uploaded_file($file['tmp_name'], $filepath);
+            $foto_entrega = $filename;
+        } catch (Exception $e) {
+            throw new Exception('Error en foto principal: ' . $e->getMessage());
         }
-        
-        move_uploaded_file($file['tmp_name'], $filepath);
-        $foto_entrega = $filename;
     }
     
-    // Procesar fotos adicionales
+    // Procesar fotos adicionales con validación
     $foto_adicional_1 = null;
     if (isset($_FILES['foto_adicional_1']) && $_FILES['foto_adicional_1']['error'] === UPLOAD_ERR_OK) {
-        $file = $_FILES['foto_adicional_1'];
-        $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-        $filename = 'entrega_' . $paquete_id . '_adicional1_' . time() . '.' . $ext;
-        $filepath = UPLOADS_DIR . 'entregas/' . $filename;
-        move_uploaded_file($file['tmp_name'], $filepath);
-        $foto_adicional_1 = $filename;
+        try {
+            $file = $_FILES['foto_adicional_1'];
+            validar_imagen($file);
+            $filename = generate_unique_filename($file['name'], 'entrega_' . $paquete_id . '_adicional1');
+            $filepath = UPLOADS_DIR . 'entregas/' . $filename;
+            move_uploaded_file($file['tmp_name'], $filepath);
+            $foto_adicional_1 = $filename;
+        } catch (Exception $e) {
+            // Foto adicional es opcional, solo registrar error
+            error_log('Error en foto adicional 1: ' . $e->getMessage());
+        }
     }
     
     $foto_adicional_2 = null;
     if (isset($_FILES['foto_adicional_2']) && $_FILES['foto_adicional_2']['error'] === UPLOAD_ERR_OK) {
-        $file = $_FILES['foto_adicional_2'];
-        $ext = pathinfo($file['name'], PATHINFO_EXTENSION);
-        $filename = 'entrega_' . $paquete_id . '_adicional2_' . time() . '.' . $ext;
-        $filepath = UPLOADS_DIR . 'entregas/' . $filename;
-        move_uploaded_file($file['tmp_name'], $filepath);
-        $foto_adicional_2 = $filename;
+        try {
+            $file = $_FILES['foto_adicional_2'];
+            validar_imagen($file);
+            $filename = generate_unique_filename($file['name'], 'entrega_' . $paquete_id . '_adicional2');
+            $filepath = UPLOADS_DIR . 'entregas/' . $filename;
+            move_uploaded_file($file['tmp_name'], $filepath);
+            $foto_adicional_2 = $filename;
+        } catch (Exception $e) {
+            // Foto adicional es opcional, solo registrar error
+            error_log('Error en foto adicional 2: ' . $e->getMessage());
+        }
     }
     
     // Iniciar transacción
@@ -146,73 +212,29 @@ try {
     
     // Registrar ingreso si la entrega fue exitosa
     if ($tipo_entrega === 'exitosa') {
-        // Obtener tarifa según el distrito del paquete
-        $monto = TARIFA_POR_PAQUETE; // Valor por defecto
-        $tarifa_encontrada = false;
-        
-        // Primero intentar buscar por el campo distrito
-        if (!empty($paquete['distrito'])) {
-            $stmt_tarifa = $db->prepare("SELECT tarifa_repartidor FROM zonas_tarifas 
-                                         WHERE UPPER(TRIM(nombre_zona)) = UPPER(TRIM(?)) AND activo = 1 
-                                         LIMIT 1");
-            $stmt_tarifa->bind_param("s", $paquete['distrito']);
-            $stmt_tarifa->execute();
-            $result_tarifa = $stmt_tarifa->get_result();
-            
-            if ($tarifa_row = $result_tarifa->fetch_assoc()) {
-                $monto = $tarifa_row['tarifa_repartidor'];
-                $tarifa_encontrada = true;
-            }
-        }
-        
-        // Si no encuentra por distrito, intentar extraerlo de ciudad
-        if (!$tarifa_encontrada && !empty($paquete['ciudad'])) {
-            $partes_ciudad = array_map('trim', explode(' - ', $paquete['ciudad']));
-            $distrito_extraido = trim(end($partes_ciudad));
-            
-            $stmt_tarifa2 = $db->prepare("SELECT tarifa_repartidor FROM zonas_tarifas 
-                                         WHERE UPPER(TRIM(nombre_zona)) = UPPER(TRIM(?)) AND activo = 1 
-                                         LIMIT 1");
-            $stmt_tarifa2->bind_param("s", $distrito_extraido);
-            $stmt_tarifa2->execute();
-            $result_tarifa2 = $stmt_tarifa2->get_result();
-            
-            if ($tarifa_row2 = $result_tarifa2->fetch_assoc()) {
-                $monto = $tarifa_row2['tarifa_repartidor'];
-                $tarifa_encontrada = true;
-            }
-        }
-        
-        // Si aún no encuentra, buscar por provincia
-        if (!$tarifa_encontrada && !empty($paquete['provincia'])) {
-            $stmt_tarifa3 = $db->prepare("SELECT tarifa_repartidor FROM zonas_tarifas 
-                                          WHERE UPPER(TRIM(nombre_zona)) = UPPER(TRIM(?)) AND activo = 1 
-                                          LIMIT 1");
-            $stmt_tarifa3->bind_param("s", $paquete['provincia']);
-            $stmt_tarifa3->execute();
-            $result_tarifa3 = $stmt_tarifa3->get_result();
-            
-            if ($tarifa_row3 = $result_tarifa3->fetch_assoc()) {
-                $monto = $tarifa_row3['tarifa_repartidor'];
-            }
-        }
+        // Usar el costo_envio ya calculado del paquete
+        $monto = !empty($paquete['costo_envio']) ? $paquete['costo_envio'] : 3.50;
         
         $sql_ingreso = "INSERT INTO ingresos (tipo, concepto, monto, paquete_id, registrado_por) 
                         VALUES ('envio', ?, ?, ?, ?)";
         $stmt_ingreso = $db->prepare($sql_ingreso);
-        $zona_info = !empty($paquete['distrito']) ? $paquete['distrito'] : $paquete['ciudad'];
-        $concepto = 'Entrega de paquete ' . $paquete['codigo_seguimiento'] . ' - ' . $zona_info;
-        $stmt_ingreso->bind_param("sdii", $concepto, $monto, $paquete_id, $repartidor_id);
-        $stmt_ingreso->execute();
+        if ($stmt_ingreso) {
+            $zona_info = !empty($paquete['ciudad']) ? $paquete['ciudad'] : ($paquete['provincia'] ?? 'Sin zona');
+            $concepto = 'Entrega de paquete ' . $paquete['codigo_seguimiento'] . ' - ' . $zona_info;
+            $stmt_ingreso->bind_param("sdii", $concepto, $monto, $paquete_id, $repartidor_id);
+            $stmt_ingreso->execute();
+        }
     }
     
     // Actualizar ruta si existe
     $sql_ruta = "UPDATE ruta_paquetes SET estado = ? 
                  WHERE paquete_id = ? AND estado = 'pendiente'";
     $stmt_ruta = $db->prepare($sql_ruta);
-    $estado_ruta = $tipo_entrega === 'exitosa' ? 'entregado' : 'fallido';
-    $stmt_ruta->bind_param("si", $estado_ruta, $paquete_id);
-    $stmt_ruta->execute();
+    if ($stmt_ruta) {
+        $estado_ruta = $tipo_entrega === 'exitosa' ? 'entregado' : 'fallido';
+        $stmt_ruta->bind_param("si", $estado_ruta, $paquete_id);
+        $stmt_ruta->execute();
+    }
     
     // Registrar actividad
     logActivity('Registro de entrega', 'entregas', $paquete_id, "Tipo: $tipo_entrega");

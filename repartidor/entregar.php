@@ -143,7 +143,9 @@ $pageTitle = "Registrar Entrega";
                                 <div class="mb-3">
                                     <label class="form-label">DNI de Quien Recibe</label>
                                     <input type="text" class="form-control" name="receptor_dni" 
-                                           placeholder="Ej: 12345678">
+                                           placeholder="Ej: 12345678" maxlength="8" pattern="[0-9]{8}" 
+                                           title="Debe ingresar exactamente 8 dígitos" 
+                                           oninput="this.value = this.value.replace(/[^0-9]/g, '').slice(0, 8)">
                                 </div>
                                 
                                 <div class="mb-3">

@@ -21,12 +21,11 @@ $stmt->bind_param("i", $repartidor_id);
 $stmt->execute();
 $rezagados = $stmt->get_result()->fetch_assoc()['total'];
 
-// Ingresos del mes - SOLO entregas exitosas con tarifa
+// Ingresos del mes - SOLO entregas exitosas
 $stmt = $db->prepare("
-    SELECT SUM(COALESCE(zt.tarifa_repartidor, 3.50)) as total_ingresos
+    SELECT SUM(COALESCE(p.costo_envio, 0)) as total_ingresos
     FROM entregas e
     INNER JOIN paquetes p ON e.paquete_id = p.id
-    LEFT JOIN zonas_tarifas zt ON p.zona_tarifa_id = zt.id
     WHERE e.repartidor_id = ? 
       AND e.tipo_entrega = 'exitosa'
       AND MONTH(e.fecha_entrega) = MONTH(CURDATE()) 

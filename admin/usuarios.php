@@ -61,7 +61,7 @@ $usuarios = Database::getInstance()->fetchAll($db->query("SELECT * FROM usuarios
                                 <tr>
                                     <td><?php echo $user['id']; ?></td>
                                     <td class="text-nowrap">
-                                        <img src="../uploads/perfiles/<?php echo $user['foto_perfil'] ?: 'default.png'; ?>" width="30" height="30" class="rounded-circle me-2" onerror="this.src='../uploads/perfiles/default.png'">
+                                        <img src="../uploads/perfiles/<?php echo $user['foto_perfil'] ?: 'default.png'; ?>" width="30" height="30" class="rounded-circle me-2" onerror="this.onerror=null; this.src='../uploads/perfiles/default-avatar.svg';">
                                         <?php echo $user['nombre'] . ' ' . $user['apellido']; ?>
                                     </td>
                                     <td class="text-nowrap"><?php echo $user['email']; ?></td>

@@ -233,7 +233,7 @@ $pageTitle = "Historial de Entregas";
                                             </td>
                                             <td>
                                                 <?php if ($entrega['tipo_entrega'] === 'exitosa'): ?>
-                                                    <strong class="text-success">S/ <?php echo number_format($entrega['costo_envio'] ?? TARIFA_POR_PAQUETE, 2); ?></strong>
+                                                    <strong class="text-success">S/ <?php echo number_format($entrega['costo_envio'] ?? 0, 2); ?></strong>
                                                 <?php else: ?>
                                                     <span class="text-muted">-</span>
                                                 <?php endif; ?>

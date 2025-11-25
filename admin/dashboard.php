@@ -128,6 +128,10 @@ $pageTitle = "Dashboard";
                     <i class="bi bi-cloud-upload"></i>
                     <span>Importar de SAVAR</span>
                 </a>
+                <a href="importar_excel.php" class="menu-item">
+                    <i class="bi bi-file-earmark-excel"></i>
+                    <span>Importar Excel</span>
+                </a>
                 <a href="reportes.php" class="menu-item">
                     <i class="bi bi-file-earmark-bar-graph"></i>
                     <span>Reportes</span>
@@ -164,7 +168,7 @@ $pageTitle = "Dashboard";
                     <span class="badge">3</span>
                 </div>
                 <div class="user-profile">
-                    <img src="../assets/img/<?php echo $_SESSION['foto_perfil']; ?>" alt="Avatar">
+                    <img src="../uploads/perfiles/<?php echo $_SESSION['foto_perfil'] ?? 'default.png'; ?>" alt="Avatar" onerror="this.onerror=null; this.src='../uploads/perfiles/default-avatar.svg';">
                     <div class="user-info">
                         <span class="user-name"><?php echo $_SESSION['nombre']; ?></span>
                         <span class="user-role">Administrador</span>

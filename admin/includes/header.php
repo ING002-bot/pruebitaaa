@@ -41,11 +41,11 @@
         </div>
         <div class="user-profile">
             <?php 
-            $foto_url = !empty($_SESSION['foto_perfil']) && $_SESSION['foto_perfil'] != 'default-avatar.svg' 
+            $foto_url = !empty($_SESSION['foto_perfil']) 
                 ? '../uploads/perfiles/' . $_SESSION['foto_perfil'] 
-                : '../assets/img/default-avatar.svg';
+                : '../uploads/perfiles/default.png';
             ?>
-            <img src="<?php echo $foto_url; ?>" alt="Avatar" onerror="this.src='../assets/img/default-avatar.svg'">
+            <img src="<?php echo $foto_url; ?>" alt="Avatar" onerror="this.onerror=null; this.src='../uploads/perfiles/default-avatar.svg';">
             <div class="user-info">
                 <span class="user-name"><?php echo htmlspecialchars($_SESSION['nombre']); ?></span>
                 <span class="user-role">Administrador</span>

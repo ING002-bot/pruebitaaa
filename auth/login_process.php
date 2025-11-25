@@ -2,8 +2,24 @@
 require_once '../config/config.php';
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    // Verificar token CSRF
+    if (!csrf_verify()) {
+        setFlashMessage('danger', 'Token de seguridad inválido. Por favor, intenta de nuevo.');
+        redirect(APP_URL . 'auth/login.php');
+    }
+    
     $email = sanitize($_POST['email']);
     $password = $_POST['password'];
+    
+    // Rate Limiting por IP
+    $ip = $_SERVER['REMOTE_ADDR'];
+    try {
+        check_rate_limit('login_' . $ip, 5, 900); // 5 intentos en 15 minutos
+    } catch (Exception $e) {
+        setFlashMessage('danger', $e->getMessage());
+        logActivity('Rate limit excedido en login - IP: ' . $ip);
+        redirect(APP_URL . 'auth/login.php');
+    }
     
     try {
         $db = Database::getInstance()->getConnection();
@@ -15,6 +31,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $usuario = $result->fetch_assoc();
         
         if ($usuario && password_verify($password, $usuario['password'])) {
+            // Resetear rate limit en login exitoso
+            reset_rate_limit('login_' . $ip);
+            
             // Actualizar último acceso
             $updateSql = "UPDATE usuarios SET ultimo_acceso = NOW() WHERE id = ?";
             $updateStmt = $db->prepare($updateSql);

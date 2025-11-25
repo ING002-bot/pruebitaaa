@@ -51,7 +51,11 @@
             </a>
             <a href="importar.php" class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'importar.php' ? 'active' : ''; ?>">
                 <i class="bi bi-file-earmark-arrow-up"></i>
-                <span>Importar Paquetes</span>
+                <span>Importar de SAVAR</span>
+            </a>
+            <a href="../admin/importar_excel.php" class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'importar_excel.php' ? 'active' : ''; ?>">
+                <i class="bi bi-file-earmark-excel"></i>
+                <span>Importar Excel</span>
             </a>
         </div>
         

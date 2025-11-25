@@ -1,4 +1,6 @@
-<?php session_start(); ?>
+<?php 
+require_once '../config/config.php';
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -35,6 +37,7 @@
             <?php endif; ?>
             
             <form method="POST" action="login_process.php" class="login-form">
+                <?php echo csrf_field(); ?>
                 <div class="form-group">
                     <label for="email">
                         <i class="bi bi-envelope"></i> Email
