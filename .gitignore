@@ -1,0 +1,48 @@
+# Variables de Entorno
+.env
+.env.local
+.env.*.local
+
+# Archivos de Sistema
+.DS_Store
+Thumbs.db
+*.log
+*.swp
+*.swo
+*~
+
+# IDE
+.vscode/
+.idea/
+*.sublime-workspace
+*.sublime-project
+
+# Dependencias
+vendor/
+node_modules/
+composer.lock
+
+# Uploads (mantener carpeta pero ignorar archivos)
+uploads/*
+!uploads/.gitkeep
+
+# Backups
+backups/*
+!backups/.gitkeep
+
+# Temporal
+tmp/
+temp/
+cache/
+
+# PHP
+*.php~
+.php_cs.cache
+
+# Config local
+config/.env
+config/settings.local.json
+
+# Logs
+logs/
+*.log
