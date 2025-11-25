@@ -78,6 +78,11 @@ if (isset($_POST['actualizar_perfil'])) {
         $db->commit();
         
         $_SESSION['usuario_nombre'] = $nombre . ' ' . $apellido;
+        $_SESSION['nombre'] = $nombre;
+        $_SESSION['apellido'] = $apellido;
+        if ($foto_perfil) {
+            $_SESSION['foto_perfil'] = $foto_perfil;
+        }
         $_SESSION['success_message'] = 'Perfil actualizado correctamente';
         header('Location: configuracion.php');
         exit;

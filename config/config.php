@@ -15,6 +15,15 @@ define('UPLOADS_URL', APP_URL . 'uploads/');
 // API de Google Maps (Reemplaza con tu API Key)
 define('GOOGLE_MAPS_API_KEY', 'AIzaSyAhKq8glWDGij47iJZy2_RB8jan9D1V-Sk');
 
+// ==================== CONFIGURACIÓN TWILIO ====================
+// Configurar para enviar WhatsApp real
+define('WHATSAPP_API_TYPE', 'twilio');
+define('TWILIO_ACCOUNT_SID', 'AC7cde09ffb05d087aafa652c485a2529b');
+define('TWILIO_AUTH_TOKEN', '1ee60ed1e2208401b06eae6d839c16ec');
+define('TWILIO_WHATSAPP_FROM', 'whatsapp:+14155238886'); // Número de Twilio para WhatsApp
+define('WHATSAPP_API_TOKEN', '1ee60ed1e2208401b06eae6d839c16ec'); // Token para API Cloud (si aplica)
+// ===============================================================
+
 // Configuración de uploads
 define('MAX_UPLOAD_SIZE', 5242880); // 5MB
 define('ALLOWED_IMAGE_TYPES', ['image/jpeg', 'image/png', 'image/jpg']);

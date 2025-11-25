@@ -1,5 +1,6 @@
 <?php
 require_once '../config/config.php';
+require_once '../config/whatsapp_helper.php';
 requireRole(['admin']);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -8,6 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 $db = Database::getInstance()->getConnection();
+$whatsapp = new WhatsAppNotificaciones();
 
 try {
     $stmt = $db->prepare("
@@ -59,18 +61,36 @@ try {
         $paquete_id
     );
     
+    // Obtener repartidor anterior ANTES de actualizar
+    $repartidor_anterior = null;
+    $check_stmt = $db->prepare("SELECT repartidor_id FROM paquetes WHERE id = ?");
+    if ($check_stmt) {
+        $check_stmt->bind_param("i", $paquete_id);
+        $check_stmt->execute();
+        $result = $check_stmt->get_result();
+        $anterior = $result->fetch_assoc();
+        $repartidor_anterior = $anterior['repartidor_id'] ?? null;
+        $check_stmt->close();
+    }
+    
     if (!$stmt->execute()) {
         throw new Exception("Error al ejecutar consulta: " . $stmt->error);
     }
     $stmt->close();
     
-    // Si se asignó un repartidor, actualizar fecha de asignación
+    // Si se asignó un repartidor, actualizar fecha de asignación y enviar notificación
     if ($repartidor_id && $_POST['estado'] !== 'pendiente') {
+        // Actualizar fecha de asignación
         $asig_stmt = $db->prepare("UPDATE paquetes SET fecha_asignacion = NOW() WHERE id = ? AND fecha_asignacion IS NULL");
         if ($asig_stmt) {
             $asig_stmt->bind_param("i", $paquete_id);
             $asig_stmt->execute();
             $asig_stmt->close();
+        }
+        
+        // Si cambió de repartidor o es primera asignación, enviar WhatsApp
+        if ($repartidor_anterior !== $repartidor_id) {
+            $whatsapp->notificarAsignacion($paquete_id);
         }
     }
     

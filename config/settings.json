@@ -1,0 +1,16 @@
+{
+    "empresa_nombre": "HERMES EXPRESS LOGISTIC",
+    "empresa_direccion": "avlarco herrera",
+    "empresa_telefono": "999999999",
+    "empresa_email": "hermes.express@gmail.com",
+    "empresa_ruc": "1535743",
+    "tarifa_entrega_normal": 0,
+    "tarifa_entrega_urgente": 0,
+    "tarifa_entrega_express": 0,
+    "tarifa_km_adicional": 0,
+    "email_notificaciones": "",
+    "sms_activado": 0,
+    "whatsapp_activado": 0,
+    "backup_automatico": 0,
+    "backup_frecuencia": "diario"
+}
