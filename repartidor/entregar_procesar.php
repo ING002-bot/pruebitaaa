@@ -1,6 +1,7 @@
 <?php
 require_once '../config/config.php';
 require_once '../config/notificaciones_helper.php';
+require_once '../lib/TwilioWhatsApp.php';
 requireRole('repartidor');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -244,9 +245,32 @@ try {
         $admins = obtenerAdministradores();
         $repartidor_nombre = $_SESSION['nombre'] . ' ' . $_SESSION['apellido'];
         notificarEntregaExitosa($admins, $paquete['codigo_seguimiento'], $repartidor_nombre);
+        
+        // Enviar notificación Twilio WhatsApp al cliente
+        if (!empty($paquete['destinatario_telefono'])) {
+            $twilio = new TwilioWhatsApp();
+            $twilio->notificarEntregado(
+                $paquete['destinatario_telefono'],
+                $paquete['codigo_seguimiento'],
+                $receptor_nombre
+            );
+        }
     } elseif (in_array($tipo_entrega, ['rechazada', 'no_encontrado'])) {
         $admins = obtenerAdministradores();
         notificarPaqueteRezagado($admins, $paquete_id, $paquete['codigo_seguimiento']);
+        
+        // Enviar notificación Twilio WhatsApp al cliente sobre el problema
+        if (!empty($paquete['destinatario_telefono'])) {
+            $twilio = new TwilioWhatsApp();
+            $motivo = $tipo_entrega === 'no_encontrado' 
+                ? 'Destinatario no encontrado en dirección' 
+                : 'Entrega rechazada';
+            $twilio->notificarProblema(
+                $paquete['destinatario_telefono'],
+                $paquete['codigo_seguimiento'],
+                $motivo
+            );
+        }
     }
     
     // Commit

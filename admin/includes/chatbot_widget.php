@@ -369,11 +369,12 @@ document.addEventListener('DOMContentLoaded', function() {
         messagesContainer.scrollTop = messagesContainer.scrollHeight;
         
         try {
-            // Enviar a la API
-            const response = await fetch('api_chatbot.php', {
+            // Enviar a la API con timestamp para evitar caché
+            const response = await fetch('./api_chatbot.php?t=' + Date.now(), {
                 method: 'POST',
                 headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded'
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'Cache-Control': 'no-cache, no-store, must-revalidate'
                 },
                 body: 'action=chat&input=' + encodeURIComponent(mensaje)
             });
@@ -388,10 +389,6 @@ document.addEventListener('DOMContentLoaded', function() {
             const botMsgDiv = document.createElement('div');
             botMsgDiv.className = 'chat-message mensaje-bot';
             let respuesta = (data.respuesta || 'Error procesando');
-            // Limpiar respuesta de mensaje de ayuda no deseado
-            respuesta = respuesta
-                .replace(/❓\s+No entendí eso\..*?📊 \*\*Reportes\*\*/s, 'No entendí, intenta de otra forma')
-                .replace(/❌\s+Error de conexión BD/g, 'Error de conexión');
             
             botMsgDiv.innerHTML = '<div class="bubble">' + respuesta.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>') + '</div>';
             messagesContainer.appendChild(botMsgDiv);

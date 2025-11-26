@@ -14,7 +14,7 @@ if (!isLoggedIn() || $_SESSION['rol'] !== 'admin') {
 }
 
 $action = $_POST['action'] ?? '';
-$input = $_POST['input'] ?? '';
+$input = trim($_POST['input'] ?? '');
 
 class ChatbotIA {
     private $db;
@@ -35,28 +35,28 @@ class ChatbotIA {
     private function inicializarPatrones() {
         $this->patrones = [
             'paquetes' => [
-                'total' => 'cuant(o|a|os|as)?\s+paquetes|total\s+paquetes|cantidad\s+paquetes|paquetes\s+totales|cuantos\s+hay|^total$|hay\s+paquetes',
-                'pendientes' => 'paquetes?\s+pendientes|sin\s+entregar|falta\s+entregar|no\s+entregados?|por\s+entregar|rezagados?|en\s+espera',
-                'entregados' => 'paquetes?\s+entregados?|completados?|entregas?\s+exitosas?|cumplidos?|finalizados?',
-                'hoy' => 'paquetes?\s+(hoy|de\s+hoy|registrados?\s+hoy|llegaron?|recibidos?\s+hoy)',
+                'total' => '(cuant|cuant|cuantos|total|hay)\s+(paquetes|son|hay|entradas?)\b|^paquetes?$|^cuantos?$|cuantos\s+paquetes',
+                'pendientes' => '(pendientes?|falta|entregar|rezagados?|atrasados?|espera|no\s+entregados?|sin\s+entregar)\s+paquetes?|(paquetes?)\s+(pendientes?|falta|atrasado)',
+                'entregados' => '(entregados?|cumplidos?|finalizados?|completados?|exitosas?)\s+(paquetes?|entregas?)|(paquetes?|entregas?)\s+(entregados?|cumplidos?)',
+                'hoy' => 'paquetes?.*hoy|hoy.*paquetes?|registrados?\s+hoy|llegaron?\s+hoy|recibidos?\s+hoy',
             ],
             'clientes' => [
-                'total' => 'cuant(o|a|os|as)?\s+clientes|total\s+clientes|cantidad\s+clientes|clientes?\s+totales',
-                'activos' => 'clientes?\s+activos?|clientes?\s+registrados?|clientes?\s+vigentes?|clientes?\s+nuevos?',
+                'total' => '(cuant|total)\s+(clientes?|son|hay)|^clientes?$|cuantos\s+clientes?',
+                'activos' => '(activos?|registrados?|vigentes?|nuevos?|nuevos)\s+clientes?|clientes?\s+(activos?|registrados?|vigentes?)',
             ],
             'repartidores' => [
-                'total' => 'cuant(o|a|os|as)?\s+repartidores|total\s+repartidores|cantidad\s+repartidores|cuantos\s+conductores',
-                'activos' => 'repartidores?\s+activos?|repartidores?\s+disponibles?|conductores?\s+activos?|en\s+servicio',
+                'total' => '(cuant|total)\s+(repartidores?|conductores?|son|hay)|^repartidores?$|cuantos.*repartidores?',
+                'activos' => '(activos?|disponibles?|servicio)\s+(repartidores?|conductores?)|repartidores?.*activos?',
             ],
             'ingresos' => [
-                'total' => 'ingresos?\s+totales?|total\s+ingresos?|ganancias?\s+totales?|cuanto\s+ganamos?|ganancia\s+total|facturacion\s+total',
-                'hoy' => 'ingresos?\s+(hoy|de\s+hoy)|ganancias?\s+(hoy|de\s+hoy)|cuanto\s+ganamos?\s+hoy|dinero\s+de\s+hoy',
-                'mes' => 'ingresos?\s+(del\s+mes|mensuales?|este\s+mes)|ganancias?\s+(del\s+mes|mensuales?)',
+                'total' => '(ingresos?|ganancias?|dinero|facturacion|soles|total)\s+totales?|total\s+(ingresos?|ganancias?)|cuanto\s+(ganamos?|facturamos?)',
+                'hoy' => '(ingresos?|ganancias?|dinero)\s+(hoy|de\s+hoy)|(hoy).*ingresos?|ganancias?\s+hoy',
+                'mes' => '(ingresos?|ganancias?)\s+(del\s+mes|mensuales?|este\s+mes)|(del\s+mes|mensuales?).*(ingresos?|ganancias?)',
             ],
             'reportes' => [
-                'resumen' => 'resumen|reporte\s+general|estado\s+general|cómo\s+estamos?|vista\s+general|dashboard|overview',
-                'problemas' => 'problemas?|entregas?\s+fallidas?|entregas?\s+con\s+problemas?|errores?|incidentes?|rechazos?',
-                'pendientes' => 'tareas?\s+pendientes?|qué\s+falta|pendientes|por\s+hacer|alertas?',
+                'resumen' => '(resumen|reporte|dashboard|estado|vista|cómo\s+estamos?|síntesis|general)',
+                'problemas' => '(problemas?|fallidas?|rechazos?|devueltas?|errores?|incidentes?|con\s+problemas?)',
+                'pendientes' => '(tareas?|qué|por\s+hacer|alertas?|pendientes?)\s+(pendientes?|falta)',
             ]
         ];
     }
@@ -64,7 +64,7 @@ class ChatbotIA {
     public function procesarPregunta($pregunta) {
         $pregunta = strtolower(trim($pregunta));
         $pregunta_clean = $this->removerAcentos($pregunta);
-        
+
         // 1. Buscar coincidencia de patrones
         foreach ($this->patrones as $categoria => $tipos) {
             foreach ($tipos as $tipo => $regex) {
@@ -73,9 +73,89 @@ class ChatbotIA {
                 }
             }
         }
-        
-        // 2. Respuestas rápidas
-        return $this->respuestasRapidas($pregunta);
+
+        // 2. Buscar por palabras clave generales
+        $palabrasClave = [
+            'paquetes' => ['paquete', 'paquetes', 'mipaquetes', 'mispaquetes'],
+            'clientes' => ['cliente', 'clientes'],
+            'repartidores' => ['repartidor', 'repartidores', 'conductor', 'conductores'],
+            'ingresos' => ['ingreso', 'ingresos', 'dinero', 'ganancia', 'facturacion'],
+            'reportes' => ['reporte', 'resumen', 'dashboard', 'estado', 'sintesis'],
+        ];
+        foreach ($palabrasClave as $categoria => $palabras) {
+            foreach ($palabras as $palabra) {
+                if (strpos($pregunta_clean, $palabra) !== false) {
+                    // Responder con el total de la categoría
+                    return $this->ejecutarConsulta($categoria, 'total', $pregunta);
+                }
+            }
+        }
+
+        // 3. Respuestas rápidas
+        $respuestaRapida = $this->respuestasRapidas($pregunta);
+        if ($respuestaRapida['tipo'] !== 'error') {
+            return $respuestaRapida;
+        }
+
+        // 4. Búsqueda y resumen en todas las tablas principales
+        $resumen = $this->resumenGeneralSistema();
+        return [
+            'tipo' => 'info',
+            'respuesta' => $resumen,
+            'icono' => '📚'
+        ];
+    }
+
+    // Nuevo: Resumen general del sistema con datos de todas las tablas principales
+    private function resumenGeneralSistema() {
+        if (!$this->db) {
+            return '❌ Error de conexión a la base de datos.';
+        }
+        $res = [];
+        // Paquetes
+        $q1 = $this->db->query("SELECT COUNT(*) as total, SUM(estado = 'entregado') as entregados, SUM(estado != 'entregado') as pendientes FROM paquetes");
+        if ($q1) {
+            $row = $q1->fetch_assoc();
+            $res[] = '📦 <b>Paquetes:</b> ' . $row['total'] . ' | Entregados: ' . $row['entregados'] . ' | Pendientes: ' . $row['pendientes'];
+            $q1->close();
+        }
+        // Clientes
+        $q2 = $this->db->query("SELECT COUNT(DISTINCT destinatario_nombre) as clientes FROM paquetes");
+        if ($q2) {
+            $row = $q2->fetch_assoc();
+            $res[] = '👥 <b>Clientes:</b> ' . $row['clientes'];
+            $q2->close();
+        }
+        // Repartidores
+        $q3 = $this->db->query("SELECT COUNT(*) as total, SUM(estado = 'activo') as activos FROM usuarios WHERE rol = 'repartidor'");
+        if ($q3) {
+            $row = $q3->fetch_assoc();
+            $res[] = '🚚 <b>Repartidores:</b> ' . $row['total'] . ' | Activos: ' . $row['activos'];
+            $q3->close();
+        }
+        // Ingresos
+        $q4 = $this->db->query("SELECT COALESCE(SUM(monto),0) as total FROM pagos WHERE estado = 'completado'");
+        if ($q4) {
+            $row = $q4->fetch_assoc();
+            $res[] = '💰 <b>Ingresos totales:</b> S/. ' . number_format($row['total'],2);
+            $q4->close();
+        }
+        // Gastos
+        $q5 = $this->db->query("SELECT COALESCE(SUM(monto),0) as total FROM gastos");
+        if ($q5) {
+            $row = $q5->fetch_assoc();
+            $res[] = '💸 <b>Gastos totales:</b> S/. ' . number_format($row['total'],2);
+            $q5->close();
+        }
+        // Usuarios
+        $q6 = $this->db->query("SELECT COUNT(*) as total FROM usuarios");
+        if ($q6) {
+            $row = $q6->fetch_assoc();
+            $res[] = '👤 <b>Usuarios registrados:</b> ' . $row['total'];
+            $q6->close();
+        }
+        // Otros módulos puedes agregar aquí...
+        return implode("<br>", $res);
     }
     
     private function removerAcentos($texto) {

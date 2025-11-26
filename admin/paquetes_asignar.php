@@ -1,6 +1,7 @@
 <?php
 require_once '../config/config.php';
 require_once '../config/whatsapp_helper.php';
+require_once '../lib/TwilioWhatsApp.php';
 requireRole(['admin']);
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -10,6 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 $db = Database::getInstance()->getConnection();
 $whatsapp = new WhatsAppNotificaciones();
+$twilio = new TwilioWhatsApp();
 
 try {
     // Calcular fecha límite de entrega (2 días desde ahora)
@@ -39,7 +41,34 @@ try {
     // Enviar notificación WhatsApp al cliente
     $notificacion_enviada = $whatsapp->notificarAsignacion($paquete_id);
     
-    // Obtener info del paquete
+    // Obtener info del paquete para Twilio
+    $info_paquete = $db->prepare("
+        SELECT p.codigo_seguimiento, p.destinatario_nombre, p.destinatario_telefono,
+               u.nombre as repartidor_nombre, u.apellido as repartidor_apellido, u.placa
+        FROM paquetes p
+        LEFT JOIN usuarios u ON p.repartidor_id = u.id
+        WHERE p.id = ?
+    ");
+    if ($info_paquete) {
+        $info_paquete->bind_param("i", $paquete_id);
+        $info_paquete->execute();
+        $result = $info_paquete->get_result();
+        $datos = $result->fetch_assoc();
+        $info_paquete->close();
+        
+        // Enviar notificación Twilio WhatsApp al cliente
+        if ($datos && !empty($datos['destinatario_telefono'])) {
+            $nombre_repartidor = trim($datos['repartidor_nombre'] . ' ' . $datos['repartidor_apellido']);
+            $twilio->notificarEnRuta(
+                $datos['destinatario_telefono'],
+                $datos['codigo_seguimiento'],
+                $nombre_repartidor,
+                $datos['placa'] ?? ''
+            );
+        }
+    }
+    
+    // Obtener info del paquete para notificación interna
     $paquete = $db->prepare("SELECT codigo_seguimiento FROM paquetes WHERE id = ?");
     if (!$paquete) {
         throw new Exception("Error al preparar consulta: " . $db->error);

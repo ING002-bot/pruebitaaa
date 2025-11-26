@@ -1,5 +1,6 @@
 <?php
 require_once '../config/config.php';
+require_once '../lib/TwilioWhatsApp.php';
 requireRole('admin');
 
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
@@ -71,6 +72,17 @@ try {
     
     // Log
     logActivity('Creación de paquete', 'paquetes', $paquete_id, 'Código: ' . $data['codigo_seguimiento']);
+    
+    // Enviar notificación Twilio WhatsApp al cliente
+    if (!empty($data['destinatario_telefono'])) {
+        $twilio = new TwilioWhatsApp();
+        $twilio->notificarNuevoPaquete(
+            $data['destinatario_telefono'],
+            $data['codigo_seguimiento'],
+            $data['destinatario_nombre'],
+            $data['direccion_completa']
+        );
+    }
     
     // Notificación al repartidor si fue asignado
     if ($data['repartidor_id']) {
