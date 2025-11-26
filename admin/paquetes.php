@@ -246,34 +246,6 @@ $pageTitle = "Gestión de Paquetes";
                                 <textarea class="form-control" name="direccion_completa" rows="2" required></textarea>
                             </div>
                             <div class="col-md-6 mb-3">
-                                <label class="form-label">Ciudad</label>
-                                <input type="text" class="form-control" name="ciudad">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Provincia</label>
-                                <input type="text" class="form-control" name="provincia">
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Peso (kg)</label>
-                                <input type="number" step="0.01" class="form-control" name="peso">
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Valor Declarado</label>
-                                <input type="number" step="0.01" class="form-control" name="valor_declarado">
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label class="form-label">Costo Envío</label>
-                                <input type="number" step="0.01" class="form-control" name="costo_envio" value="<?php echo TARIFA_POR_PAQUETE; ?>">
-                            </div>
-                            <div class="col-md-6 mb-3">
-                                <label class="form-label">Prioridad</label>
-                                <select class="form-select" name="prioridad">
-                                    <option value="normal">Normal</option>
-                                    <option value="urgente">Urgente</option>
-                                    <option value="express">Express</option>
-                                </select>
-                            </div>
-                            <div class="col-md-6 mb-3">
                                 <label class="form-label">Asignar Repartidor</label>
                                 <select class="form-select" name="repartidor_id">
                                     <option value="">Sin asignar</option>
@@ -283,10 +255,6 @@ $pageTitle = "Gestión de Paquetes";
                                         </option>
                                     <?php endforeach; ?>
                                 </select>
-                            </div>
-                            <div class="col-12 mb-3">
-                                <label class="form-label">Notas</label>
-                                <textarea class="form-control" name="notas" rows="2"></textarea>
                             </div>
                         </div>
                     </div>

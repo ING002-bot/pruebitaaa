@@ -19,14 +19,14 @@ try {
         'destinatario_telefono' => sanitize($_POST['destinatario_telefono']),
         'destinatario_email' => sanitize($_POST['destinatario_email'] ?? ''),
         'direccion_completa' => sanitize($_POST['direccion_completa']),
-        'ciudad' => sanitize($_POST['ciudad'] ?? ''),
-        'provincia' => sanitize($_POST['provincia'] ?? ''),
-        'peso' => (float)($_POST['peso'] ?? 0),
-        'valor_declarado' => (float)($_POST['valor_declarado'] ?? 0),
-        'costo_envio' => (float)($_POST['costo_envio'] ?? TARIFA_POR_PAQUETE),
-        'prioridad' => sanitize($_POST['prioridad'] ?? 'normal'),
+        'ciudad' => '',
+        'provincia' => '',
+        'peso' => 0,
+        'valor_declarado' => 0,
+        'costo_envio' => TARIFA_POR_PAQUETE,
+        'prioridad' => 'normal',
         'repartidor_id' => !empty($_POST['repartidor_id']) ? (int)$_POST['repartidor_id'] : null,
-        'notas' => sanitize($_POST['notas'] ?? '')
+        'notas' => ''
     ];
     
     $sql = "INSERT INTO paquetes (

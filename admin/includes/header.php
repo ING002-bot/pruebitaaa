@@ -1,15 +1,5 @@
 <!-- Header Include para Admin -->
-<script>
-// Prevenir acceso mediante botón de retroceso después de logout
-(function() {
-    if (window.history && window.history.pushState) {
-        window.history.pushState(null, null, window.location.href);
-        window.onpopstate = function() {
-            window.history.pushState(null, null, window.location.href);
-        };
-    }
-})();
-</script>
+<script src="../assets/js/prevent-back.js"></script>
 <div class="top-header">
     <div class="header-left">
         <button class="menu-toggle" onclick="toggleSidebar()">
