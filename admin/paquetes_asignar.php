@@ -44,7 +44,7 @@ try {
     // Obtener info del paquete para Twilio
     $info_paquete = $db->prepare("
         SELECT p.codigo_seguimiento, p.destinatario_nombre, p.destinatario_telefono,
-               u.nombre as repartidor_nombre, u.apellido as repartidor_apellido, u.placa
+               u.nombre as repartidor_nombre, u.apellido as repartidor_apellido
         FROM paquetes p
         LEFT JOIN usuarios u ON p.repartidor_id = u.id
         WHERE p.id = ?
@@ -63,7 +63,7 @@ try {
                 $datos['destinatario_telefono'],
                 $datos['codigo_seguimiento'],
                 $nombre_repartidor,
-                $datos['placa'] ?? ''
+                '' // Placa vacía ya que no existe en la BD
             );
         }
     }
