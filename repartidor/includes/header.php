@@ -1,5 +1,6 @@
 <!-- Header Include para Repartidor -->
 <script src="../assets/js/prevent-back.js"></script>
+<script src="../assets/js/session-guard.js"></script>
 <div class="top-header">
     <div class="header-left">
         <button class="menu-toggle" onclick="toggleSidebar()">
