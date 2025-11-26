@@ -81,13 +81,7 @@ $pageTitle = "Dashboard";
                 <a href="paquetes.php" class="menu-item">
                     <i class="bi bi-box"></i>
                     <span>Paquetes</span>
-                    <?php if($paquetesEnRuta > 0): ?>
-                        <span class="badge bg-warning"><?php echo $paquetesEnRuta; ?></span>
-                    <?php endif; ?>
-                </a>
-                <a href="rutas.php" class="menu-item">
-                    <i class="bi bi-map"></i>
-                    <span>Rutas</span>
+                    <span class="badge bg-warning rounded-pill" id="paquetes-notificaciones-badge" style="display: none; margin-left: auto;">0</span>
                 </a>
                 <a href="entregas.php" class="menu-item">
                     <i class="bi bi-check-circle"></i>
@@ -107,6 +101,14 @@ $pageTitle = "Dashboard";
                 <a href="usuarios.php" class="menu-item">
                     <i class="bi bi-people"></i>
                     <span>Usuarios</span>
+                </a>
+                <a href="tarifas.php" class="menu-item">
+                    <i class="bi bi-cash-coin"></i>
+                    <span>Tarifas por Zona</span>
+                </a>
+                <a href="caja_chica.php" class="menu-item">
+                    <i class="bi bi-wallet2"></i>
+                    <span>Caja Chica</span>
                 </a>
                 <a href="pagos.php" class="menu-item">
                     <i class="bi bi-cash-stack"></i>
@@ -156,20 +158,39 @@ $pageTitle = "Dashboard";
                 <button class="menu-toggle" onclick="toggleSidebar()">
                     <i class="bi bi-list"></i>
                 </button>
-                <div style="margin-left: 20px; font-size: 16px; font-weight: 600; color: #333;">
-                    Bienvenido, Admin Sistema
+                <div class="welcome-message">
+                    <h5 class="mb-0">Bienvenido, <?php echo htmlspecialchars($_SESSION['nombre'] . ' ' . ($_SESSION['apellido'] ?? '')); ?></h5>
                 </div>
             </div>
             
             <div class="header-right">
-                <div class="header-icon">
-                    <i class="bi bi-bell"></i>
-                    <span class="badge">3</span>
+                <div class="dropdown">
+                    <div class="header-icon" id="notificacionesDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;" title="Notificaciones">
+                        <i class="bi bi-bell"></i>
+                        <span class="badge bg-warning" id="notificaciones-count" style="display: none;">0</span>
+                    </div>
+                    <ul class="dropdown-menu dropdown-menu-end notificaciones-dropdown" aria-labelledby="notificacionesDropdown" style="width: 350px; max-height: 400px; overflow-y: auto;">
+                        <li class="dropdown-header d-flex justify-content-between align-items-center">
+                            <span>Notificaciones</span>
+                            <a href="#" class="text-primary small" onclick="marcarTodasLeidas(); return false;">Marcar todas como leídas</a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <div id="notificaciones-lista">
+                            <li class="dropdown-item text-center text-muted">
+                                <small>No hay notificaciones</small>
+                            </li>
+                        </div>
+                    </ul>
                 </div>
                 <div class="user-profile">
-                    <img src="../uploads/perfiles/<?php echo $_SESSION['foto_perfil'] ?? 'default.png'; ?>" alt="Avatar" onerror="this.onerror=null; this.src='../uploads/perfiles/default-avatar.svg';">
+                    <?php 
+                    $foto_url = !empty($_SESSION['foto_perfil']) 
+                        ? '../uploads/perfiles/' . $_SESSION['foto_perfil'] 
+                        : '../uploads/perfiles/default.png';
+                    ?>
+                    <img src="<?php echo $foto_url; ?>" alt="Avatar" onerror="this.onerror=null; this.src='../uploads/perfiles/default-avatar.svg';">
                     <div class="user-info">
-                        <span class="user-name"><?php echo $_SESSION['nombre']; ?></span>
+                        <span class="user-name"><?php echo htmlspecialchars($_SESSION['nombre']); ?></span>
                         <span class="user-role">Administrador</span>
                     </div>
                 </div>
@@ -371,6 +392,7 @@ $pageTitle = "Dashboard";
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../assets/js/notificaciones.js"></script>
     <script src="../assets/js/prevent-back.js"></script>
+    <script src="../assets/js/session-guard.js"></script>
     <script>
         // Toggle Sidebar
         function toggleSidebar() {

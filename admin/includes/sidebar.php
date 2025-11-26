@@ -16,6 +16,7 @@
             <a href="paquetes.php" class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'paquetes.php' ? 'active' : ''; ?>">
                 <i class="bi bi-box"></i>
                 <span>Paquetes</span>
+                <span class="badge bg-warning rounded-pill ms-auto" id="paquetes-notificaciones-badge" style="display: none; margin-left: auto;">0</span>
             </a>
             <a href="entregas.php" class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'entregas.php' ? 'active' : ''; ?>">
                 <i class="bi bi-check-circle"></i>

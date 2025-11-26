@@ -16,7 +16,7 @@
         <div class="dropdown">
             <div class="header-icon" id="notificacionesDropdown" data-bs-toggle="dropdown" aria-expanded="false" style="cursor: pointer;" title="Notificaciones">
                 <i class="bi bi-bell"></i>
-                <span class="badge" id="notificaciones-count">0</span>
+                <span class="badge bg-warning" id="notificaciones-count" style="display: none;">0</span>
             </div>
             <ul class="dropdown-menu dropdown-menu-end notificaciones-dropdown" aria-labelledby="notificacionesDropdown" style="width: 350px; max-height: 400px; overflow-y: auto;">
                 <li class="dropdown-header d-flex justify-content-between align-items-center">

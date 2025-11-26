@@ -31,10 +31,28 @@ function cargarNotificaciones() {
  * Actualizar badge con el contador
  */
 function actualizarBadge(count) {
+    // Badge en la campana del header (amarillo)
     const badge = document.getElementById('notificaciones-count');
     if (badge) {
         badge.textContent = count;
+        badge.classList.remove('bg-danger');
+        badge.classList.add('bg-warning');
         badge.style.display = count > 0 ? 'inline-block' : 'none';
+    }
+    
+    // Badge en el menú de Paquetes (sidebar - amarillo)
+    const badgePaquetes = document.getElementById('paquetes-notificaciones-badge');
+    if (badgePaquetes) {
+        badgePaquetes.textContent = count;
+        
+        // Solo mostrar si count > 0
+        if (count > 0) {
+            badgePaquetes.style.display = 'inline-block';
+            badgePaquetes.style.visibility = 'visible';
+        } else {
+            badgePaquetes.style.display = 'none';
+            badgePaquetes.style.visibility = 'hidden';
+        }
     }
 }
 

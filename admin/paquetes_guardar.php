@@ -19,8 +19,9 @@ try {
         'destinatario_telefono' => sanitize($_POST['destinatario_telefono']),
         'destinatario_email' => sanitize($_POST['destinatario_email'] ?? ''),
         'direccion_completa' => sanitize($_POST['direccion_completa']),
-        'ciudad' => '',
-        'provincia' => '',
+        'ciudad' => sanitize($_POST['departamento'] ?? 'Lambayeque'),
+        'provincia' => sanitize($_POST['provincia'] ?? ''),
+        'distrito' => sanitize($_POST['distrito'] ?? ''),
         'peso' => 0,
         'valor_declarado' => 0,
         'costo_envio' => TARIFA_POR_PAQUETE,
@@ -31,9 +32,9 @@ try {
     
     $sql = "INSERT INTO paquetes (
         codigo_seguimiento, codigo_savar, destinatario_nombre, destinatario_telefono,
-        destinatario_email, direccion_completa, ciudad, provincia, peso, valor_declarado,
+        destinatario_email, direccion_completa, ciudad, provincia, distrito, peso, valor_declarado,
         costo_envio, prioridad, repartidor_id, notas, estado, fecha_asignacion
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
         CASE WHEN ? IS NOT NULL THEN 'en_ruta' ELSE 'pendiente' END,
         CASE WHEN ? IS NOT NULL THEN NOW() ELSE NULL END
     )";
@@ -44,7 +45,7 @@ try {
     }
     
     $stmt->bind_param(
-        "ssssssssdddsisii",
+        "sssssssssdddsisiii",
         $data['codigo_seguimiento'],
         $data['codigo_savar'],
         $data['destinatario_nombre'],
@@ -53,6 +54,7 @@ try {
         $data['direccion_completa'],
         $data['ciudad'],
         $data['provincia'],
+        $data['distrito'],
         $data['peso'],
         $data['valor_declarado'],
         $data['costo_envio'],

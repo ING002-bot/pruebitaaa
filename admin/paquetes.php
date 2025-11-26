@@ -241,6 +241,74 @@ $pageTitle = "Gestión de Paquetes";
                                 <label class="form-label">Teléfono Destinatario *</label>
                                 <input type="text" class="form-control" name="destinatario_telefono" required>
                             </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Departamento *</label>
+                                <input type="text" class="form-control" name="departamento" value="Lambayeque" readonly>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Provincia *</label>
+                                <select class="form-select" name="provincia" required>
+                                    <option value="">Seleccione provincia</option>
+                                    <option value="Chiclayo">Chiclayo</option>
+                                    <option value="Ferreñafe">Ferreñafe</option>
+                                    <option value="Lambayeque">Lambayeque</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Distrito *</label>
+                                <select class="form-select" name="distrito" required>
+                                    <option value="">Seleccione distrito</option>
+                                    <optgroup label="CHICLAYO">
+                                        <option value="Chiclayo">Chiclayo</option>
+                                        <option value="Leonardo Ortiz">Leonardo Ortiz</option>
+                                        <option value="La Victoria">La Victoria</option>
+                                        <option value="Santa Victoria">Santa Victoria</option>
+                                    </optgroup>
+                                    <optgroup label="PUEBLOS">
+                                        <option value="Lambayeque">Lambayeque</option>
+                                        <option value="Mochumi">Mochumi</option>
+                                        <option value="Tucume">Tucume</option>
+                                        <option value="Illimo">Illimo</option>
+                                        <option value="Nuevos Aires">Nuevos Aires</option>
+                                        <option value="Jayanca">Jayanca</option>
+                                        <option value="Pacora">Pacora</option>
+                                        <option value="Morrope">Morrope</option>
+                                        <option value="Olmos">Olmos</option>
+                                        <option value="Salas">Salas</option>
+                                    </optgroup>
+                                    <optgroup label="PLAYAS">
+                                        <option value="San Jose">San Jose</option>
+                                        <option value="Santa Rosa">Santa Rosa</option>
+                                        <option value="Pimentel">Pimentel</option>
+                                        <option value="Reque">Reque</option>
+                                        <option value="Monsefu">Monsefu</option>
+                                        <option value="Eten">Eten</option>
+                                        <option value="Puerto Eten">Puerto Eten</option>
+                                    </optgroup>
+                                    <optgroup label="COOPERATIVAS">
+                                        <option value="Pomalca">Pomalca</option>
+                                        <option value="Patapo">Patapo</option>
+                                        <option value="Tumán">Tumán</option>
+                                        <option value="Pucala">Pucala</option>
+                                        <option value="Saltur">Saltur</option>
+                                    </optgroup>
+                                    <optgroup label="EXCOPERATIVAS">
+                                        <option value="Chongoyape">Chongoyape</option>
+                                        <option value="Ucupe">Ucupe</option>
+                                        <option value="Mocupe">Mocupe</option>
+                                        <option value="Zaña">Zaña</option>
+                                        <option value="Lagunas">Lagunas</option>
+                                        <option value="Picsi">Picsi</option>
+                                        <option value="Cayalti">Cayalti</option>
+                                        <option value="Oyotun">Oyotun</option>
+                                    </optgroup>
+                                    <optgroup label="FERREÑAFE">
+                                        <option value="Ferreñafe">Ferreñafe</option>
+                                        <option value="Motupillo">Motupillo</option>
+                                        <option value="Pueblo Nuevo">Pueblo Nuevo</option>
+                                    </optgroup>
+                                </select>
+                            </div>
                             <div class="col-12 mb-3">
                                 <label class="form-label">Dirección Completa *</label>
                                 <textarea class="form-control" name="direccion_completa" rows="2" required></textarea>
