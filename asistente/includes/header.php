@@ -1,6 +1,7 @@
 <!-- Header Include para Asistente -->
 <script src="../assets/js/prevent-back.js"></script>
 <script src="../assets/js/session-guard.js"></script>
+<script src="../assets/js/notificaciones.js"></script>
 <div class="top-header">
     <div class="header-left">
         <button class="menu-toggle" onclick="toggleSidebar()">
