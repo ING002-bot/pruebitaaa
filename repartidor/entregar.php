@@ -187,7 +187,6 @@ $pageTitle = "Registrar Entrega";
                                     <label class="form-label">Tipo de Entrega *</label>
                                     <select class="form-select" name="tipo_entrega" required>
                                         <option value="exitosa">Entrega Exitosa</option>
-                                        <option value="parcial">Entrega Parcial</option>
                                         <option value="rechazada">Rechazada por Cliente</option>
                                         <option value="no_encontrado">Destinatario No Encontrado</option>
                                     </select>

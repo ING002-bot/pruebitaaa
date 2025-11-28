@@ -315,14 +315,15 @@ $pageTitle = "Gestión de Paquetes";
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Asignar Repartidor</label>
-                                <select class="form-select" name="repartidor_id">
-                                    <option value="">Sin asignar</option>
-                                    <?php foreach($repartidores as $rep): ?>
-                                        <option value="<?php echo $rep['id']; ?>">
-                                            <?php echo $rep['nombre'] . ' ' . $rep['apellido']; ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
+                                <div class="autocomplete-wrapper" style="position: relative;">
+                                    <input type="text" 
+                                           class="form-control autocomplete-repartidor" 
+                                           id="repartidor_nuevo_search" 
+                                           placeholder="Escriba el nombre del repartidor..."
+                                           autocomplete="off">
+                                    <input type="hidden" name="repartidor_id" id="repartidor_nuevo_id" value="">
+                                    <div class="autocomplete-suggestions" id="suggestions_nuevo" style="display: none;"></div>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -386,14 +387,16 @@ $pageTitle = "Gestión de Paquetes";
                         <input type="hidden" name="paquete_id" id="asignar_paquete_id">
                         <div class="mb-3">
                             <label class="form-label">Seleccionar Repartidor</label>
-                            <select class="form-select" name="repartidor_id" required>
-                                <option value="">Seleccione...</option>
-                                <?php foreach($repartidores as $rep): ?>
-                                    <option value="<?php echo $rep['id']; ?>">
-                                        <?php echo $rep['nombre'] . ' ' . $rep['apellido']; ?>
-                                    </option>
-                                <?php endforeach; ?>
-                            </select>
+                            <div class="autocomplete-wrapper" style="position: relative;">
+                                <input type="text" 
+                                       class="form-control autocomplete-repartidor" 
+                                       id="repartidor_asignar_search" 
+                                       placeholder="Escriba el nombre del repartidor..."
+                                       autocomplete="off"
+                                       required>
+                                <input type="hidden" name="repartidor_id" id="repartidor_asignar_id" value="">
+                                <div class="autocomplete-suggestions" id="suggestions_asignar" style="display: none;"></div>
+                            </div>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -406,8 +409,99 @@ $pageTitle = "Gestión de Paquetes";
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="../assets/js/dashboard.js"></script>
     <script>
+        // Datos de repartidores
+        const repartidores = [
+            <?php foreach($repartidores as $rep): ?>
+            {
+                id: '<?php echo $rep["id"]; ?>',
+                nombre: '<?php echo addslashes($rep["nombre"] . " " . $rep["apellido"]); ?>'
+            },
+            <?php endforeach; ?>
+        ];
+
+        // Función para crear autocompletado
+        function setupAutocomplete(searchId, hiddenId, suggestionsId) {
+            const searchInput = document.getElementById(searchId);
+            const hiddenInput = document.getElementById(hiddenId);
+            const suggestionsDiv = document.getElementById(suggestionsId);
+            
+            if (!searchInput) return;
+
+            searchInput.addEventListener('input', function() {
+                const value = this.value.toLowerCase().trim();
+                hiddenInput.value = '';
+                
+                if (value.length === 0) {
+                    suggestionsDiv.style.display = 'none';
+                    suggestionsDiv.innerHTML = '';
+                    return;
+                }
+
+                // Filtrar repartidores
+                const filtered = repartidores.filter(rep => 
+                    rep.nombre.toLowerCase().includes(value)
+                );
+
+                if (filtered.length === 0) {
+                    suggestionsDiv.style.display = 'none';
+                    suggestionsDiv.innerHTML = '';
+                    return;
+                }
+
+                // Mostrar sugerencias
+                suggestionsDiv.innerHTML = filtered.map(rep => 
+                    `<div class="autocomplete-item" data-id="${rep.id}" data-nombre="${rep.nombre}">
+                        ${rep.nombre}
+                    </div>`
+                ).join('');
+                
+                suggestionsDiv.style.display = 'block';
+
+                // Agregar eventos a las sugerencias
+                suggestionsDiv.querySelectorAll('.autocomplete-item').forEach(item => {
+                    item.addEventListener('click', function() {
+                        searchInput.value = this.getAttribute('data-nombre');
+                        hiddenInput.value = this.getAttribute('data-id');
+                        suggestionsDiv.style.display = 'none';
+                        suggestionsDiv.innerHTML = '';
+                    });
+                });
+            });
+
+            // Cerrar sugerencias al hacer clic fuera
+            document.addEventListener('click', function(e) {
+                if (e.target !== searchInput && !suggestionsDiv.contains(e.target)) {
+                    suggestionsDiv.style.display = 'none';
+                }
+            });
+
+            // Validar al perder foco
+            searchInput.addEventListener('blur', function() {
+                setTimeout(() => {
+                    const exactMatch = repartidores.find(rep => 
+                        rep.nombre.toLowerCase() === this.value.toLowerCase().trim()
+                    );
+                    
+                    if (exactMatch) {
+                        hiddenInput.value = exactMatch.id;
+                    } else if (this.value.trim() !== '') {
+                        // Si hay texto pero no coincide exactamente, limpiar
+                        this.value = '';
+                        hiddenInput.value = '';
+                    }
+                }, 200);
+            });
+        }
+
+        // Inicializar cuando el DOM esté listo
+        $(document).ready(function() {
+            setupAutocomplete('repartidor_nuevo_search', 'repartidor_nuevo_id', 'suggestions_nuevo');
+            setupAutocomplete('repartidor_asignar_search', 'repartidor_asignar_id', 'suggestions_asignar');
+        });
+
         function verDetalle(id) {
             const modal = new bootstrap.Modal(document.getElementById('modalDetalle'));
             modal.show();

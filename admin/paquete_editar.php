@@ -104,14 +104,25 @@ $repartidores = Database::getInstance()->fetchAll($db->query("SELECT id, nombre,
         </div>
         <div class="col-md-6 mb-3">
             <label class="form-label">Asignar Repartidor</label>
-            <select class="form-select" name="repartidor_id">
-                <option value="">Sin asignar</option>
-                <?php foreach($repartidores as $rep): ?>
-                    <option value="<?php echo $rep['id']; ?>" <?php echo $paquete['repartidor_id'] == $rep['id'] ? 'selected' : ''; ?>>
-                        <?php echo $rep['nombre'] . ' ' . $rep['apellido']; ?>
-                    </option>
-                <?php endforeach; ?>
-            </select>
+            <?php 
+            $repartidor_actual = '';
+            foreach($repartidores as $rep) {
+                if ($paquete['repartidor_id'] == $rep['id']) {
+                    $repartidor_actual = $rep['nombre'] . ' ' . $rep['apellido'];
+                    break;
+                }
+            }
+            ?>
+            <div class="autocomplete-wrapper" style="position: relative;">
+                <input type="text" 
+                       class="form-control autocomplete-repartidor" 
+                       id="repartidor_editar_search" 
+                       placeholder="Escriba el nombre del repartidor..."
+                       value="<?php echo htmlspecialchars($repartidor_actual); ?>"
+                       autocomplete="off">
+                <input type="hidden" name="repartidor_id" id="repartidor_editar_id" value="<?php echo $paquete['repartidor_id']; ?>">
+                <div class="autocomplete-suggestions" id="suggestions_editar" style="display: none;"></div>
+            </div>
         </div>
         <div class="col-12 mb-3">
             <label class="form-label">Descripción del Contenido</label>
@@ -128,3 +139,81 @@ $repartidores = Database::getInstance()->fetchAll($db->query("SELECT id, nombre,
         <button type="submit" class="btn btn-primary">Actualizar Paquete</button>
     </div>
 </form>
+
+<script>
+// Datos de repartidores
+const repartidoresEditar = [
+    <?php foreach($repartidores as $rep): ?>
+    {
+        id: '<?php echo $rep["id"]; ?>',
+        nombre: '<?php echo addslashes($rep["nombre"] . " " . $rep["apellido"]); ?>'
+    },
+    <?php endforeach; ?>
+];
+
+$(document).ready(function() {
+    const searchInput = document.getElementById('repartidor_editar_search');
+    const hiddenInput = document.getElementById('repartidor_editar_id');
+    const suggestionsDiv = document.getElementById('suggestions_editar');
+    
+    if (!searchInput) return;
+
+    searchInput.addEventListener('input', function() {
+        const value = this.value.toLowerCase().trim();
+        
+        if (value.length === 0) {
+            suggestionsDiv.style.display = 'none';
+            suggestionsDiv.innerHTML = '';
+            hiddenInput.value = '';
+            return;
+        }
+
+        const filtered = repartidoresEditar.filter(rep => 
+            rep.nombre.toLowerCase().includes(value)
+        );
+
+        if (filtered.length === 0) {
+            suggestionsDiv.style.display = 'none';
+            suggestionsDiv.innerHTML = '';
+            return;
+        }
+
+        suggestionsDiv.innerHTML = filtered.map(rep => 
+            `<div class="autocomplete-item" data-id="${rep.id}" data-nombre="${rep.nombre}">
+                ${rep.nombre}
+            </div>`
+        ).join('');
+        
+        suggestionsDiv.style.display = 'block';
+
+        suggestionsDiv.querySelectorAll('.autocomplete-item').forEach(item => {
+            item.addEventListener('click', function() {
+                searchInput.value = this.getAttribute('data-nombre');
+                hiddenInput.value = this.getAttribute('data-id');
+                suggestionsDiv.style.display = 'none';
+                suggestionsDiv.innerHTML = '';
+            });
+        });
+    });
+
+    document.addEventListener('click', function(e) {
+        if (e.target !== searchInput && !suggestionsDiv.contains(e.target)) {
+            suggestionsDiv.style.display = 'none';
+        }
+    });
+
+    searchInput.addEventListener('blur', function() {
+        setTimeout(() => {
+            const exactMatch = repartidoresEditar.find(rep => 
+                rep.nombre.toLowerCase() === this.value.toLowerCase().trim()
+            );
+            
+            if (exactMatch) {
+                hiddenInput.value = exactMatch.id;
+            } else if (this.value.trim() !== '' && hiddenInput.value === '') {
+                this.value = '';
+            }
+        }, 200);
+    });
+});
+</script>
