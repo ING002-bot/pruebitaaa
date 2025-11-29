@@ -53,14 +53,28 @@ try {
     
     // Procesar Excel con SimpleXLSX
     try {
+        if (!file_exists($ruta_destino)) {
+            throw new Exception('El archivo no se encontró después de subirlo');
+        }
+        
         $xlsx = new SimpleXLSX($ruta_destino);
+        
+        if (!$xlsx) {
+            throw new Exception('No se pudo leer el archivo Excel. Error: ' . SimpleXLSX::parseError());
+        }
+        
         $rows = $xlsx->rows();
         
         if (empty($rows)) {
-            throw new Exception('El archivo Excel está vacío');
+            throw new Exception('El archivo Excel está vacío o no tiene datos');
         }
         
         $total_registros = count($rows) - 1; // -1 por la cabecera
+        
+        if ($total_registros <= 0) {
+            throw new Exception('El archivo solo contiene la cabecera, no hay datos para importar');
+        }
+        
         $importados = 0;
         $fallidos = 0;
         $errores = [];
@@ -91,11 +105,15 @@ try {
                 
                 // Validaciones básicas
                 if (empty($codigo_seguimiento)) {
-                    throw new Exception("Fila $rowNum: Código de seguimiento vacío");
+                    $errores[] = "Fila $rowNum: Código de seguimiento vacío (Columna A)";
+                    $fallidos++;
+                    continue;
                 }
                 
                 if (empty($destinatario_nombre)) {
-                    throw new Exception("Fila $rowNum: Nombre del consignado vacío");
+                    $errores[] = "Fila $rowNum: Nombre del consignado vacío (Columna J)";
+                    $fallidos++;
+                    continue;
                 }
                 
                 if (empty($direccion)) {

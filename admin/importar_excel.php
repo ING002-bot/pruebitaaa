@@ -189,6 +189,62 @@ $importaciones = Database::getInstance()->fetchAll($db->query(
                 </div>
                 <form method="POST" action="importar_excel_procesar.php" enctype="multipart/form-data">
                     <div class="modal-body">
+                        <div class="alert alert-info small">
+                            <strong><i class="bi bi-info-circle"></i> Formato del Excel:</strong>
+                            <div class="mt-2">
+                                <table class="table table-sm table-bordered mb-0" style="font-size: 0.85rem;">
+                                    <thead>
+                                        <tr>
+                                            <th>Columna</th>
+                                            <th>Dato</th>
+                                            <th>Requerido</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td><strong>A</strong></td>
+                                            <td>Código de Seguimiento</td>
+                                            <td><span class="badge bg-danger">Sí</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>D</strong></td>
+                                            <td>Departamento</td>
+                                            <td><span class="badge bg-secondary">No</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>E</strong></td>
+                                            <td>Provincia</td>
+                                            <td><span class="badge bg-secondary">No</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>F</strong></td>
+                                            <td>Distrito</td>
+                                            <td><span class="badge bg-secondary">No</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>J</strong></td>
+                                            <td>Nombre Consignado</td>
+                                            <td><span class="badge bg-danger">Sí</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>K</strong></td>
+                                            <td>Dirección</td>
+                                            <td><span class="badge bg-secondary">No</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>M</strong></td>
+                                            <td>Peso (kg)</td>
+                                            <td><span class="badge bg-secondary">No</span></td>
+                                        </tr>
+                                        <tr>
+                                            <td><strong>N</strong></td>
+                                            <td>Teléfono</td>
+                                            <td><span class="badge bg-secondary">No</span></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
                         <div class="mb-3">
                             <label class="form-label">Archivo Excel *</label>
                             <input type="file" name="archivo_excel" class="form-control" accept=".xlsx,.xls" required>
@@ -196,11 +252,7 @@ $importaciones = Database::getInstance()->fetchAll($db->query(
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Observaciones</label>
-                            <textarea name="observaciones" class="form-control" rows="3" placeholder="Notas sobre esta importación..."></textarea>
-                        </div>
-                        <div class="alert alert-warning">
-                            <i class="bi bi-exclamation-triangle"></i> <strong>Importante:</strong>
-                            Los paquetes se crearán en estado pendiente. Para activar el sistema de alertas y notificaciones WhatsApp, asígnalos a un repartidor.
+                            <textarea name="observaciones" class="form-control" rows="2" placeholder="Notas sobre esta importación..."></textarea>
                         </div>
                     </div>
                     <div class="modal-footer">

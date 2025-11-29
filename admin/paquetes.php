@@ -135,11 +135,21 @@ $pageTitle = "Gestión de Paquetes";
                         </div>
                     </form>
                     
+                    <!-- Botón de Asignación Masiva -->
+                    <div class="mb-3" id="asignacion-masiva-container">
+                        <button type="button" class="btn btn-success" id="btnAsignarMultiple" style="display: none;" onclick="asignarMultiples()">
+                            <i class="bi bi-person-plus"></i> Asignar <span id="countSelected">0</span> paquete(s) seleccionado(s)
+                        </button>
+                    </div>
+                    
                     <!-- Tabla -->
                     <div class="table-responsive" style="max-height: 600px; overflow-x: auto; overflow-y: auto;">
                         <table class="table table-hover" style="min-width: 1200px;">
                             <thead class="sticky-top bg-white">
                                 <tr>
+                                    <th style="width: 50px;">
+                                        <input type="checkbox" id="selectAll" class="form-check-input" onclick="toggleSelectAll()">
+                                    </th>
                                     <th style="min-width: 150px;">Código</th>
                                     <th style="min-width: 200px;">Destinatario</th>
                                     <th style="min-width: 250px;">Dirección</th>
@@ -152,6 +162,13 @@ $pageTitle = "Gestión de Paquetes";
                             <tbody>
                                 <?php foreach($paquetes as $paquete): ?>
                                 <tr>
+                                    <td>
+                                        <?php if($paquete['estado'] === 'pendiente'): ?>
+                                        <input type="checkbox" class="form-check-input paquete-checkbox" 
+                                               value="<?php echo $paquete['id']; ?>" 
+                                               onchange="updateSelection()">
+                                        <?php endif; ?>
+                                    </td>
                                     <td><strong><?php echo $paquete['codigo_seguimiento']; ?></strong></td>
                                     <td>
                                         <div class="text-truncate" style="max-width: 200px;" title="<?php echo htmlspecialchars($paquete['destinatario_nombre']); ?>">
@@ -408,6 +425,43 @@ $pageTitle = "Gestión de Paquetes";
         </div>
     </div>
 
+    <!-- Modal Asignar M\u00faltiples Paquetes -->
+    <div class="modal fade" id="modalAsignarMultiple" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Asignar M\u00faltiples Paquetes a Repartidor</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <form action="paquetes_asignar_multiple.php" method="POST">
+                    <div class="modal-body">
+                        <input type="hidden" name="paquetes_ids" id="asignar_paquetes_ids">
+                        <div class="alert alert-info">
+                            <i class="bi bi-info-circle"></i> Se asignar\u00e1n <strong><span id="count_paquetes_modal">0</span></strong> paquete(s) al repartidor seleccionado.
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Seleccionar Repartidor</label>
+                            <div class="autocomplete-wrapper" style="position: relative;">
+                                <input type="text" 
+                                       class="form-control autocomplete-repartidor" 
+                                       id="repartidor_multiple_search" 
+                                       placeholder="Escriba el nombre del repartidor..."
+                                       autocomplete="off"
+                                       required>
+                                <input type="hidden" name="repartidor_id" id="repartidor_multiple_id" value="">
+                                <div class="autocomplete-suggestions" id="suggestions_multiple" style="display: none;"></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                        <button type="submit" class="btn btn-success">Asignar Paquetes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="../assets/js/dashboard.js"></script>
@@ -500,6 +554,7 @@ $pageTitle = "Gestión de Paquetes";
         $(document).ready(function() {
             setupAutocomplete('repartidor_nuevo_search', 'repartidor_nuevo_id', 'suggestions_nuevo');
             setupAutocomplete('repartidor_asignar_search', 'repartidor_asignar_id', 'suggestions_asignar');
+            setupAutocomplete('repartidor_multiple_search', 'repartidor_multiple_id', 'suggestions_multiple');
         });
 
         function verDetalle(id) {
@@ -533,6 +588,56 @@ $pageTitle = "Gestión de Paquetes";
         function asignarRepartidor(id) {
             document.getElementById('asignar_paquete_id').value = id;
             const modal = new bootstrap.Modal(document.getElementById('modalAsignar'));
+            modal.show();
+        }
+
+        // Funciones para selección múltiple
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('selectAll');
+            const checkboxes = document.querySelectorAll('.paquete-checkbox');
+            checkboxes.forEach(checkbox => {
+                checkbox.checked = selectAll.checked;
+            });
+            updateSelection();
+        }
+
+        function updateSelection() {
+            const checkboxes = document.querySelectorAll('.paquete-checkbox:checked');
+            const count = checkboxes.length;
+            const btnAsignar = document.getElementById('btnAsignarMultiple');
+            const countSpan = document.getElementById('countSelected');
+            
+            if (count > 0) {
+                btnAsignar.style.display = 'inline-block';
+                countSpan.textContent = count;
+            } else {
+                btnAsignar.style.display = 'none';
+            }
+
+            // Actualizar estado del checkbox "Seleccionar todo"
+            const allCheckboxes = document.querySelectorAll('.paquete-checkbox');
+            const selectAll = document.getElementById('selectAll');
+            if (allCheckboxes.length > 0) {
+                selectAll.checked = checkboxes.length === allCheckboxes.length;
+            }
+        }
+
+        function asignarMultiples() {
+            const checkboxes = document.querySelectorAll('.paquete-checkbox:checked');
+            const ids = Array.from(checkboxes).map(cb => cb.value);
+            
+            if (ids.length === 0) {
+                alert('Por favor seleccione al menos un paquete');
+                return;
+            }
+
+            // Guardar los IDs en un campo oculto
+            document.getElementById('asignar_paquetes_ids').value = ids.join(',');
+            
+            // Actualizar el contador en el modal
+            document.getElementById('count_paquetes_modal').textContent = ids.length;
+            
+            const modal = new bootstrap.Modal(document.getElementById('modalAsignarMultiple'));
             modal.show();
         }
     </script>

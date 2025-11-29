@@ -91,7 +91,7 @@ $rezagados = Database::getInstance()->fetchAll($db->query($sql));
                                         <td><?php echo $r['destinatario_nombre']; ?></td>
                                         <td><?php echo substr($r['direccion_completa'], 0, 40) . (strlen($r['direccion_completa']) > 40 ? '...' : ''); ?></td>
                                         <td><?php echo $r['repartidor_nombre'] ? $r['repartidor_nombre'] . ' ' . $r['repartidor_apellido'] : '-'; ?></td>
-                                        <td><?php echo $r['motivo_rezago']; ?></td>
+                                        <td><?php echo $r['motivo_rezago'] ?? $r['motivo'] ?? 'No especificado'; ?></td>
                                         <td><?php echo date('d/m/Y H:i', strtotime($r['fecha_rezago'])); ?></td>
                                         <td>
                                             <span class="badge bg-warning"><?php echo $r['intentos_entrega'] ?? 0; ?></span>
