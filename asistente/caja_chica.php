@@ -277,7 +277,7 @@ $pageTitle = "Caja Chica";
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Monto Gastado (S/) *</label>
-                            <input type="number" name="monto" id="gastoMonto" class="form-control" step="0.01" min="0.01" required>
+                            <input type="number" name="monto" id="gastoMonto" class="form-control" step="0.01" min="0.01" required title="Solo se permiten números decimales">
                         </div>
                         <div class="mb-3">
                             <label class="form-label">¿Qué compraste? *</label>

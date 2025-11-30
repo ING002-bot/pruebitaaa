@@ -145,11 +145,11 @@ $pageTitle = "Mi Perfil";
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Nombre</label>
-                                        <input type="text" class="form-control" name="nombre" value="<?php echo htmlspecialchars($usuario['nombre']); ?>" required>
+                                        <input type="text" class="form-control" name="nombre" value="<?php echo htmlspecialchars($usuario['nombre']); ?>" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" title="Solo se permiten letras y espacios">
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Apellido</label>
-                                        <input type="text" class="form-control" name="apellido" value="<?php echo htmlspecialchars($usuario['apellido']); ?>" required>
+                                        <input type="text" class="form-control" name="apellido" value="<?php echo htmlspecialchars($usuario['apellido']); ?>" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" title="Solo se permiten letras y espacios">
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Email</label>
@@ -157,7 +157,7 @@ $pageTitle = "Mi Perfil";
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Teléfono</label>
-                                        <input type="text" class="form-control" name="telefono" value="<?php echo htmlspecialchars($usuario['telefono']); ?>">
+                                        <input type="text" class="form-control" name="telefono" value="<?php echo htmlspecialchars($usuario['telefono']); ?>" pattern="[\+]?[0-9\s\-\(\)]+" title="Solo números, espacios, guiones y paréntesis">
                                     </div>
                                     <div class="col-md-12 mb-3">
                                         <label class="form-label">Foto de Perfil</label>
@@ -172,11 +172,21 @@ $pageTitle = "Mi Perfil";
                                 <div class="row">
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Nueva Contraseña</label>
-                                        <input type="password" class="form-control" name="nueva_password" placeholder="Dejar en blanco para no cambiar">
+                                        <div class="input-group">
+                                            <input type="password" class="form-control" name="nueva_password" id="nueva_password_repartidor" placeholder="Dejar en blanco para no cambiar">
+                                            <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('nueva_password_repartidor', this)">
+                                                <i class="bi bi-eye" id="eye-nueva_password_repartidor"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                     <div class="col-md-6 mb-3">
                                         <label class="form-label">Confirmar Contraseña</label>
-                                        <input type="password" class="form-control" name="confirmar_password" placeholder="Confirmar nueva contraseña">
+                                        <div class="input-group">
+                                            <input type="password" class="form-control" name="confirmar_password" id="confirmar_password_repartidor" placeholder="Confirmar nueva contraseña">
+                                            <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('confirmar_password_repartidor', this)">
+                                                <i class="bi bi-eye" id="eye-confirmar_password_repartidor"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
 
@@ -218,5 +228,23 @@ $pageTitle = "Mi Perfil";
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function togglePassword(inputId, button) {
+            const passwordInput = document.getElementById(inputId);
+            const eyeIcon = document.getElementById('eye-' + inputId);
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.remove('bi-eye');
+                eyeIcon.classList.add('bi-eye-slash');
+                button.setAttribute('aria-label', 'Ocultar contraseña');
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.classList.remove('bi-eye-slash');
+                eyeIcon.classList.add('bi-eye');
+                button.setAttribute('aria-label', 'Mostrar contraseña');
+            }
+        }
+    </script>
 </body>
 </html>

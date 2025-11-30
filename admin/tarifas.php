@@ -174,15 +174,15 @@ $pageTitle = "Tarifas por Zona";
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Nombre de Zona</label>
-                            <input type="text" name="nombre_zona" class="form-control" required>
+                            <input type="text" name="nombre_zona" class="form-control" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s\-]+" title="Solo se permiten letras, espacios y guiones">
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Tipo de Envío</label>
-                            <input type="text" name="tipo_envio" class="form-control" value="Paquete" required>
+                            <input type="text" name="tipo_envio" class="form-control" value="Paquete" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" title="Solo se permiten letras y espacios">
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Tarifa para Repartidor (S/)</label>
-                            <input type="number" name="tarifa_repartidor" class="form-control" step="0.01" min="0" required>
+                            <input type="number" name="tarifa_repartidor" class="form-control" step="0.01" min="0" required title="Solo se permiten números decimales">
                             <small class="text-muted">Monto que recibirá el repartidor por cada paquete entregado</small>
                         </div>
                         <div class="mb-3">
@@ -225,15 +225,15 @@ $pageTitle = "Tarifas por Zona";
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Nombre de Zona</label>
-                            <input type="text" name="nombre_zona" id="edit_nombre_zona" class="form-control" required>
+                            <input type="text" name="nombre_zona" id="edit_nombre_zona" class="form-control" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s\-]+" title="Solo se permiten letras, espacios y guiones">
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Tipo de Envío</label>
-                            <input type="text" name="tipo_envio" id="edit_tipo_envio" class="form-control" required>
+                            <input type="text" name="tipo_envio" id="edit_tipo_envio" class="form-control" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" title="Solo se permiten letras y espacios">
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Tarifa para Repartidor (S/)</label>
-                            <input type="number" name="tarifa_repartidor" id="edit_tarifa_repartidor" class="form-control" step="0.01" min="0" required>
+                            <input type="number" name="tarifa_repartidor" id="edit_tarifa_repartidor" class="form-control" step="0.01" min="0" required title="Solo se permiten números decimales">
                             <small class="text-muted">Monto que recibirá el repartidor por cada paquete entregado</small>
                         </div>
                         <div class="mb-3">

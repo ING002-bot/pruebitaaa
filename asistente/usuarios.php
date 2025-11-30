@@ -108,11 +108,11 @@ $usuarios = Database::getInstance()->fetchAll($db->query("SELECT * FROM usuarios
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Nombre *</label>
-                                <input type="text" name="nombre" id="edit_nombre" class="form-control" required>
+                                <input type="text" name="nombre" id="edit_nombre" class="form-control" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" title="Solo se permiten letras y espacios">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Apellido *</label>
-                                <input type="text" name="apellido" id="edit_apellido" class="form-control" required>
+                                <input type="text" name="apellido" id="edit_apellido" class="form-control" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" title="Solo se permiten letras y espacios">
                             </div>
                         </div>
                         <div class="mb-3">
@@ -121,7 +121,7 @@ $usuarios = Database::getInstance()->fetchAll($db->query("SELECT * FROM usuarios
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Teléfono</label>
-                            <input type="text" name="telefono" id="edit_telefono" class="form-control">
+                            <input type="text" name="telefono" id="edit_telefono" class="form-control" pattern="[\+]?[0-9\s\-\(\)]+" title="Solo números, espacios, guiones y paréntesis">
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Estado *</label>

@@ -271,11 +271,21 @@ $stats_sistema = [
                                         <div class="row">
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label">Nueva Contraseña</label>
-                                                <input type="password" class="form-control" name="nueva_password" minlength="6" placeholder="Dejar en blanco para no cambiar">
+                                                <div class="input-group">
+                                                    <input type="password" class="form-control" name="nueva_password" id="nueva_password_admin" minlength="6" placeholder="Dejar en blanco para no cambiar">
+                                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('nueva_password_admin', this)">
+                                                        <i class="bi bi-eye" id="eye-nueva_password_admin"></i>
+                                                    </button>
+                                                </div>
                                             </div>
                                             <div class="col-md-6 mb-3">
                                                 <label class="form-label">Confirmar Contraseña</label>
-                                                <input type="password" class="form-control" name="confirmar_password" placeholder="Repetir contraseña">
+                                                <div class="input-group">
+                                                    <input type="password" class="form-control" name="confirmar_password" id="confirmar_password_admin" placeholder="Repetir contraseña">
+                                                    <button class="btn btn-outline-secondary" type="button" onclick="togglePassword('confirmar_password_admin', this)">
+                                                        <i class="bi bi-eye" id="eye-confirmar_password_admin"></i>
+                                                    </button>
+                                                </div>
                                             </div>
                                         </div>
 
@@ -485,6 +495,23 @@ $stats_sistema = [
         function verificarIntegridad() {
             if (confirm('¿Verificar la integridad del sistema?\n\nEsto comprobará la base de datos, permisos de directorios y optimizará las tablas.')) {
                 window.location.href = 'verificar_integridad.php';
+            }
+        }
+        
+        function togglePassword(inputId, button) {
+            const passwordInput = document.getElementById(inputId);
+            const eyeIcon = document.getElementById('eye-' + inputId);
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.remove('bi-eye');
+                eyeIcon.classList.add('bi-eye-slash');
+                button.setAttribute('aria-label', 'Ocultar contraseña');
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.classList.remove('bi-eye-slash');
+                eyeIcon.classList.add('bi-eye');
+                button.setAttribute('aria-label', 'Mostrar contraseña');
             }
         }
     </script>

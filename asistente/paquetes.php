@@ -153,11 +153,11 @@ $paquetes = Database::getInstance()->fetchAll($stmt->get_result());
                             </div>
                             <div class="col-md-12 mb-3">
                                 <label class="form-label">Destinatario *</label>
-                                <input type="text" name="destinatario_nombre" class="form-control" required>
+                                <input type="text" name="destinatario_nombre" class="form-control" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" title="Solo se permiten letras y espacios">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Teléfono</label>
-                                <input type="text" name="destinatario_telefono" class="form-control">
+                                <input type="text" name="destinatario_telefono" class="form-control" pattern="[\+]?[0-9\s\-\(\)]+" title="Solo números, espacios, guiones y paréntesis">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Email</label>
@@ -177,7 +177,7 @@ $paquetes = Database::getInstance()->fetchAll($stmt->get_result());
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Costo de Envío</label>
-                                <input type="number" name="costo_envio" class="form-control" step="0.01" min="0">
+                                <input type="number" name="costo_envio" class="form-control" step="0.01" min="0" title="Solo se permiten números decimales">
                             </div>
                         </div>
                     </div>

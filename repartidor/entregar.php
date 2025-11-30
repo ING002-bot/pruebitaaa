@@ -195,7 +195,7 @@ $pageTitle = "Registrar Entrega";
                                 <div class="mb-3">
                                     <label class="form-label">Nombre de Quien Recibe</label>
                                     <input type="text" class="form-control" name="receptor_nombre" 
-                                           placeholder="Ej: María González">
+                                           placeholder="Ej: María González" pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" title="Solo se permiten letras y espacios">
                                 </div>
                                 
                                 <div class="mb-3">
