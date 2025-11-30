@@ -99,70 +99,120 @@ function testearAutenticacion() {
         ];
     }
     
-    // Test básico de conectividad a la API
-    $url = rtrim(FLEXBIS_API_URL, '/') . '/auth/test'; // Endpoint típico para test
-    
-    $headers = [
-        'Authorization: Bearer ' . FLEXBIS_API_KEY,
-        'Content-Type: application/json',
-        'Accept: application/json'
+    // Intentar diferentes endpoints comunes para test
+    $test_endpoints = [
+        '/status',
+        '/auth/test', 
+        '/account/balance',
+        '/me',
+        '/health'
     ];
     
-    $ch = curl_init($url);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
-    curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+    $base_url = rtrim(FLEXBIS_API_URL, '/');
+    $last_error = '';
     
-    $response = curl_exec($ch);
-    $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-    $curl_error = curl_error($ch);
-    curl_close($ch);
-    
-    if ($curl_error) {
-        return [
-            'success' => false,
-            'error' => 'cURL Error: ' . $curl_error,
-            'http_code' => $http_code
+    foreach ($test_endpoints as $endpoint) {
+        $url = $base_url . $endpoint;
+        
+        $headers = [
+            'Authorization: Bearer ' . FLEXBIS_API_KEY,
+            'Content-Type: application/json',
+            'Accept: application/json',
+            'User-Agent: HermesExpress/1.0'
         ];
+        
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+        
+        $response = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curl_error = curl_error($ch);
+        curl_close($ch);
+        
+        if ($curl_error) {
+            $last_error = "cURL Error en $endpoint: " . $curl_error;
+            continue;
+        }
+        
+        // Si responde 200-299, es exitoso
+        if ($http_code >= 200 && $http_code < 300) {
+            $response_data = json_decode($response, true);
+            return [
+                'success' => true,
+                'http_code' => $http_code,
+                'endpoint' => $endpoint,
+                'response' => $response_data,
+                'message' => "Conexión exitosa en endpoint: $endpoint"
+            ];
+        }
+        
+        // Si es 401, credenciales incorrectas
+        if ($http_code === 401) {
+            return [
+                'success' => false,
+                'error' => 'Credenciales inválidas (HTTP 401)',
+                'http_code' => $http_code,
+                'endpoint' => $endpoint,
+                'raw_response' => $response
+            ];
+        }
+        
+        $last_error = "HTTP $http_code en $endpoint: $response";
     }
     
-    $response_data = json_decode($response, true);
-    
     return [
-        'success' => $http_code >= 200 && $http_code < 400,
-        'http_code' => $http_code,
-        'response' => $response_data,
-        'raw_response' => $response
+        'success' => false,
+        'error' => $last_error ?: 'No se pudo conectar a ningún endpoint',
+        'endpoints_tested' => $test_endpoints
     ];
 }
 
 function enviarMensajePrueba($telefono, $mensaje) {
     try {
-        require_once 'config/whatsapp_helper.php';
+        require_once 'config/flexbis_client.php';
         
-        // Instanciar el helper de WhatsApp
-        $whatsapp = new WhatsAppHelper();
+        // Crear instancia del cliente FlexBis
+        $flexbis = new FlexBisClient();
         
-        // Limpiar teléfono
-        $telefono_limpio = preg_replace('/[^0-9+]/', '', $telefono);
-        if (!str_starts_with($telefono_limpio, '+')) {
-            $telefono_limpio = '+51' . ltrim($telefono_limpio, '0');
+        // Verificar configuración
+        if (!$flexbis->isConfigured()) {
+            return [
+                'success' => false,
+                'error' => 'FlexBis no está configurado correctamente',
+                'missing' => implode(', ', $flexbis->getConfig()['missing'] ?? ['credenciales'])
+            ];
         }
         
         // Preparar mensaje de prueba
-        $mensaje_completo = "[PRUEBA FLEXBIS] " . $mensaje . "\n\n⚡ Hermes Express - " . date('d/m/Y H:i:s');
+        $mensaje_completo = "🧪 [PRUEBA FLEXBIS]\n\n" . $mensaje . "\n\n⚡ Hermes Express\n📅 " . date('d/m/Y H:i:s');
         
-        // Enviar usando el helper (que internamente usará Flexbis si está configurado)
-        $resultado = $whatsapp->enviarMensajeDirecto($telefono_limpio, $mensaje_completo);
+        // Enviar mensaje usando FlexBis directamente
+        $resultado = $flexbis->sendMessage($telefono, $mensaje_completo);
         
-        return [
-            'success' => $resultado !== 'error',
-            'resultado' => $resultado,
-            'telefono' => $telefono_limpio,
-            'mensaje' => $mensaje_completo,
-            'metodo' => 'WhatsAppHelper->enviarMensajeDirecto'
-        ];
+        if ($resultado['success']) {
+            return [
+                'success' => true,
+                'message_id' => $resultado['message_id'],
+                'status' => $resultado['status'],
+                'telefono' => $telefono,
+                'mensaje' => $mensaje_completo,
+                'metodo' => 'FlexBisClient->sendMessage',
+                'data' => $resultado['data'] ?? []
+            ];
+        } else {
+            return [
+                'success' => false,
+                'error' => $resultado['error'],
+                'telefono' => $telefono,
+                'mensaje' => $mensaje_completo,
+                'metodo' => 'FlexBisClient->sendMessage',
+                'data' => $resultado['data'] ?? []
+            ];
+        }
         
     } catch (Exception $e) {
         return [

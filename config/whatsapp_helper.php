@@ -7,30 +7,40 @@
 class WhatsAppNotificaciones {
     private $api_url;
     private $api_token;
-    private $api_type = 'simulado'; // 'twilio', 'whatsapp_cloud', 'simulado'
+    private $api_type = 'simulado'; // 'twilio', 'whatsapp_cloud', 'simulado', 'flexbis', 'hibrido'
     private $db;
     private $numero_empresa = null;
+    private $flexbis = null;
     
     public function __construct() {
         $this->db = Database::getInstance()->getConnection();
         
         // Configurar según el tipo de API disponible
-        $this->api_type = defined('WHATSAPP_API_TYPE') ? WHATSAPP_API_TYPE : 'simulado';
+        $this->api_type = defined('WHATSAPP_API_TYPE') ? WHATSAPP_API_TYPE : 'flexbis';
         
-        if (defined('WHATSAPP_API_TOKEN')) {
-            $this->api_token = WHATSAPP_API_TOKEN;
+        // Usar constantes FlexBis que están realmente definidas
+        if (defined('FLEXBIS_API_KEY')) {
+            $this->api_token = FLEXBIS_API_KEY;
         }
         
-        if (defined('WHATSAPP_API_URL')) {
-            $this->api_url = WHATSAPP_API_URL;
+        if (defined('FLEXBIS_API_URL')) {
+            $this->api_url = FLEXBIS_API_URL;
         }
         
-        if (defined('WHATSAPP_NUMERO_EMPRESA')) {
-            $this->numero_empresa = WHATSAPP_NUMERO_EMPRESA;
+        if (defined('FLEXBIS_WHATSAPP_FROM')) {
+            $this->numero_empresa = FLEXBIS_WHATSAPP_FROM;
         }
         
         // Log del tipo de API configurado
         error_log("WhatsApp Helper initialized with API type: " . $this->api_type);
+        
+        // Si es modo híbrido, cargar también FlexBis
+        if ($this->api_type === 'hibrido' || $this->api_type === 'flexbis') {
+            if (file_exists(__DIR__ . '/flexbis_client.php')) {
+                require_once __DIR__ . '/flexbis_client.php';
+                $this->flexbis = new FlexBisClient();
+            }
+        }
     }
     
     /**
@@ -421,6 +431,10 @@ class WhatsAppNotificaciones {
             return $this->enviarConFlexbis($telefono, $mensaje);
         }
         
+        if ($this->api_type === 'hibrido') {
+            return $this->enviarConModoHibrido($telefono, $mensaje, $tipo);
+        }
+        
         return 'error';
     }
     
@@ -546,73 +560,38 @@ class WhatsAppNotificaciones {
     }
 
     /**
-     * Enviar con Flexbis WhatsApp API
+     * Enviar con Flexbis WhatsApp API usando FlexBisClient
      */
     private function enviarConFlexbis($telefono, $mensaje) {
-        $flexbis_sid = defined('FLEXBIS_API_SID') ? constant('FLEXBIS_API_SID') : '';
-        $flexbis_key = defined('FLEXBIS_API_KEY') ? constant('FLEXBIS_API_KEY') : '';
-        $flexbis_url = defined('FLEXBIS_API_URL') ? constant('FLEXBIS_API_URL') : 'https://api.flexbis.com/v1/';
-        $flexbis_from = defined('FLEXBIS_WHATSAPP_FROM') ? constant('FLEXBIS_WHATSAPP_FROM') : '';
-        
-        if (empty($flexbis_sid) || empty($flexbis_key)) {
-            error_log("Flexbis: Credenciales no configuradas en config.php");
-            return 'error';
-        }
-        
         try {
-            // Construir URL de la API
-            $url = rtrim($flexbis_url, '/') . '/messages/whatsapp';
+            // Incluir la clase FlexBis si no está cargada
+            if (!class_exists('FlexBisClient')) {
+                require_once __DIR__ . '/flexbis_client.php';
+            }
             
-            // Preparar datos del mensaje
-            $post_data = [
-                'sid' => $flexbis_sid,
-                'to' => $telefono,
-                'message' => $mensaje,
-                'from' => $flexbis_from,
-                'type' => 'text'
-            ];
+            // Crear instancia del cliente FlexBis
+            $flexbis = new FlexBisClient();
             
-            // Headers de autenticación
-            $headers = [
-                'Content-Type: application/json',
-                'Authorization: Bearer ' . $flexbis_key,
-                'Accept: application/json'
-            ];
-            
-            // Inicializar cURL
-            $ch = curl_init($url);
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_setopt($ch, CURLOPT_TIMEOUT, 15);
-            curl_setopt($ch, CURLOPT_POST, true);
-            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($post_data));
-            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-            
-            // Ejecutar
-            $response = curl_exec($ch);
-            $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-            $curl_error = curl_error($ch);
-            curl_close($ch);
-            
-            // Verificar respuesta
-            if ($curl_error) {
-                error_log("❌ Flexbis cURL Error: $curl_error");
+            // Verificar configuración
+            if (!$flexbis->isConfigured()) {
+                error_log("❌ FlexBis no configurado correctamente");
                 return 'error';
             }
             
-            if ($http_code >= 200 && $http_code < 300) {
-                $result = json_decode($response, true);
-                $message_id = $result['message_id'] ?? $result['id'] ?? 'success';
-                error_log("✅ Flexbis WhatsApp enviado: ID $message_id");
+            // Enviar mensaje usando la clase FlexBis
+            $result = $flexbis->sendMessage($telefono, $mensaje);
+            
+            if ($result['success']) {
+                $message_id = $result['message_id'] ?? 'success';
+                error_log("✅ FlexBis WhatsApp enviado: ID $message_id a $telefono");
                 return $message_id;
             } else {
-                error_log("❌ Flexbis Error HTTP $http_code: $response");
+                error_log("❌ FlexBis Error: " . $result['error']);
                 return 'error';
             }
             
         } catch (Exception $e) {
-            error_log("❌ Flexbis Exception: " . $e->getMessage());
+            error_log("❌ FlexBis Exception: " . $e->getMessage());
             return 'error';
         }
     }
@@ -682,5 +661,40 @@ class WhatsAppNotificaciones {
         } catch (Exception $e) {
             error_log("Error al registrar notificación WhatsApp: " . $e->getMessage());
         }
+    }
+    
+    /**
+     * Modo híbrido: simula envío pero prueba conexión FlexBis
+     */
+    private function enviarConModoHibrido($telefono, $mensaje, $tipo) {
+        // Siempre simular el envío (para no consumir créditos reales)
+        $resultado_simulado = $this->simularEnvio($telefono, $mensaje, $tipo);
+        
+        // Paralelamente, probar FlexBis para debugging
+        if ($this->flexbis && $this->flexbis->isConfigured()) {
+            try {
+                // Solo test de conexión, no envío real
+                $test_connection = $this->flexbis->testConnection();
+                
+                $log = [
+                    'timestamp' => date('Y-m-d H:i:s'),
+                    'mode' => 'hibrido',
+                    'telefono' => $telefono,
+                    'simulado' => true,
+                    'flexbis_connection' => $test_connection['success'] ? 'OK' : 'ERROR',
+                    'flexbis_error' => $test_connection['error'] ?? null
+                ];
+                
+                error_log("MODO HÍBRIDO: " . json_encode($log));
+                
+                // Si queremos probar envío real (comentado por defecto)
+                // $result = $this->flexbis->sendMessage($telefono, "[TEST] " . $mensaje);
+                
+            } catch (Exception $e) {
+                error_log("MODO HÍBRIDO - FlexBis test error: " . $e->getMessage());
+            }
+        }
+        
+        return $resultado_simulado;
     }
 }

@@ -256,7 +256,15 @@ $pageTitle = "Gestión de Paquetes";
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label class="form-label">Teléfono Destinatario *</label>
-                                <input type="text" class="form-control" name="destinatario_telefono" required>
+                                <div class="input-group">
+                                    <span class="input-group-text">+51</span>
+                                    <input type="text" class="form-control" name="destinatario_telefono" 
+                                           placeholder="903417579" 
+                                           pattern="[9][0-9]{8}" 
+                                           title="Ingrese 9 dígitos comenzando con 9"
+                                           maxlength="9" required>
+                                </div>
+                                <small class="form-text text-muted">9 dígitos comenzando con 9</small>
                             </div>
                             <div class="col-md-4 mb-3">
                                 <label class="form-label">Departamento *</label>
@@ -467,14 +475,15 @@ $pageTitle = "Gestión de Paquetes";
     <script src="../assets/js/dashboard.js"></script>
     <script>
         // Datos de repartidores
-        const repartidores = [
-            <?php foreach($repartidores as $rep): ?>
-            {
-                id: '<?php echo $rep["id"]; ?>',
-                nombre: '<?php echo addslashes($rep["nombre"] . " " . $rep["apellido"]); ?>'
-            },
-            <?php endforeach; ?>
-        ];
+        const repartidores = <?php
+        $js_repartidores = array_map(function($rep) {
+            return [
+                'id' => $rep['id'],
+                'nombre' => addslashes($rep['nombre'] . ' ' . $rep['apellido'])
+            ];
+        }, $repartidores);
+        echo json_encode($js_repartidores);
+        ?>;
 
         // Función para crear autocompletado
         function setupAutocomplete(searchId, hiddenId, suggestionsId) {

@@ -36,7 +36,28 @@ $repartidores = Database::getInstance()->fetchAll($db->query("SELECT id, nombre,
         </div>
         <div class="col-md-6 mb-3">
             <label class="form-label">Teléfono Destinatario</label>
-            <input type="text" class="form-control" name="destinatario_telefono" value="<?php echo htmlspecialchars($paquete['destinatario_telefono']); ?>" required>
+            <?php
+            // Separar +51 del número si existe para mostrar en el campo
+            $telefono = $paquete['destinatario_telefono'];
+            $numero_solo = $telefono;
+            
+            // Si tiene +51 al inicio, quitarlo para el campo
+            if (strpos($telefono, '+51') === 0) {
+                $numero_solo = substr($telefono, 3);
+            } elseif (strpos($telefono, '51') === 0 && strlen($telefono) === 11) {
+                $numero_solo = substr($telefono, 2);
+            }
+            ?>
+            <div class="input-group">
+                <span class="input-group-text">+51</span>
+                <input type="text" class="form-control" name="destinatario_telefono" 
+                       value="<?php echo htmlspecialchars($numero_solo); ?>" 
+                       placeholder="903417579" 
+                       pattern="[9][0-9]{8}" 
+                       title="Ingrese 9 dígitos comenzando con 9"
+                       maxlength="9" required>
+            </div>
+            <small class="form-text text-muted">9 dígitos comenzando con 9</small>
         </div>
         <div class="col-md-6 mb-3">
             <label class="form-label">Email Destinatario</label>
@@ -142,14 +163,15 @@ $repartidores = Database::getInstance()->fetchAll($db->query("SELECT id, nombre,
 
 <script>
 // Datos de repartidores
-const repartidoresEditar = [
-    <?php foreach($repartidores as $rep): ?>
-    {
-        id: '<?php echo $rep["id"]; ?>',
-        nombre: '<?php echo addslashes($rep["nombre"] . " " . $rep["apellido"]); ?>'
-    },
-    <?php endforeach; ?>
-];
+const repartidoresEditar = <?php
+$js_repartidores = array_map(function($rep) {
+    return [
+        'id' => $rep['id'],
+        'nombre' => addslashes($rep['nombre'] . ' ' . $rep['apellido'])
+    ];
+}, $repartidores);
+echo json_encode($js_repartidores);
+?>;
 
 $(document).ready(function() {
     const searchInput = document.getElementById('repartidor_editar_search');

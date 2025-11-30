@@ -11,6 +11,19 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $db = Database::getInstance()->getConnection();
 $whatsapp = new WhatsAppNotificaciones();
 
+// Procesar teléfono con +51 automático
+$telefono = sanitize($_POST['destinatario_telefono']);
+if (!empty($telefono)) {
+    // Si el usuario ingresó solo 9 dígitos, agregar +51
+    if (preg_match('/^[9][0-9]{8}$/', $telefono)) {
+        $telefono = '+51' . $telefono;
+    }
+    // Si no tiene +51 pero tiene 9 dígitos válidos, agregarlo
+    elseif (strlen($telefono) === 9 && !str_contains($telefono, '+51')) {
+        $telefono = '+51' . $telefono;
+    }
+}
+
 try {
     $stmt = $db->prepare("
         UPDATE paquetes SET
@@ -41,11 +54,11 @@ try {
     $paquete_id = (int)$_POST['id'];
     
     $stmt->bind_param(
-        "ssssssssdddssisi",
+        "sssssssssdddssisi",
         $_POST['codigo_seguimiento'],
         $_POST['codigo_savar'],
         $_POST['destinatario_nombre'],
-        $_POST['destinatario_telefono'],
+        $telefono,
         $_POST['destinatario_email'],
         $_POST['direccion_completa'],
         $_POST['ciudad'],

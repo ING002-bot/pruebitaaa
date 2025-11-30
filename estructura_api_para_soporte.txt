@@ -1,0 +1,49 @@
+¡GRACIAS! ENDPOINT CORRECTO RECIBIDO - HERMES EXPRESS
+==================================================
+
+❌ ENDPOINT INCORRECTO QUE ESTÁBAMOS USANDO:
+https://api.ultramsg.com/serhsznr/messages/chat
+
+✅ ENDPOINT CORRECTO DE FLEXBIS:
+https://whatsapp-service.flexbis.com/api/v1/message/text
+
+🔧 METHOD:
+POST
+
+📋 HEADERS CORRECTOS:
+flexbis-instance: serhsznr
+flexbis-token: H4vP1g837ZxKR0VMz3yD
+Content-Type: application/json
+
+📦 BODY CORRECTO (JSON):
+{
+    "numero_destinatario": "+51903417579",
+    "tipo_destinatario": "contacto",
+    "tipo_mensaje": "texto", 
+    "texto": "🎉 ¡Mensaje enviado desde HERMES EXPRESS! Sistema funcionando correctamente 🎉"
+}
+
+---
+
+📋 DETALLES TÉCNICOS:
+- SID Instancia: serhsznr
+- Token: H4vP1g837ZxKR0VMz3yD
+- Formato: application/x-www-form-urlencoded
+- Timeout: 30 segundos
+- User-Agent: PHP cURL
+
+---
+
+❌ ERROR RECIBIDO:
+HTTP 404
+{"error":"Your instance has been Stopped due to non-payment. you can activate this instance by extending your subscription. Payment information updates every 5 minutes."}
+
+💳 PAGO CONFIRMADO:
+Orden: 152248498
+Fecha: 30-11-2025 11:49
+Monto: 18.00 PEN
+Estado: PAGADO
+
+🤔 PREGUNTA:
+¿Es correcta la URL y estructura? 
+¿Hay algún paso adicional para activar la instancia después del pago?

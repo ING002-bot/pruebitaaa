@@ -22,14 +22,26 @@ define('UPLOADS_URL', APP_URL . 'uploads/');
 define('GOOGLE_MAPS_API_KEY', 'AIzaSyAhKq8glWDGij47iJZy2_RB8jan9D1V-Sk');
 
 // ==================== CONFIGURACIÓN WHATSAPP FLEXBIS ====================
+// Cargar variables de entorno desde archivo .env
+if (file_exists(__DIR__ . '/../.env')) {
+    $env_lines = file(__DIR__ . '/../.env', FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    foreach ($env_lines as $line) {
+        if (strpos($line, '=') !== false && strpos($line, '#') !== 0) {
+            list($key, $value) = explode('=', $line, 2);
+            $_ENV[trim($key)] = trim($value);
+            putenv(trim($key) . '=' . trim($value));
+        }
+    }
+}
+
 // Configurar para enviar WhatsApp real usando API de Flexbis
-// NOTA: Agregar credenciales en variables de entorno
-define('WHATSAPP_API_TYPE', getenv('WHATSAPP_API_TYPE') ?: 'simulado');
-define('FLEXBIS_API_SID', getenv('FLEXBIS_API_SID') ?: '');
-define('FLEXBIS_API_KEY', getenv('FLEXBIS_API_KEY') ?: '');
-define('FLEXBIS_API_URL', getenv('FLEXBIS_API_URL') ?: 'https://api.flexbis.com/v1/');
-define('FLEXBIS_WHATSAPP_FROM', getenv('FLEXBIS_WHATSAPP_FROM') ?: '');
-define('WHATSAPP_API_TOKEN', getenv('WHATSAPP_API_TOKEN') ?: '');
+define('WHATSAPP_API_TYPE', $_ENV['WHATSAPP_API_TYPE'] ?? getenv('WHATSAPP_API_TYPE') ?: 'flexbis');
+define('FLEXBIS_API_SID', $_ENV['FLEXBIS_API_SID'] ?? getenv('FLEXBIS_API_SID') ?: 'serhsznr');
+define('FLEXBIS_API_KEY', $_ENV['FLEXBIS_API_KEY'] ?? getenv('FLEXBIS_API_KEY') ?: 'H4vP1g837ZxKR0VMz3yD');
+define('FLEXBIS_API_URL', $_ENV['FLEXBIS_API_URL'] ?? getenv('FLEXBIS_API_URL') ?: 'https://api.flexbis.com/v1/');
+define('FLEXBIS_WHATSAPP_FROM', $_ENV['FLEXBIS_WHATSAPP_FROM'] ?? getenv('FLEXBIS_WHATSAPP_FROM') ?: '+51987654321');
+define('FLEXBIS_TIMEOUT', $_ENV['FLEXBIS_TIMEOUT'] ?? getenv('FLEXBIS_TIMEOUT') ?: '30');
+define('FLEXBIS_DEBUG', $_ENV['FLEXBIS_DEBUG'] ?? getenv('FLEXBIS_DEBUG') ?: 'true');
 // ===============================================================
 
 // Configuración de uploads
