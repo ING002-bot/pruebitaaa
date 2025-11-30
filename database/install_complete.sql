@@ -560,6 +560,27 @@ ON DUPLICATE KEY UPDATE
     fecha_actualizacion = CURRENT_TIMESTAMP;
 
 -- ====================================================================
+-- PARTE 8: ACTUALIZACIONES ADICIONALES
+-- ====================================================================
+
+-- Agregar columna distrito a la tabla paquetes si no existe
+ALTER TABLE paquetes ADD COLUMN IF NOT EXISTS distrito VARCHAR(100) AFTER provincia;
+
+-- Crear tabla para logs de WhatsApp si no existe
+CREATE TABLE IF NOT EXISTS logs_whatsapp (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    paquete_id INT,
+    usuario_id INT,
+    tipo_evento VARCHAR(100) NOT NULL COMMENT 'intento_envio, fallo, reintento, exito',
+    detalles LONGTEXT,
+    fecha_evento TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    KEY idx_paquete_id (paquete_id),
+    KEY idx_usuario_id (usuario_id),
+    KEY idx_tipo_evento (tipo_evento),
+    KEY idx_fecha_evento (fecha_evento)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- ====================================================================
 -- INSTALACIÓN COMPLETADA
 -- ====================================================================
 

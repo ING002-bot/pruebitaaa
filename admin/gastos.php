@@ -15,23 +15,76 @@ $fecha_desde = $_GET['fecha_desde'] ?? date('Y-m-01');
 $fecha_hasta = $_GET['fecha_hasta'] ?? date('Y-m-d');
 
 if ($tiene_descripcion) {
-    // Estructura nueva
-    $sql = "SELECT g.*, u.nombre, u.apellido
-            FROM gastos g
-            LEFT JOIN usuarios u ON g.registrado_por = u.id
-            WHERE DATE(g.fecha_gasto) BETWEEN ? AND ?
-            ORDER BY g.fecha_gasto DESC";
+    // Estructura nueva - incluir gastos regulares Y gastos de caja chica
+    $sql = "SELECT * FROM (
+                -- Gastos regulares
+                SELECT g.id, g.categoria, g.monto, g.fecha_gasto as fecha, g.descripcion, 
+                       g.numero_comprobante, g.comprobante_archivo, u.nombre, u.apellido, 'gasto_regular' as tipo_origen
+                FROM gastos g
+                LEFT JOIN usuarios u ON g.registrado_por = u.id
+                WHERE DATE(g.fecha_gasto) BETWEEN ? AND ?
+                
+                UNION ALL
+                
+                -- Gastos de caja chica (asignaciones y gastos)
+                SELECT cc.id, 
+                       CASE cc.tipo 
+                           WHEN 'asignacion' THEN 'Caja Chica - Asignación'
+                           WHEN 'gasto' THEN 'Caja Chica - Gasto'
+                           ELSE 'Caja Chica'
+                       END as categoria,
+                       cc.monto, 
+                       cc.fecha_operacion as fecha,
+                       CONCAT(cc.concepto, CASE WHEN cc.descripcion IS NOT NULL AND cc.descripcion != '' 
+                                                THEN CONCAT(' - ', cc.descripcion) 
+                                                ELSE '' END) as descripcion,
+                       '' as numero_comprobante,
+                       cc.foto_comprobante as comprobante_archivo,
+                       u.nombre, u.apellido, 'caja_chica' as tipo_origen
+                FROM caja_chica cc
+                LEFT JOIN usuarios u ON cc.registrado_por = u.id
+                WHERE cc.tipo IN ('asignacion', 'gasto') 
+                AND DATE(cc.fecha_operacion) BETWEEN ? AND ?
+            ) AS todos_gastos
+            ORDER BY fecha DESC";
 } else {
     // Estructura antigua - usar 'concepto' como 'descripcion'
-    $sql = "SELECT g.*, u.nombre, u.apellido, g.concepto as descripcion, '' as numero_comprobante, '' as comprobante_archivo
-            FROM gastos g
-            LEFT JOIN usuarios u ON g.registrado_por = u.id
-            WHERE DATE(g.fecha_gasto) BETWEEN ? AND ?
-            ORDER BY g.fecha_gasto DESC";
+    $sql = "SELECT * FROM (
+                -- Gastos regulares
+                SELECT g.id, g.categoria, g.monto, g.fecha_gasto as fecha, g.concepto as descripcion, 
+                       '' as numero_comprobante, '' as comprobante_archivo, u.nombre, u.apellido, 'gasto_regular' as tipo_origen
+                FROM gastos g
+                LEFT JOIN usuarios u ON g.registrado_por = u.id
+                WHERE DATE(g.fecha_gasto) BETWEEN ? AND ?
+                
+                UNION ALL
+                
+                -- Gastos de caja chica
+                SELECT cc.id, 
+                       CASE cc.tipo 
+                           WHEN 'asignacion' THEN 'Caja Chica - Asignación'
+                           WHEN 'gasto' THEN 'Caja Chica - Gasto'
+                           ELSE 'Caja Chica'
+                       END as categoria,
+                       cc.monto, 
+                       cc.fecha_operacion as fecha,
+                       CONCAT(cc.concepto, CASE WHEN cc.descripcion IS NOT NULL AND cc.descripcion != '' 
+                                                THEN CONCAT(' - ', cc.descripcion) 
+                                                ELSE '' END) as descripcion,
+                       '' as numero_comprobante,
+                       cc.foto_comprobante as comprobante_archivo,
+                       u.nombre, u.apellido, 'caja_chica' as tipo_origen
+                FROM caja_chica cc
+                LEFT JOIN usuarios u ON cc.registrado_por = u.id
+                WHERE cc.tipo IN ('asignacion', 'gasto') 
+                AND DATE(cc.fecha_operacion) BETWEEN ? AND ?
+            ) AS todos_gastos
+            ORDER BY fecha DESC";
 }
 
 $stmt = $db->prepare($sql);
-$stmt->bind_param("ss", $fecha_desde, $fecha_hasta);
+// Pasar los parámetros dos veces: para gastos regulares y para caja chica
+$stmt->bind_param("ssss", $fecha_desde, $fecha_hasta, $fecha_desde, $fecha_hasta);
 $stmt->execute();
 $gastos = Database::getInstance()->fetchAll($stmt);
 
@@ -115,7 +168,7 @@ $total = array_sum(array_column($gastos, 'monto'));
                             <tbody>
                                 <?php foreach ($gastos as $gasto): ?>
                                 <tr>
-                                    <td><?php echo date('d/m/Y', strtotime($gasto['fecha_gasto'])); ?></td>
+                                    <td><?php echo date('d/m/Y', strtotime($gasto['fecha'])); ?></td>
                                     <td><span class="badge bg-secondary"><?php echo ucfirst($gasto['categoria']); ?></span></td>
                                     <td><?php echo $gasto['descripcion']; ?></td>
                                     <td><?php echo $gasto['numero_comprobante'] ?: '-'; ?></td>
@@ -123,7 +176,16 @@ $total = array_sum(array_column($gastos, 'monto'));
                                     <td><?php echo $gasto['nombre'] . ' ' . $gasto['apellido']; ?></td>
                                     <td>
                                         <?php if ($gasto['comprobante_archivo']): ?>
-                                            <a href="../uploads/gastos/<?php echo $gasto['comprobante_archivo']; ?>" target="_blank" class="btn btn-sm btn-info">
+                                            <?php
+                                            // Determinar la ruta del archivo según el tipo de gasto
+                                            $ruta_archivo = '';
+                                            if ($gasto['tipo_origen'] === 'caja_chica') {
+                                                $ruta_archivo = '../uploads/caja_chica/' . $gasto['comprobante_archivo'];
+                                            } else {
+                                                $ruta_archivo = '../uploads/gastos/' . $gasto['comprobante_archivo'];
+                                            }
+                                            ?>
+                                            <a href="<?php echo $ruta_archivo; ?>" target="_blank" class="btn btn-sm btn-info">
                                                 <i class="bi bi-file-earmark"></i>
                                             </a>
                                         <?php endif; ?>

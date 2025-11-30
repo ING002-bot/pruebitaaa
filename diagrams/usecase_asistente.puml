@@ -1,0 +1,22 @@
+@startuml
+left to right direction
+actor "Asistente" as Asistente
+
+rectangle "Sistema HERMES EXPRESS" {
+  Asistente --> (Crear/Editar Paquetes)
+  Asistente --> (Importar Paquetes por Excel)
+  Asistente --> (Asignar a Repartidor)
+  Asistente --> (Gestionar Caja Chica)
+  Asistente --> (Generar Reportes)
+  Asistente --> (Enviar Notificaciones)
+  Asistente --> (Consultar Tarifas)
+}
+
+note right of Asistente
+Responsabilidades:
+- Operaciones diarias
+- Importación y verificación
+- Gestión de caja chica
+end note
+
+@enduml

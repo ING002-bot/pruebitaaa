@@ -2,15 +2,27 @@
  * Sistema de Notificaciones en Tiempo Real
  */
 
-let ultimaActualizacion = null;
-
-// Cargar notificaciones al iniciar
-document.addEventListener('DOMContentLoaded', function() {
-    cargarNotificaciones();
+// Proteger contra múltiples cargas del script
+if (typeof window.NotificacionesManager === 'undefined') {
+    window.NotificacionesManager = {
+        ultimaActualizacion: null,
+        inicializado: false
+    };
     
-    // Actualizar cada 30 segundos
-    setInterval(cargarNotificaciones, 30000);
-});
+    var ultimaActualizacion = null; // Mantener compatibilidad
+}
+
+// Cargar notificaciones al iniciar (solo una vez)
+if (!window.NotificacionesManager.inicializado) {
+    document.addEventListener('DOMContentLoaded', function() {
+        cargarNotificaciones();
+        
+        // Actualizar cada 30 segundos
+        setInterval(cargarNotificaciones, 30000);
+    });
+    
+    window.NotificacionesManager.inicializado = true;
+}
 
 /**
  * Cargar notificaciones del servidor

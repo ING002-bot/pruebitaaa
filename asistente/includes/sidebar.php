@@ -46,11 +46,11 @@
                 <i class="bi bi-wallet2"></i>
                 <span>Caja Chica</span>
             </a>
-            <a href="importar.php" class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'importar.php' ? 'active' : ''; ?>">
-                <i class="bi bi-file-earmark-arrow-up"></i>
+            <a href="importar_savar.php" class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'importar_savar.php' ? 'active' : ''; ?>">
+                <i class="bi bi-server"></i>
                 <span>Importar de SAVAR</span>
             </a>
-            <a href="importar.php" class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'importar.php' ? 'active' : ''; ?>">
+            <a href="importar_excel.php" class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'importar_excel.php' ? 'active' : ''; ?>">
                 <i class="bi bi-file-earmark-excel"></i>
                 <span>Importar Excel</span>
             </a>

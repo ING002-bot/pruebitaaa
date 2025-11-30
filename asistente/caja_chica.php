@@ -219,11 +219,24 @@ $pageTitle = "Caja Chica";
                                                     <?php echo ucfirst($gasto['tipo']); ?>
                                                 </span>
                                             </td>
-                                            <td><small class="text-muted"><?php echo htmlspecialchars($gasto['concepto_asignacion'] ?? '-'); ?></small></td>
                                             <td>
-                                                <strong><?php echo htmlspecialchars($gasto['concepto']); ?></strong>
-                                                <?php if ($gasto['descripcion']): ?>
-                                                    <br><small class="text-muted"><?php echo htmlspecialchars(substr($gasto['descripcion'], 0, 50)); ?></small>
+                                                <?php 
+                                                // Mostrar concepto de asignación solo si existe y no es un número
+                                                $concepto_asig = $gasto['concepto_asignacion'] ?? '';
+                                                if (!empty($concepto_asig) && !is_numeric($concepto_asig) && $concepto_asig !== '0') {
+                                                    echo '<small class="text-muted">' . htmlspecialchars($concepto_asig) . '</small>';
+                                                } else {
+                                                    echo '<small class="text-muted">-</small>';
+                                                }
+                                                ?>
+                                            </td>
+                                            <td>
+                                                <?php if (!empty($gasto['descripcion'])): ?>
+                                                    <strong><?php echo htmlspecialchars($gasto['descripcion']); ?></strong>
+                                                <?php elseif (!empty($gasto['concepto']) && $gasto['concepto'] !== '0'): ?>
+                                                    <strong><?php echo htmlspecialchars($gasto['concepto']); ?></strong>
+                                                <?php else: ?>
+                                                    <strong>Gasto sin descripción</strong>
                                                 <?php endif; ?>
                                             </td>
                                             <td class="text-danger"><strong>-S/ <?php echo number_format($gasto['monto'], 2); ?></strong></td>
@@ -310,23 +323,48 @@ $pageTitle = "Caja Chica";
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../assets/js/dashboard.js"></script>
-    <script src="../assets/js/notificaciones.js"></script>
+    <!-- notificaciones.js ya está cargado en header.php -->
     <script>
         function toggleSidebar() {
             document.getElementById('sidebar').classList.toggle('active');
         }
 
         function registrarGasto(asignacionId, disponible, concepto) {
-            document.getElementById('gastoAsignacionId').value = asignacionId;
-            document.getElementById('gastoDisponible').textContent = disponible.toFixed(2);
-            document.getElementById('gastoConceptoAsignacion').textContent = concepto;
-            document.getElementById('gastoMonto').max = disponible;
-            document.getElementById('gastoMonto').value = '';
-            
-            // Obtener el modal y mostrarlo
+            // Buscar el modal
             const modalElement = document.getElementById('registrarGastoModal');
-            const modal = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
-            modal.show();
+            if (!modalElement) {
+                console.error('Modal no encontrado');
+                return;
+            }
+
+            // Cerrar cualquier modal abierto primero
+            const existingModal = bootstrap.Modal.getInstance(modalElement);
+            if (existingModal) {
+                existingModal.hide();
+            }
+
+            // Esperar un poco para que se cierre completamente
+            setTimeout(function() {
+                // Buscar elementos del formulario
+                const gastoAsignacionId = document.querySelector('#registrarGastoModal input[name="asignacion_id"]');
+                const gastoDisponible = document.querySelector('#registrarGastoModal #gastoDisponible');
+                const gastoConceptoAsignacion = document.querySelector('#registrarGastoModal #gastoConceptoAsignacion');
+                const gastoMonto = document.querySelector('#registrarGastoModal input[name="monto"]');
+                
+                // Configurar valores directamente sin validaciones excesivas
+                if (gastoAsignacionId) gastoAsignacionId.value = asignacionId;
+                if (gastoDisponible) gastoDisponible.textContent = disponible.toFixed(2);
+                if (gastoConceptoAsignacion) gastoConceptoAsignacion.textContent = concepto;
+                if (gastoMonto) {
+                    gastoMonto.max = disponible;
+                    gastoMonto.value = '';
+                }
+                
+                // Mostrar el modal sin crear nueva instancia
+                const modal = bootstrap.Modal.getOrCreateInstance(modalElement);
+                modal.show();
+                
+            }, 200);
         }
 
         function verComprobante(foto) {
@@ -335,6 +373,28 @@ $pageTitle = "Caja Chica";
             const modal = bootstrap.Modal.getInstance(modalElement) || new bootstrap.Modal(modalElement);
             modal.show();
         }
+
+        // Limpiar solo el formulario cuando se cierra el modal (NO los elementos informativos)
+        document.addEventListener('DOMContentLoaded', function() {
+            const gastoModal = document.getElementById('registrarGastoModal');
+            if (gastoModal) {
+                gastoModal.addEventListener('hidden.bs.modal', function() {
+                    // Solo limpiar los campos de entrada del usuario
+                    const montoInput = this.querySelector('input[name="monto"]');
+                    const conceptoInput = this.querySelector('input[name="concepto"]');
+                    const descripcionInput = this.querySelector('textarea[name="descripcion"]');
+                    const fotoInput = this.querySelector('input[name="foto_comprobante"]');
+                    
+                    if (montoInput) montoInput.value = '';
+                    if (conceptoInput) conceptoInput.value = '';
+                    if (descripcionInput) descripcionInput.value = '';
+                    if (fotoInput) fotoInput.value = '';
+                    
+                    // NO limpiar los spans informativos (gastoDisponible, gastoConceptoAsignacion)
+                    // porque los necesitamos para la siguiente apertura
+                });
+            }
+        });
     </script>
 </body>
 </html>

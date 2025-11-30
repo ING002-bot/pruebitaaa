@@ -58,22 +58,7 @@ if ($stmt) {
                 </div>
             <?php endif; ?>
 
-            <!-- Instrucciones -->
-            <div class="card mb-4">
-                <div class="card-header bg-primary text-white">
-                    <h5 class="mb-0"><i class="bi bi-info-circle"></i> Instrucciones de Importación</h5>
-                </div>
-                <div class="card-body">
-                    <div class="alert alert-info mb-0">
-                        <h6><i class="bi bi-exclamation-triangle"></i> Importante:</h6>
-                        <ul class="mb-0">
-                            <li>La importación automática desde SAVAR requiere configuración del script Python</li>
-                            <li>Contacta al administrador para ejecutar importaciones desde el sistema SAVAR</li>
-                            <li>Puedes revisar el historial de importaciones previas más abajo</li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
+            <!-- Instrucciones removidas por solicitud del usuario -->
 
             <!-- Historial de Importaciones -->
             <?php if (!empty($importaciones)): ?>
@@ -119,11 +104,7 @@ if ($stmt) {
                                         </span>
                                     </td>
                                     <td>
-                                        <?php if (($imp['errores'] ?? 0) > 0): ?>
-                                            <a href="../admin/importar_errores.php?id=<?php echo $imp['id']; ?>" class="btn btn-sm btn-warning">
-                                                <i class="bi bi-exclamation-triangle"></i> Ver Errores
-                                            </a>
-                                        <?php endif; ?>
+
                                     </td>
                                 </tr>
                                 <?php endforeach; ?>

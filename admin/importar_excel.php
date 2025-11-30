@@ -162,11 +162,6 @@ $importaciones = Database::getInstance()->fetchAll($db->query(
                                             <a href="../uploads/importaciones/<?php echo $imp['nombre_archivo']; ?>" class="btn btn-sm btn-info" download>
                                                 <i class="bi bi-download"></i>
                                             </a>
-                                            <?php if ($imp['registros_fallidos'] > 0): ?>
-                                                <button class="btn btn-sm btn-warning" onclick="verErrores(<?php echo $imp['id']; ?>)">
-                                                    <i class="bi bi-exclamation-triangle"></i>
-                                                </button>
-                                            <?php endif; ?>
                                         </td>
                                     </tr>
                                     <?php endforeach; ?>

@@ -1,0 +1,20 @@
+@startuml
+left to right direction
+actor "Repartidor" as Repartidor
+
+rectangle "Sistema HERMES EXPRESS" {
+  Repartidor --> (Ver Paquetes Asignados)
+  Repartidor --> (Iniciar Entrega)
+  Repartidor --> (Registrar Entrega con Foto)
+  Repartidor --> (Reportar Incidencia / Rezago)
+  Repartidor --> (Consultar Historial)
+  Repartidor --> (Actualizar Ubicación en Tiempo Real)
+}
+
+note right of Repartidor
+Responsabilidades:
+- Entregas en terreno
+- Registro de evidencia
+end note
+
+@enduml

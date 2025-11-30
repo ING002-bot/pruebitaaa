@@ -28,6 +28,9 @@ class WhatsAppNotificaciones {
         if (defined('WHATSAPP_NUMERO_EMPRESA')) {
             $this->numero_empresa = WHATSAPP_NUMERO_EMPRESA;
         }
+        
+        // Log del tipo de API configurado
+        error_log("WhatsApp Helper initialized with API type: " . $this->api_type);
     }
     
     /**
@@ -414,6 +417,10 @@ class WhatsAppNotificaciones {
             return $this->enviarConWhatsAppCloud($telefono, $mensaje);
         }
         
+        if ($this->api_type === 'flexbis') {
+            return $this->enviarConFlexbis($telefono, $mensaje);
+        }
+        
         return 'error';
     }
     
@@ -439,24 +446,28 @@ class WhatsAppNotificaciones {
      * Enviar con Twilio
      */
     private function enviarConTwilio($telefono, $mensaje) {
-        if (empty(TWILIO_ACCOUNT_SID) || empty(TWILIO_AUTH_TOKEN)) {
+        $twilio_sid = defined('TWILIO_ACCOUNT_SID') ? constant('TWILIO_ACCOUNT_SID') : '';
+        $twilio_token = defined('TWILIO_AUTH_TOKEN') ? constant('TWILIO_AUTH_TOKEN') : '';
+        $twilio_from = defined('TWILIO_WHATSAPP_FROM') ? constant('TWILIO_WHATSAPP_FROM') : 'whatsapp:+14155238886';
+        
+        if (empty($twilio_sid) || empty($twilio_token)) {
             error_log("Twilio: Credenciales no configuradas en config.php");
             return 'error';
         }
         
         try {
             // URL de la API de Twilio para WhatsApp
-            $url = 'https://api.twilio.com/2010-04-01/Accounts/' . TWILIO_ACCOUNT_SID . '/Messages.json';
+            $url = 'https://api.twilio.com/2010-04-01/Accounts/' . $twilio_sid . '/Messages.json';
             
             // Datos del mensaje
             $post_data = [
-                'From' => TWILIO_WHATSAPP_FROM,
+                'From' => $twilio_from,
                 'To' => 'whatsapp:' . $telefono,
                 'Body' => $mensaje
             ];
             
             // Crear credenciales básicas
-            $auth = base64_encode(TWILIO_ACCOUNT_SID . ':' . TWILIO_AUTH_TOKEN);
+            $auth = base64_encode($twilio_sid . ':' . $twilio_token);
             
             // Inicializar cURL
             $ch = curl_init($url);
@@ -532,6 +543,78 @@ class WhatsAppNotificaciones {
         
         error_log("WhatsApp Cloud API Error: HTTP $http_code - $response");
         return 'error';
+    }
+
+    /**
+     * Enviar con Flexbis WhatsApp API
+     */
+    private function enviarConFlexbis($telefono, $mensaje) {
+        $flexbis_sid = defined('FLEXBIS_API_SID') ? constant('FLEXBIS_API_SID') : '';
+        $flexbis_key = defined('FLEXBIS_API_KEY') ? constant('FLEXBIS_API_KEY') : '';
+        $flexbis_url = defined('FLEXBIS_API_URL') ? constant('FLEXBIS_API_URL') : 'https://api.flexbis.com/v1/';
+        $flexbis_from = defined('FLEXBIS_WHATSAPP_FROM') ? constant('FLEXBIS_WHATSAPP_FROM') : '';
+        
+        if (empty($flexbis_sid) || empty($flexbis_key)) {
+            error_log("Flexbis: Credenciales no configuradas en config.php");
+            return 'error';
+        }
+        
+        try {
+            // Construir URL de la API
+            $url = rtrim($flexbis_url, '/') . '/messages/whatsapp';
+            
+            // Preparar datos del mensaje
+            $post_data = [
+                'sid' => $flexbis_sid,
+                'to' => $telefono,
+                'message' => $mensaje,
+                'from' => $flexbis_from,
+                'type' => 'text'
+            ];
+            
+            // Headers de autenticación
+            $headers = [
+                'Content-Type: application/json',
+                'Authorization: Bearer ' . $flexbis_key,
+                'Accept: application/json'
+            ];
+            
+            // Inicializar cURL
+            $ch = curl_init($url);
+            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($ch, CURLOPT_TIMEOUT, 15);
+            curl_setopt($ch, CURLOPT_POST, true);
+            curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($post_data));
+            curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+            curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+            curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+            
+            // Ejecutar
+            $response = curl_exec($ch);
+            $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+            $curl_error = curl_error($ch);
+            curl_close($ch);
+            
+            // Verificar respuesta
+            if ($curl_error) {
+                error_log("❌ Flexbis cURL Error: $curl_error");
+                return 'error';
+            }
+            
+            if ($http_code >= 200 && $http_code < 300) {
+                $result = json_decode($response, true);
+                $message_id = $result['message_id'] ?? $result['id'] ?? 'success';
+                error_log("✅ Flexbis WhatsApp enviado: ID $message_id");
+                return $message_id;
+            } else {
+                error_log("❌ Flexbis Error HTTP $http_code: $response");
+                return 'error';
+            }
+            
+        } catch (Exception $e) {
+            error_log("❌ Flexbis Exception: " . $e->getMessage());
+            return 'error';
+        }
     }
     
     /**

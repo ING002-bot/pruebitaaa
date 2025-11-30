@@ -1,0 +1,34 @@
+@startuml
+skinparam linetype ortho
+hide circle
+
+' Entidades (tablas) sin atributos específicos
+entity USUARIO {}
+entity ASIGNACION_PAQUETE {}
+entity PAQUETE_JSON {}
+entity RESOUNEM_LONES {}
+entity RUTA {}
+entity PAQUETE {}
+entity RESUMEN_HERMES {}
+entity RESUMEN_ING_EGR {}
+entity CAJA_CHICAMOVIMIENTOS {}
+entity TARIFA_RUTA {}
+entity TARIFA_ZON {}
+entity WHATSAPPNOTIFICATION {}
+
+' Relaciones según tu definición (sin etiquetas)
+USUARIO ||--o{ ASIGNACION_PAQUETE
+ASIGNACION_PAQUETE ||--o{ PAQUETE_JSON
+PAQUETE_JSON ||--o{ RESOUNEM_LONES
+
+RUTA ||--o{ PAQUETE
+
+PAQUETE ||--o{ RESUMEN_HERMES
+RESUMEN_HERMES ||--o{ RESUMEN_ING_EGR
+RESUMEN_ING_EGR ||--o{ CAJA_CHICAMOVIMIENTOS
+
+PAQUETE ||--o{ TARIFA_RUTA
+TARIFA_RUTA ||--o{ TARIFA_ZON
+TARIFA_ZON ||--o{ WHATSAPPNOTIFICATION
+
+@enduml

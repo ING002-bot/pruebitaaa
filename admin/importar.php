@@ -181,11 +181,6 @@ if ($stmt) {
                                                         <button class="btn btn-sm btn-info" onclick="verDetalles(<?php echo $imp['id']; ?>)">
                                                             <i class="bi bi-eye"></i>
                                                         </button>
-                                                        <?php if ($imp['errores']): ?>
-                                                            <button class="btn btn-sm btn-warning" onclick="verErrores(<?php echo $imp['id']; ?>)">
-                                                                <i class="bi bi-exclamation-triangle"></i>
-                                                            </button>
-                                                        <?php endif; ?>
                                                     </td>
                                                 </tr>
                                             <?php endforeach; ?>

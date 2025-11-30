@@ -25,8 +25,24 @@ $paquetesRezagados = $stmt->fetch_assoc()['total'];
 $stmt = $db->query("SELECT COALESCE(SUM(monto), 0) as total FROM ingresos WHERE MONTH(fecha_ingreso) = MONTH(CURDATE()) AND YEAR(fecha_ingreso) = YEAR(CURDATE())");
 $ingresosMes = $stmt->fetch_assoc()['total'];
 
-// Gastos del mes actual
-$stmt = $db->query("SELECT COALESCE(SUM(monto), 0) as total FROM gastos WHERE MONTH(fecha_gasto) = MONTH(CURDATE()) AND YEAR(fecha_gasto) = YEAR(CURDATE())");
+// Gastos del mes actual (gastos regulares + asignaciones y gastos de caja chica)
+$stmt = $db->query("
+    SELECT COALESCE(SUM(monto), 0) as total 
+    FROM (
+        -- Gastos regulares del sistema
+        SELECT monto FROM gastos 
+        WHERE MONTH(fecha_gasto) = MONTH(CURDATE()) 
+        AND YEAR(fecha_gasto) = YEAR(CURDATE())
+        
+        UNION ALL
+        
+        -- Asignaciones y gastos de caja chica
+        SELECT monto FROM caja_chica 
+        WHERE tipo IN ('asignacion', 'gasto') 
+        AND MONTH(fecha_operacion) = MONTH(CURDATE()) 
+        AND YEAR(fecha_operacion) = YEAR(CURDATE())
+    ) AS todos_gastos
+");
 $gastosMes = $stmt->fetch_assoc()['total'];
 
 // Repartidores activos
