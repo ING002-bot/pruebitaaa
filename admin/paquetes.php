@@ -280,57 +280,59 @@ $pageTitle = "Gestión de Paquetes";
                                 </select>
                             </div>
                             <div class="col-md-4 mb-3">
-                                <label class="form-label">Distrito *</label>
-                                <select class="form-select" name="distrito" required>
+                                <label class="form-label">Distrito * <small class="text-muted">(Tarifa se calcula automáticamente)</small></label>
+                                <select class="form-select" name="distrito" id="distrito_select" onchange="actualizarTarifa()" required>
                                     <option value="">Seleccione distrito</option>
-                                    <optgroup label="CHICLAYO">
-                                        <option value="Chiclayo">Chiclayo</option>
-                                        <option value="Leonardo Ortiz">Leonardo Ortiz</option>
-                                        <option value="La Victoria">La Victoria</option>
-                                        <option value="Santa Victoria">Santa Victoria</option>
+                                    <optgroup label="URBANO - Ganancia: S/ 1.20 a S/ 1.50">
+                                        <option value="Chiclayo" data-precio="3.00" data-repartidor="1.50">Chiclayo - S/ 3.00 (Ganancia: S/ 1.50)</option>
+                                        <option value="Leonardo Ortiz" data-precio="3.00" data-repartidor="1.80">Leonardo Ortiz - S/ 3.00 (Ganancia: S/ 1.20)</option>
+                                        <option value="La Victoria" data-precio="3.00" data-repartidor="1.50">La Victoria - S/ 3.00 (Ganancia: S/ 1.50)</option>
+                                        <option value="Santa Victoria" data-precio="3.00" data-repartidor="1.50">Santa Victoria - S/ 3.00 (Ganancia: S/ 1.50)</option>
                                     </optgroup>
-                                    <optgroup label="PUEBLOS">
-                                        <option value="Lambayeque">Lambayeque</option>
-                                        <option value="Mochumi">Mochumi</option>
-                                        <option value="Tucume">Tucume</option>
-                                        <option value="Illimo">Illimo</option>
-                                        <option value="Nuevos Aires">Nuevos Aires</option>
-                                        <option value="Jayanca">Jayanca</option>
-                                        <option value="Pacora">Pacora</option>
-                                        <option value="Morrope">Morrope</option>
-                                        <option value="Olmos">Olmos</option>
-                                        <option value="Salas">Salas</option>
+                                    <optgroup label="PUEBLOS - Ganancia: S/ 2.00 a S/ 5.00">
+                                        <option value="Lambayeque" data-precio="5.00" data-repartidor="3.00">Lambayeque - S/ 5.00 (Ganancia: S/ 2.00)</option>
+                                        <option value="Mochumi" data-precio="8.00" data-repartidor="3.00">Mochumi - S/ 8.00 (Ganancia: S/ 5.00)</option>
+                                        <option value="Tucume" data-precio="8.00" data-repartidor="3.00">Tucume - S/ 8.00 (Ganancia: S/ 5.00)</option>
+                                        <option value="Illimo" data-precio="8.00" data-repartidor="3.00">Illimo - S/ 8.00 (Ganancia: S/ 5.00)</option>
+                                        <option value="Nueva Arica" data-precio="8.00" data-repartidor="3.00">Nueva Arica - S/ 8.00 (Ganancia: S/ 5.00)</option>
+                                        <option value="Jayanca" data-precio="8.00" data-repartidor="3.00">Jayanca - S/ 8.00 (Ganancia: S/ 5.00)</option>
+                                        <option value="Pacora" data-precio="8.00" data-repartidor="3.00">Pacora - S/ 8.00 (Ganancia: S/ 5.00)</option>
+                                        <option value="Morrope" data-precio="8.00" data-repartidor="3.00">Morrope - S/ 8.00 (Ganancia: S/ 5.00)</option>
+                                        <option value="Motupe" data-precio="8.00" data-repartidor="3.00">Motupe - S/ 8.00 (Ganancia: S/ 5.00)</option>
+                                        <option value="Olmos" data-precio="8.00" data-repartidor="3.00">Olmos - S/ 8.00 (Ganancia: S/ 5.00)</option>
+                                        <option value="Salas" data-precio="8.00" data-repartidor="3.00">Salas - S/ 8.00 (Ganancia: S/ 5.00)</option>
                                     </optgroup>
-                                    <optgroup label="PLAYAS">
-                                        <option value="San Jose">San Jose</option>
-                                        <option value="Santa Rosa">Santa Rosa</option>
-                                        <option value="Pimentel">Pimentel</option>
-                                        <option value="Reque">Reque</option>
-                                        <option value="Monsefu">Monsefu</option>
-                                        <option value="Eten">Eten</option>
-                                        <option value="Puerto Eten">Puerto Eten</option>
+                                    <optgroup label="PLAYAS - Ganancia: S/ 2.50 a S/ 5.50">
+                                        <option value="San Jose" data-precio="5.00" data-repartidor="2.00">San Jose - S/ 5.00 (Ganancia: S/ 3.00)</option>
+                                        <option value="Santa Rosa" data-precio="5.00" data-repartidor="2.00">Santa Rosa - S/ 5.00 (Ganancia: S/ 3.00)</option>
+                                        <option value="Pimentel" data-precio="5.00" data-repartidor="2.00">Pimentel - S/ 5.00 (Ganancia: S/ 3.00)</option>
+                                        <option value="Reque" data-precio="5.00" data-repartidor="2.50">Reque - S/ 5.00 (Ganancia: S/ 2.50)</option>
+                                        <option value="Monsefu" data-precio="5.00" data-repartidor="2.50">Monsefu - S/ 5.00 (Ganancia: S/ 2.50)</option>
+                                        <option value="Eten" data-precio="8.00" data-repartidor="2.50">Eten - S/ 8.00 (Ganancia: S/ 5.50)</option>
+                                        <option value="Puerto Eten" data-precio="8.00" data-repartidor="2.50">Puerto Eten - S/ 8.00 (Ganancia: S/ 5.50)</option>
                                     </optgroup>
-                                    <optgroup label="COOPERATIVAS">
-                                        <option value="Pomalca">Pomalca</option>
-                                        <option value="Patapo">Patapo</option>
-                                        <option value="Tumán">Tumán</option>
-                                        <option value="Pucala">Pucala</option>
-                                        <option value="Saltur">Saltur</option>
+                                    <optgroup label="COOPERATIVAS - Ganancia: S/ 3.00 a S/ 6.00">
+                                        <option value="Pomalca" data-precio="5.00" data-repartidor="2.00">Pomalca - S/ 5.00 (Ganancia: S/ 3.00)</option>
+                                        <option value="Patapo" data-precio="8.00" data-repartidor="2.00">Patapo - S/ 8.00 (Ganancia: S/ 6.00)</option>
+                                        <option value="Tuman" data-precio="8.00" data-repartidor="2.00">Tuman - S/ 8.00 (Ganancia: S/ 6.00)</option>
+                                        <option value="Pucala" data-precio="8.00" data-repartidor="2.00">Pucala - S/ 8.00 (Ganancia: S/ 6.00)</option>
+                                        <option value="Sartur" data-precio="8.00" data-repartidor="2.00">Sartur - S/ 8.00 (Ganancia: S/ 6.00)</option>
+                                        <option value="Chongoyape" data-precio="8.00" data-repartidor="2.00">Chongoyape - S/ 8.00 (Ganancia: S/ 6.00)</option>
                                     </optgroup>
-                                    <optgroup label="EXCOPERATIVAS">
-                                        <option value="Chongoyape">Chongoyape</option>
-                                        <option value="Ucupe">Ucupe</option>
-                                        <option value="Mocupe">Mocupe</option>
-                                        <option value="Zaña">Zaña</option>
-                                        <option value="Lagunas">Lagunas</option>
-                                        <option value="Picsi">Picsi</option>
-                                        <option value="Cayalti">Cayalti</option>
-                                        <option value="Oyotun">Oyotun</option>
+                                    <optgroup label="EXCOPERATIVAS - Ganancia: S/ 6.00">
+                                        <option value="Ucupe" data-precio="8.00" data-repartidor="2.00">Ucupe - S/ 8.00 (Ganancia: S/ 6.00)</option>
+                                        <option value="Mocupe" data-precio="8.00" data-repartidor="2.00">Mocupe - S/ 8.00 (Ganancia: S/ 6.00)</option>
+                                        <option value="Zaña" data-precio="8.00" data-repartidor="2.00">Zaña - S/ 8.00 (Ganancia: S/ 6.00)</option>
+                                        <option value="Cayalti" data-precio="8.00" data-repartidor="2.00">Cayalti - S/ 8.00 (Ganancia: S/ 6.00)</option>
+                                        <option value="Oyotun" data-precio="8.00" data-repartidor="2.00">Oyotun - S/ 8.00 (Ganancia: S/ 6.00)</option>
+                                        <option value="Lagunas" data-precio="8.00" data-repartidor="2.00">Lagunas - S/ 8.00 (Ganancia: S/ 6.00)</option>
                                     </optgroup>
-                                    <optgroup label="FERREÑAFE">
-                                        <option value="Ferreñafe">Ferreñafe</option>
-                                        <option value="Motupillo">Motupillo</option>
-                                        <option value="Pueblo Nuevo">Pueblo Nuevo</option>
+                                    <optgroup label="FERREÑAFE - Ganancia: S/ 5.50">
+                                        <option value="Ferreñafe" data-precio="8.00" data-repartidor="2.50">Ferreñafe - S/ 8.00 (Ganancia: S/ 5.50)</option>
+                                        <option value="Picsi" data-precio="8.00" data-repartidor="2.50">Picsi - S/ 8.00 (Ganancia: S/ 5.50)</option>
+                                        <option value="Pitipo" data-precio="8.00" data-repartidor="2.50">Pitipo - S/ 8.00 (Ganancia: S/ 5.50)</option>
+                                        <option value="Motupillo" data-precio="8.00" data-repartidor="2.50">Motupillo - S/ 8.00 (Ganancia: S/ 5.50)</option>
+                                        <option value="Pueblo Nuevo" data-precio="8.00" data-repartidor="2.50">Pueblo Nuevo - S/ 8.00 (Ganancia: S/ 5.50)</option>
                                     </optgroup>
                                 </select>
                             </div>
@@ -338,7 +340,23 @@ $pageTitle = "Gestión de Paquetes";
                                 <label class="form-label">Dirección Completa *</label>
                                 <textarea class="form-control" name="direccion_completa" rows="2" required></textarea>
                             </div>
-                            <div class="col-md-6 mb-3">
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Prioridad</label>
+                                <select class="form-select" name="prioridad" id="prioridad_select" onchange="actualizarTarifa()">
+                                    <option value="normal">Normal</option>
+                                    <option value="urgente">Urgente (+50%)</option>
+                                    <option value="express">Express (+100%)</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4 mb-3">
+                                <label class="form-label">Costo Envío</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">S/</span>
+                                    <input type="number" step="0.01" class="form-control" name="costo_envio" id="costo_envio" readonly value="0.00">
+                                </div>
+                                <small class="form-text text-muted" id="tarifa_info">Seleccione distrito para calcular</small>
+                            </div>
+                            <div class="col-md-4 mb-3">
                                 <label class="form-label">Asignar Repartidor</label>
                                 <div class="autocomplete-wrapper" style="position: relative;">
                                     <input type="text" 
@@ -649,6 +667,93 @@ $pageTitle = "Gestión de Paquetes";
             const modal = new bootstrap.Modal(document.getElementById('modalAsignarMultiple'));
             modal.show();
         }
+
+        // Función para actualizar tarifa automáticamente
+        function actualizarTarifa() {
+            const distritoSelect = document.getElementById('distrito_select');
+            const prioridadSelect = document.getElementById('prioridad_select');
+            const costoInput = document.getElementById('costo_envio');
+            const tarifaInfo = document.getElementById('tarifa_info');
+            
+            if (!distritoSelect || !prioridadSelect || !costoInput) return;
+            
+            const selectedOption = distritoSelect.options[distritoSelect.selectedIndex];
+            const prioridad = prioridadSelect.value;
+            
+            if (!selectedOption || !selectedOption.dataset.precio) {
+                costoInput.value = '0.00';
+                tarifaInfo.textContent = 'Seleccione distrito para calcular';
+                mostrarInfoGanancia('', '', '', '', '');
+                return;
+            }
+            
+            let precioBase = parseFloat(selectedOption.dataset.precio);
+            let tarifaRepartidor = parseFloat(selectedOption.dataset.repartidor);
+            let precioFinal = precioBase;
+            let costoRepartidor = tarifaRepartidor;
+            
+            // Aplicar factores según prioridad
+            switch (prioridad) {
+                case 'urgente':
+                    precioFinal = precioBase * 1.5;
+                    costoRepartidor = tarifaRepartidor * 1.5;
+                    tarifaInfo.textContent = `Tarifa base: S/ ${precioBase.toFixed(2)} + 50% urgente = S/ ${precioFinal.toFixed(2)}`;
+                    break;
+                case 'express':
+                    precioFinal = precioBase * 2.0;
+                    costoRepartidor = tarifaRepartidor * 2.0;
+                    tarifaInfo.textContent = `Tarifa base: S/ ${precioBase.toFixed(2)} + 100% express = S/ ${precioFinal.toFixed(2)}`;
+                    break;
+                default:
+                    tarifaInfo.textContent = `Tarifa normal: S/ ${precioFinal.toFixed(2)}`;
+            }
+            
+            const ganancia = precioFinal - costoRepartidor;
+            const margen = ((ganancia / precioFinal) * 100).toFixed(1);
+            const zona = selectedOption.text.split(' -')[0].trim();
+            
+            costoInput.value = precioFinal.toFixed(2);
+            mostrarInfoGanancia(precioFinal, costoRepartidor, ganancia, margen, zona);
+        }
+        
+        function mostrarInfoGanancia(cliente, repartidor, ganancia, margen, zona) {
+            let infoDiv = document.getElementById('info-ganancia');
+            if (!infoDiv) {
+                infoDiv = document.createElement('div');
+                infoDiv.id = 'info-ganancia';
+                infoDiv.className = 'alert mt-2';
+                document.getElementById('costo_envio').parentNode.appendChild(infoDiv);
+            }
+            
+            if (!zona) {
+                infoDiv.innerHTML = '';
+                infoDiv.className = 'alert mt-2';
+                return;
+            }
+            
+            const colorGanancia = ganancia >= 5 ? 'success' : ganancia >= 2.5 ? 'warning' : 'danger';
+            infoDiv.className = `alert alert-${colorGanancia} mt-2`;
+            
+            infoDiv.innerHTML = `
+                <small>
+                    <strong>💰 Análisis de Rentabilidad - ${zona}:</strong><br>
+                    Cliente paga: <span class="text-primary"><strong>S/ ${cliente.toFixed(2)}</strong></span> | 
+                    Repartidor recibe: <span class="text-warning"><strong>S/ ${repartidor.toFixed(2)}</strong></span><br>
+                    <strong>🎯 Tu ganancia: <span class="text-${colorGanancia}">S/ ${ganancia.toFixed(2)} (${margen}%)</span></strong>
+                    ${ganancia < 2 ? '<br><span class="text-danger">⚠️ Ganancia baja - Considera revisar costos</span>' : ''}
+                    ${ganancia >= 5 ? '<br><span class="text-success">🏆 ¡Excelente rentabilidad!</span>' : ''}
+                </small>
+            `;
+        }
+
+        // Inicializar cuando se carga el DOM
+        $(document).ready(function() {
+            // Configurar evento para actualizar tarifa al cambiar distrito
+            const distritoSelect = document.getElementById('distrito_select');
+            if (distritoSelect) {
+                distritoSelect.addEventListener('change', actualizarTarifa);
+            }
+        });
     </script>
     
     <!-- Chatbot Widget -->

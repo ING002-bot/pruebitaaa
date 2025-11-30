@@ -25,6 +25,20 @@ try {
         }
     }
 
+    // Calcular costo de envío basado en distrito y prioridad
+    $distrito = sanitize($_POST['distrito'] ?? '');
+    $prioridad = sanitize($_POST['prioridad'] ?? 'normal');
+    $costo_envio = !empty($_POST['costo_envio']) ? (float)$_POST['costo_envio'] : calcularCostoEnvio($distrito, $prioridad);
+    
+    // Obtener zona_tarifa_id para vincular con tarifas
+    $zona_tarifa_id = null;
+    if (!empty($distrito)) {
+        $tarifa_info = obtenerTarifaPorDistrito($distrito);
+        if ($tarifa_info) {
+            $zona_tarifa_id = $tarifa_info['id'];
+        }
+    }
+
     $data = [
         'codigo_seguimiento' => sanitize($_POST['codigo_seguimiento']),
         'codigo_savar' => sanitize($_POST['codigo_savar'] ?? ''),
@@ -34,20 +48,21 @@ try {
         'direccion_completa' => sanitize($_POST['direccion_completa']),
         'ciudad' => sanitize($_POST['departamento'] ?? 'Lambayeque'),
         'provincia' => sanitize($_POST['provincia'] ?? ''),
-        'distrito' => sanitize($_POST['distrito'] ?? ''),
+        'distrito' => $distrito,
         'peso' => 0,
         'valor_declarado' => 0,
-        'costo_envio' => TARIFA_POR_PAQUETE,
-        'prioridad' => 'normal',
+        'costo_envio' => $costo_envio,
+        'prioridad' => $prioridad,
         'repartidor_id' => !empty($_POST['repartidor_id']) ? (int)$_POST['repartidor_id'] : null,
-        'notas' => ''
+        'notas' => '',
+        'zona_tarifa_id' => $zona_tarifa_id
     ];
     
     $sql = "INSERT INTO paquetes (
         codigo_seguimiento, codigo_savar, destinatario_nombre, destinatario_telefono,
         destinatario_email, direccion_completa, ciudad, provincia, distrito, peso, valor_declarado,
-        costo_envio, prioridad, repartidor_id, notas, estado, fecha_asignacion
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 
+        costo_envio, prioridad, repartidor_id, notas, zona_tarifa_id, estado, fecha_asignacion
+    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?,
         CASE WHEN ? IS NOT NULL THEN 'en_ruta' ELSE 'pendiente' END,
         CASE WHEN ? IS NOT NULL THEN NOW() ELSE NULL END
     )";
@@ -58,7 +73,7 @@ try {
     }
     
     $stmt->bind_param(
-        "sssssssssdddsisii",
+        "sssssssssddsisiii",
         $data['codigo_seguimiento'],
         $data['codigo_savar'],
         $data['destinatario_nombre'],
@@ -74,6 +89,7 @@ try {
         $data['prioridad'],
         $data['repartidor_id'],
         $data['notas'],
+        $data['zona_tarifa_id'],
         $data['repartidor_id'],
         $data['repartidor_id']
     );

@@ -54,6 +54,10 @@
                 <i class="bi bi-graph-down-arrow"></i>
                 <span>Gastos</span>
             </a>
+            <a href="dashboard_ganancias.php" class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'dashboard_ganancias.php' ? 'active' : ''; ?>">
+                <i class="bi bi-currency-dollar"></i>
+                <span>Dashboard Ganancias</span>
+            </a>
         </div>
         
         <div class="menu-section">

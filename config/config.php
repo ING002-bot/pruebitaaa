@@ -48,13 +48,16 @@ define('FLEXBIS_DEBUG', $_ENV['FLEXBIS_DEBUG'] ?? getenv('FLEXBIS_DEBUG') ?: 'tr
 define('MAX_UPLOAD_SIZE', 5242880); // 5MB
 define('ALLOWED_IMAGE_TYPES', ['image/jpeg', 'image/png', 'image/jpg']);
 
-// Tarifas por paquete (configurable)
-define('TARIFA_POR_PAQUETE', 3.50);
-define('TARIFA_URGENTE', 5.00);
-define('TARIFA_EXPRESS', 7.50);
+// Tarifas por paquete (configurable - ahora dinámicas por zona)
+define('TARIFA_URBANO_MIN', 3.00);     // Zona urbana más barata
+define('TARIFA_PUEBLOS_MIN', 5.00);    // Pueblos cercanos
+define('TARIFA_LEJANOS_MAX', 8.00);    // Zonas más lejanas
+define('TARIFA_URGENTE_FACTOR', 1.5);  // Factor multiplicador urgente
+define('TARIFA_EXPRESS_FACTOR', 2.0);  // Factor multiplicador express
 
-// Incluir base de datos
+// Incluir base de datos y helpers
 require_once __DIR__ . '/database.php';
+require_once __DIR__ . '/tarifas_helper.php';
 
 // Funciones de utilidad
 function isLoggedIn() {
