@@ -1,6 +1,8 @@
 <?php
 // Configuración general del sistema
-session_start();
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 
 // Prevenir que el navegador cachee páginas protegidas
 header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");

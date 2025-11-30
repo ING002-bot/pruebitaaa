@@ -39,7 +39,8 @@ $pageTitle = "Tarifas por Zona";
         
         <div class="page-content">
             <div class="page-title">
-                <h1><i class="bi bi-cash-coin"></i> Tarifas por Zona</h1>
+                <h1><i class="bi bi-calculator"></i> 💰 Gestión de Tarifas</h1>
+                <p class="text-muted">Administra lo que cobras a clientes y pagas a repartidores por cada zona</p>
                 <nav aria-label="breadcrumb">
                     <ol class="breadcrumb">
                         <li class="breadcrumb-item"><a href="dashboard.php">Dashboard</a></li>
@@ -88,43 +89,58 @@ $pageTitle = "Tarifas por Zona";
                     <div class="card-body p-0">
                         <div class="table-responsive">
                             <table class="table table-hover mb-0">
-                                <thead class="table-light">
+                                <thead class="table-primary text-white">
                                     <tr>
-                                        <th width="5%">ID</th>
-                                        <th width="35%">Nombre de Zona</th>
-                                        <th width="15%">Tipo Envío</th>
-                                        <th width="15%">Tarifa Repartidor</th>
-                                        <th width="10%">Estado</th>
-                                        <th width="15%">Última Actualización</th>
-                                        <th width="5%">Acciones</th>
+                                        <th width="20%">📍 Zona de Entrega</th>
+                                        <th width="18%" class="text-center">💰 TÚ COBRAS<br><small>(Al Cliente)</small></th>
+                                        <th width="18%" class="text-center">💸 TÚ PAGAS<br><small>(Al Repartidor)</small></th>
+                                        <th width="18%" class="text-center">📈 TU GANANCIA<br><small>(Por Paquete)</small></th>
+                                        <th width="11%" class="text-center">% Margen</th>
+                                        <th width="15%" class="text-center">Acciones</th>
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    <?php foreach ($tarifas as $tarifa): ?>
-                                        <tr>
-                                            <td><?php echo $tarifa['id']; ?></td>
-                                            <td><strong><?php echo htmlspecialchars($tarifa['nombre_zona']); ?></strong></td>
-                                            <td><?php echo htmlspecialchars($tarifa['tipo_envio']); ?></td>
+                                    <?php foreach ($tarifas as $tarifa): 
+                                        $ganancia = $tarifa['costo_cliente'] - $tarifa['tarifa_repartidor'];
+                                        $margen = $tarifa['costo_cliente'] > 0 ? (($ganancia / $tarifa['costo_cliente']) * 100) : 0;
+                                    ?>
+                                        <tr class="align-middle">
                                             <td>
-                                                <span class="badge bg-success fs-6">
-                                                    S/ <?php echo number_format($tarifa['tarifa_repartidor'], 2); ?>
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <?php if ($tarifa['activo']): ?>
-                                                    <span class="badge bg-success">Activo</span>
-                                                <?php else: ?>
-                                                    <span class="badge bg-secondary">Inactivo</span>
+                                                <strong class="text-dark"><?php echo htmlspecialchars($tarifa['nombre_zona']); ?></strong>
+                                                <?php if (!$tarifa['activo']): ?>
+                                                <span class="badge bg-danger ms-1">Inactiva</span>
                                                 <?php endif; ?>
                                             </td>
-                                            <td>
-                                                <small class="text-muted">
-                                                    <?php echo date('d/m/Y H:i', strtotime($tarifa['fecha_actualizacion'])); ?>
-                                                </small>
+                                            <td class="text-center bg-light-primary">
+                                                <div class="d-flex flex-column">
+                                                    <span class="fs-4 fw-bold text-success">S/ <?php echo number_format($tarifa['costo_cliente'], 2); ?></span>
+                                                    <small class="text-muted">Ingresas por paquete</small>
+                                                </div>
                                             </td>
-                                            <td>
-                                                <button class="btn btn-sm btn-warning" onclick="editarTarifa(<?php echo htmlspecialchars(json_encode($tarifa)); ?>)">
-                                                    <i class="bi bi-pencil"></i>
+                                            <td class="text-center bg-light-danger">
+                                                <div class="d-flex flex-column">
+                                                    <span class="fs-4 fw-bold text-danger">S/ <?php echo number_format($tarifa['tarifa_repartidor'], 2); ?></span>
+                                                    <small class="text-muted">Gastas por paquete</small>
+                                                </div>
+                                            </td>
+                                            <td class="text-center bg-light-success">
+                                                <div class="d-flex flex-column">
+                                                    <span class="fs-4 fw-bold <?php echo $ganancia >= 5 ? 'text-success' : ($ganancia >= 2.5 ? 'text-warning' : 'text-danger'); ?>">
+                                                        S/ <?php echo number_format($ganancia, 2); ?>
+                                                    </span>
+                                                    <small class="text-muted">Ganas neto</small>
+                                                </div>
+                                            </td>
+                                            <td class="text-center">
+                                                <span class="badge fs-6 p-2 <?php echo $margen >= 60 ? 'bg-success' : ($margen >= 40 ? 'bg-warning text-dark' : 'bg-danger'); ?>">
+                                                    <?php echo number_format($margen, 1); ?>%
+                                                </span>
+                                            </td>
+                                            <td class="text-center">
+                                                <button class="btn btn-warning btn-sm fw-bold" 
+                                                        onclick="editarTarifa(<?php echo htmlspecialchars(json_encode($tarifa)); ?>)" 
+                                                        title="Editar Tarifas">
+                                                    <i class="bi bi-pencil-fill"></i> EDITAR
                                                 </button>
                                             </td>
                                         </tr>
@@ -152,105 +168,193 @@ $pageTitle = "Tarifas por Zona";
 
     <!-- Modal Nueva Zona -->
     <div class="modal fade" id="nuevaZonaModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <form action="tarifa_guardar.php" method="POST">
-                    <div class="modal-header">
-                        <h5 class="modal-title"><i class="bi bi-plus-circle"></i> Nueva Zona</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                    <div class="modal-header bg-success text-white">
+                        <h5 class="modal-title"><i class="bi bi-plus-circle"></i> 🆕 Crear Nueva Zona de Entrega</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Categoría</label>
-                            <select name="categoria" class="form-select" required>
-                                <option value="">Seleccionar...</option>
-                                <option value="URBANO">URBANO</option>
-                                <option value="PUEBLOS">PUEBLOS</option>
-                                <option value="PLAYAS">PLAYAS</option>
-                                <option value="COOPERATIVAS">COOPERATIVAS</option>
-                                <option value="EXCOPERATIVAS">EXCOPERATIVAS</option>
-                                <option value="FERREÑAFE">FERREÑAFE</option>
-                            </select>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Nombre de Zona</label>
-                            <input type="text" name="nombre_zona" class="form-control" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s\-]+" title="Solo se permiten letras, espacios y guiones">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Tipo de Envío</label>
-                            <input type="text" name="tipo_envio" class="form-control" value="Paquete" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" title="Solo se permiten letras y espacios">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Tarifa para Repartidor (S/)</label>
-                            <input type="number" name="tarifa_repartidor" class="form-control" step="0.01" min="0" required title="Solo se permiten números decimales">
-                            <small class="text-muted">Monto que recibirá el repartidor por cada paquete entregado</small>
-                        </div>
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input type="checkbox" name="activo" class="form-check-input" id="activoCheck" value="1" checked>
-                                <label class="form-check-label" for="activoCheck">Zona activa</label>
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">📍 Categoría</label>
+                                <select name="categoria" class="form-select" required>
+                                    <option value="">Seleccionar categoría...</option>
+                                    <option value="URBANO">URBANO</option>
+                                    <option value="PUEBLOS">PUEBLOS</option>
+                                    <option value="PLAYAS">PLAYAS</option>
+                                    <option value="COOPERATIVAS">COOPERATIVAS</option>
+                                    <option value="EXCOPERATIVAS">EXCOPERATIVAS</option>
+                                    <option value="FERREÑAFE">FERREÑAFE</option>
+                                </select>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-bold">🏘️ Nombre de Zona</label>
+                                <input type="text" name="nombre_zona" class="form-control" required 
+                                       pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s\-]+" 
+                                       title="Solo se permiten letras, espacios y guiones"
+                                       placeholder="Ej: Chiclayo, Lambayeque, etc.">
                             </div>
                         </div>
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="card border-success">
+                                    <div class="card-header bg-success text-white text-center">
+                                        <h6 class="mb-0">💰 LO QUE COBRARÁS AL CLIENTE</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="input-group input-group-lg">
+                                            <span class="input-group-text fw-bold">S/</span>
+                                            <input type="number" step="0.01" min="0" class="form-control text-center fs-3 fw-bold" 
+                                                   id="new_costo_cliente" name="costo_cliente" required 
+                                                   placeholder="0.00" oninput="actualizarPreviewNuevo()">
+                                        </div>
+                                        <small class="text-muted d-block mt-2 text-center">
+                                            <i class="bi bi-info-circle"></i> Precio que cobrarás por cada paquete
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card border-danger">
+                                    <div class="card-header bg-danger text-white text-center">
+                                        <h6 class="mb-0">🚚 LO QUE PAGARÁS AL REPARTIDOR</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="input-group input-group-lg">
+                                            <span class="input-group-text fw-bold">S/</span>
+                                            <input type="number" step="0.01" min="0" class="form-control text-center fs-3 fw-bold" 
+                                                   id="new_tarifa_repartidor" name="tarifa_repartidor" required 
+                                                   placeholder="0.00" oninput="actualizarPreviewNuevo()">
+                                        </div>
+                                        <small class="text-muted d-block mt-2 text-center">
+                                            <i class="bi bi-info-circle"></i> Lo que pagarás por cada entrega
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card border-info">
+                            <div class="card-header bg-info text-white text-center">
+                                <h6 class="mb-0">📈 VISTA PREVIA DE TU GANANCIA</h6>
+                            </div>
+                            <div class="card-body text-center" id="preview_content_nuevo">
+                                <p class="text-muted fs-5">Ingresa los valores para ver tu ganancia</p>
+                            </div>
+                        </div>
+
+                        <input type="hidden" name="tipo_envio" value="Paquete">
+                        <input type="hidden" name="activo" value="1">
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-primary">Guardar Zona</button>
+                        <button type="button" class="btn btn-secondary btn-lg" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="bi bi-check-circle"></i> Crear Zona
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
 
-    <!-- Modal Editar Zona -->
+    <!-- Modal Editar Tarifas -->
     <div class="modal fade" id="editarZonaModal" tabindex="-1">
-        <div class="modal-dialog">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
-                <form action="tarifa_actualizar.php" method="POST">
-                    <input type="hidden" name="id" id="edit_id">
-                    <div class="modal-header">
-                        <h5 class="modal-title"><i class="bi bi-pencil"></i> Editar Zona</h5>
-                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                <form action="actualizar_tarifa.php" method="POST">
+                    <div class="modal-header bg-primary text-white">
+                        <h5 class="modal-title">💰 Editar Tarifas de Zona</h5>
+                        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
                     </div>
                     <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Categoría</label>
-                            <select name="categoria" id="edit_categoria" class="form-select" required>
-                                <option value="URBANO">URBANO</option>
-                                <option value="PUEBLOS">PUEBLOS</option>
-                                <option value="PLAYAS">PLAYAS</option>
-                                <option value="COOPERATIVAS">COOPERATIVAS</option>
-                                <option value="EXCOPERATIVAS">EXCOPERATIVAS</option>
-                                <option value="FERREÑAFE">FERREÑAFE</option>
-                            </select>
+                        <input type="hidden" name="id" id="edit_id">
+                        <input type="hidden" name="categoria" id="edit_categoria">
+                        <input type="hidden" name="nombre_zona" id="edit_nombre_zona">
+                        <input type="hidden" name="activo" value="1">
+                        
+                        <div class="text-center mb-4">
+                            <h6 class="text-muted">EDITANDO ZONA:</h6>
+                            <h3 id="edit_zona_display" class="text-primary fw-bold"></h3>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Nombre de Zona</label>
-                            <input type="text" name="nombre_zona" id="edit_nombre_zona" class="form-control" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s\-]+" title="Solo se permiten letras, espacios y guiones">
+
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <div class="card border-success">
+                                    <div class="card-header bg-success text-white text-center">
+                                        <h6 class="mb-0">💰 LO QUE COBRAS AL CLIENTE</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="input-group input-group-lg">
+                                            <span class="input-group-text fw-bold">S/</span>
+                                            <input type="number" step="0.01" min="0" class="form-control text-center fs-3 fw-bold" 
+                                                   id="edit_costo_cliente" name="costo_cliente" required 
+                                                   placeholder="0.00" oninput="actualizarPreview()">
+                                        </div>
+                                        <small class="text-muted d-block mt-2 text-center">
+                                            <i class="bi bi-info-circle"></i> Lo que ingresas por cada paquete
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <div class="card border-danger">
+                                    <div class="card-header bg-danger text-white text-center">
+                                        <h6 class="mb-0">🚚 LO QUE PAGAS AL REPARTIDOR</h6>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="input-group input-group-lg">
+                                            <span class="input-group-text fw-bold">S/</span>
+                                            <input type="number" step="0.01" min="0" class="form-control text-center fs-3 fw-bold" 
+                                                   id="edit_tarifa_repartidor" name="tarifa_repartidor" required 
+                                                   placeholder="0.00" oninput="actualizarPreview()">
+                                        </div>
+                                        <small class="text-muted d-block mt-2 text-center">
+                                            <i class="bi bi-info-circle"></i> Lo que gastas por cada entrega
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
-                        <div class="mb-3">
-                            <label class="form-label">Tipo de Envío</label>
-                            <input type="text" name="tipo_envio" id="edit_tipo_envio" class="form-control" required pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+" title="Solo se permiten letras y espacios">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Tarifa para Repartidor (S/)</label>
-                            <input type="number" name="tarifa_repartidor" id="edit_tarifa_repartidor" class="form-control" step="0.01" min="0" required title="Solo se permiten números decimales">
-                            <small class="text-muted">Monto que recibirá el repartidor por cada paquete entregado</small>
-                        </div>
-                        <div class="mb-3">
-                            <div class="form-check">
-                                <input type="checkbox" name="activo" class="form-check-input" id="edit_activo" value="1">
-                                <label class="form-check-label" for="edit_activo">Zona activa</label>
+                        
+                        <div class="card border-info">
+                            <div class="card-header bg-info text-white text-center">
+                                <h6 class="mb-0">📈 VISTA PREVIA DE TU GANANCIA</h6>
+                            </div>
+                            <div class="card-body text-center" id="preview_content">
+                                <p class="text-muted fs-5">Ingresa los valores para ver tu ganancia</p>
                             </div>
                         </div>
                     </div>
                     <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-warning">Actualizar Zona</button>
+                        <button type="button" class="btn btn-secondary btn-lg" data-bs-dismiss="modal">
+                            <i class="bi bi-x-circle"></i> Cancelar
+                        </button>
+                        <button type="submit" class="btn btn-success btn-lg">
+                            <i class="bi bi-check-circle"></i> Guardar Cambios
+                        </button>
                     </div>
                 </form>
             </div>
         </div>
     </div>
+
+    <!-- Estilos personalizados para destacar las columnas -->
+    <style>
+    .bg-light-primary { background-color: #e7f3ff !important; border-left: 3px solid #0d6efd; }
+    .bg-light-danger { background-color: #ffe7e7 !important; border-left: 3px solid #dc3545; }
+    .bg-light-success { background-color: #e7ffe7 !important; border-left: 3px solid #198754; }
+    .table-primary th { 
+        background-color: #0d6efd !important; 
+        color: white !important; 
+        font-weight: bold;
+        text-align: center;
+    }
+    </style>
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../assets/js/dashboard.js"></script>
@@ -260,17 +364,144 @@ $pageTitle = "Tarifas por Zona";
             document.getElementById('sidebar').classList.toggle('active');
         }
 
+        // Función para editar tarifas con datos pasados directamente
         function editarTarifa(tarifa) {
-            document.getElementById('edit_id').value = tarifa.id;
-            document.getElementById('edit_categoria').value = tarifa.categoria;
-            document.getElementById('edit_nombre_zona').value = tarifa.nombre_zona;
-            document.getElementById('edit_tipo_envio').value = tarifa.tipo_envio;
-            document.getElementById('edit_tarifa_repartidor').value = tarifa.tarifa_repartidor;
-            document.getElementById('edit_activo').checked = tarifa.activo == 1;
+            console.log('Editando tarifa:', tarifa);
             
-            const modal = new bootstrap.Modal(document.getElementById('editarZonaModal'));
-            modal.show();
+            try {
+                // Llenar campos ocultos
+                document.getElementById('edit_id').value = tarifa.id;
+                document.getElementById('edit_categoria').value = tarifa.categoria;
+                document.getElementById('edit_nombre_zona').value = tarifa.nombre_zona;
+                
+                // Mostrar nombre de zona
+                document.getElementById('edit_zona_display').textContent = 
+                    tarifa.nombre_zona + ' (' + tarifa.categoria + ')';
+                
+                // Llenar campos editables
+                document.getElementById('edit_costo_cliente').value = parseFloat(tarifa.costo_cliente).toFixed(2);
+                document.getElementById('edit_tarifa_repartidor').value = parseFloat(tarifa.tarifa_repartidor).toFixed(2);
+                
+                // Actualizar vista previa
+                actualizarPreview();
+                
+                // Mostrar modal
+                const modal = new bootstrap.Modal(document.getElementById('editarZonaModal'));
+                modal.show();
+                
+            } catch (error) {
+                console.error('Error al procesar datos:', error);
+                alert('Error al cargar los datos de la tarifa');
+            }
         }
+        
+        function actualizarPreview() {
+            const costoCliente = parseFloat(document.getElementById('edit_costo_cliente').value) || 0;
+            const tarifaRepartidor = parseFloat(document.getElementById('edit_tarifa_repartidor').value) || 0;
+            const ganancia = costoCliente - tarifaRepartidor;
+            const margen = costoCliente > 0 ? ((ganancia / costoCliente) * 100) : 0;
+            
+            const previewDiv = document.getElementById('preview_content');
+            
+            if (costoCliente === 0 && tarifaRepartidor === 0) {
+                previewDiv.innerHTML = '<p class="text-muted fs-5">Ingresa los valores para ver tu ganancia</p>';
+                return;
+            }
+            
+            let colorClass, mensaje;
+            if (ganancia < 1) {
+                colorClass = 'text-danger';
+                mensaje = '⚠️ Ganancia muy baja';
+            } else if (ganancia >= 4) {
+                colorClass = 'text-success';
+                mensaje = '🎯 ¡Excelente rentabilidad!';
+            } else {
+                colorClass = 'text-warning';
+                mensaje = '💰 Ganancia moderada';
+            }
+            
+            previewDiv.innerHTML = `
+                <div class="row text-center mb-3">
+                    <div class="col-4">
+                        <h3 class="text-success mb-1">S/ ${costoCliente.toFixed(2)}</h3>
+                        <small class="text-muted">Cobras al cliente</small>
+                    </div>
+                    <div class="col-1">
+                        <h3 class="text-muted">-</h3>
+                    </div>
+                    <div class="col-4">
+                        <h3 class="text-danger mb-1">S/ ${tarifaRepartidor.toFixed(2)}</h3>
+                        <small class="text-muted">Pagas al repartidor</small>
+                    </div>
+                    <div class="col-1">
+                        <h3 class="text-muted">=</h3>
+                    </div>
+                    <div class="col-2">
+                        <h2 class="${colorClass} mb-1 fw-bold">S/ ${ganancia.toFixed(2)}</h2>
+                        <small class="text-muted">Tu ganancia</small>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <div class="badge bg-secondary fs-6 mb-2">${margen.toFixed(1)}% margen</div>
+                    <p class="${colorClass} mb-0"><strong>${mensaje}</strong></p>
+                </div>
+            `;
+        }
+        
+        // Función para vista previa del modal de nueva zona
+        function actualizarPreviewNuevo() {
+            const costoCliente = parseFloat(document.getElementById('new_costo_cliente').value) || 0;
+            const tarifaRepartidor = parseFloat(document.getElementById('new_tarifa_repartidor').value) || 0;
+            const ganancia = costoCliente - tarifaRepartidor;
+            const margen = costoCliente > 0 ? ((ganancia / costoCliente) * 100) : 0;
+            
+            const previewDiv = document.getElementById('preview_content_nuevo');
+            
+            if (costoCliente === 0 && tarifaRepartidor === 0) {
+                previewDiv.innerHTML = '<p class="text-muted fs-5">Ingresa los valores para ver tu ganancia</p>';
+                return;
+            }
+            
+            let colorClass, mensaje;
+            if (ganancia < 1) {
+                colorClass = 'text-danger';
+                mensaje = '⚠️ Ganancia muy baja - Revisa los precios';
+            } else if (ganancia >= 4) {
+                colorClass = 'text-success';
+                mensaje = '🎯 ¡Excelente rentabilidad!';
+            } else {
+                colorClass = 'text-warning';
+                mensaje = '💰 Ganancia moderada';
+            }
+            
+            previewDiv.innerHTML = `
+                <div class="row text-center mb-3">
+                    <div class="col-4">
+                        <h3 class="text-success mb-1">S/ ${costoCliente.toFixed(2)}</h3>
+                        <small class="text-muted">Cobrarás</small>
+                    </div>
+                    <div class="col-1">
+                        <h3 class="text-muted">-</h3>
+                    </div>
+                    <div class="col-4">
+                        <h3 class="text-danger mb-1">S/ ${tarifaRepartidor.toFixed(2)}</h3>
+                        <small class="text-muted">Pagarás</small>
+                    </div>
+                    <div class="col-1">
+                        <h3 class="text-muted">=</h3>
+                    </div>
+                    <div class="col-2">
+                        <h2 class="${colorClass} mb-1 fw-bold">S/ ${ganancia.toFixed(2)}</h2>
+                        <small class="text-muted">Tu ganancia</small>
+                    </div>
+                </div>
+                <div class="text-center">
+                    <div class="badge bg-secondary fs-6 mb-2">${margen.toFixed(1)}% margen</div>
+                    <p class="${colorClass} mb-0"><strong>${mensaje}</strong></p>
+                </div>
+            `;
+        }
+
     </script>
     
     <!-- Chatbot Widget -->

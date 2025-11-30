@@ -54,10 +54,12 @@
                 <i class="bi bi-graph-down-arrow"></i>
                 <span>Gastos</span>
             </a>
-            <a href="dashboard_ganancias.php" class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'dashboard_ganancias.php' ? 'active' : ''; ?>">
-                <i class="bi bi-currency-dollar"></i>
-                <span>Dashboard Ganancias</span>
+            <?php if (isset($_SESSION['rol']) && $_SESSION['rol'] === 'administrador'): ?>
+            <a href="tarifas_zonas.php" class="menu-item <?php echo basename($_SERVER['PHP_SELF']) == 'tarifas_zonas.php' ? 'active' : ''; ?>">
+                <i class="bi bi-calculator"></i>
+                <span>Tarifas</span>
             </a>
+            <?php endif; ?>
         </div>
         
         <div class="menu-section">
