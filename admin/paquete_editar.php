@@ -103,26 +103,16 @@ $repartidores = Database::getInstance()->fetchAll($db->query("SELECT id, nombre,
             <label class="form-label">Provincia</label>
             <input type="text" class="form-control" name="provincia" value="<?php echo htmlspecialchars($paquete['provincia']); ?>">
         </div>
-        <div class="col-md-4 mb-3">
-            <label class="form-label">Peso (kg)</label>
-            <input type="number" step="0.01" class="form-control" name="peso" value="<?php echo $paquete['peso']; ?>">
+        <div class="col-md-6 mb-3">
+            <label class="form-label">Distrito</label>
+            <input type="text" class="form-control" name="distrito" value="<?php echo htmlspecialchars($paquete['distrito']); ?>">
         </div>
-        <div class="col-md-4 mb-3">
-            <label class="form-label">Valor Declarado</label>
-            <input type="number" step="0.01" class="form-control" name="valor_declarado" value="<?php echo $paquete['valor_declarado']; ?>">
-        </div>
-        <div class="col-md-4 mb-3">
+
+        <div class="col-md-6 mb-3">
             <label class="form-label">Costo Envío</label>
             <input type="number" step="0.01" class="form-control" name="costo_envio" value="<?php echo $paquete['costo_envio']; ?>">
         </div>
-        <div class="col-md-6 mb-3">
-            <label class="form-label">Prioridad</label>
-            <select class="form-select" name="prioridad">
-                <option value="normal" <?php echo $paquete['prioridad'] === 'normal' ? 'selected' : ''; ?>>Normal</option>
-                <option value="urgente" <?php echo $paquete['prioridad'] === 'urgente' ? 'selected' : ''; ?>>Urgente</option>
-                <option value="express" <?php echo $paquete['prioridad'] === 'express' ? 'selected' : ''; ?>>Express</option>
-            </select>
-        </div>
+
         <div class="col-md-6 mb-3">
             <label class="form-label">Asignar Repartidor</label>
             <?php 

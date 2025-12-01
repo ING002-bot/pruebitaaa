@@ -101,8 +101,9 @@ $pageTitle = "Tarifas por Zona";
                                 </thead>
                                 <tbody>
                                     <?php foreach ($tarifas as $tarifa): 
-                                        $ganancia = $tarifa['costo_cliente'] - $tarifa['tarifa_repartidor'];
-                                        $margen = $tarifa['costo_cliente'] > 0 ? (($ganancia / $tarifa['costo_cliente']) * 100) : 0;
+                                        $costo_cliente = $tarifa['costo_cliente'] ?? $tarifa['tarifa_repartidor'] ?? 0;
+                                        $ganancia = $costo_cliente - $tarifa['tarifa_repartidor'];
+                                        $margen = $costo_cliente > 0 ? (($ganancia / $costo_cliente) * 100) : 0;
                                     ?>
                                         <tr class="align-middle">
                                             <td>
@@ -113,7 +114,7 @@ $pageTitle = "Tarifas por Zona";
                                             </td>
                                             <td class="text-center bg-light-primary">
                                                 <div class="d-flex flex-column">
-                                                    <span class="fs-4 fw-bold text-success">S/ <?php echo number_format($tarifa['costo_cliente'], 2); ?></span>
+                                                    <span class="fs-4 fw-bold text-success">S/ <?php echo number_format($costo_cliente, 2); ?></span>
                                                     <small class="text-muted">Ingresas por paquete</small>
                                                 </div>
                                             </td>

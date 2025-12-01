@@ -21,19 +21,37 @@ foreach ($todasTarifas as $tarifa) {
     $tarifasPorCategoria[$tarifa['categoria']][] = $tarifa;
 }
 
-// Estadísticas del repartidor por zona
+// Estadísticas del repartidor por zona - evitando duplicados
 $stmt = $db->prepare("
     SELECT 
-        zt.categoria,
-        zt.nombre_zona,
-        zt.tarifa_repartidor,
-        COUNT(e.id) as total_entregas,
-        SUM(zt.tarifa_repartidor) as total_ganado
-    FROM entregas e
-    INNER JOIN paquetes p ON e.paquete_id = p.id
-    LEFT JOIN zonas_tarifas zt ON p.zona_tarifa_id = zt.id
-    WHERE e.repartidor_id = ? AND e.tipo_entrega = 'exitosa'
-    GROUP BY zt.id
+        zona_encontrada as nombre_zona,
+        zona_categoria as categoria,
+        zona_tarifa as tarifa_repartidor,
+        COUNT(*) as total_entregas,
+        SUM(zona_tarifa) as total_ganado
+    FROM (
+        SELECT DISTINCT p.id,
+               COALESCE(
+                   (SELECT zt1.nombre_zona FROM zonas_tarifas zt1 WHERE zt1.nombre_zona = p.distrito AND zt1.activo = 1 LIMIT 1),
+                   (SELECT zt2.nombre_zona FROM zonas_tarifas zt2 WHERE zt2.nombre_zona = p.ciudad AND zt2.activo = 1 LIMIT 1),
+                   (SELECT zt3.nombre_zona FROM zonas_tarifas zt3 WHERE zt3.nombre_zona = p.provincia AND zt3.activo = 1 LIMIT 1)
+               ) as zona_encontrada,
+               COALESCE(
+                   (SELECT zt1.categoria FROM zonas_tarifas zt1 WHERE zt1.nombre_zona = p.distrito AND zt1.activo = 1 LIMIT 1),
+                   (SELECT zt2.categoria FROM zonas_tarifas zt2 WHERE zt2.nombre_zona = p.ciudad AND zt2.activo = 1 LIMIT 1),
+                   (SELECT zt3.categoria FROM zonas_tarifas zt3 WHERE zt3.nombre_zona = p.provincia AND zt3.activo = 1 LIMIT 1)
+               ) as zona_categoria,
+               COALESCE(
+                   (SELECT zt1.tarifa_repartidor FROM zonas_tarifas zt1 WHERE zt1.nombre_zona = p.distrito AND zt1.activo = 1 LIMIT 1),
+                   (SELECT zt2.tarifa_repartidor FROM zonas_tarifas zt2 WHERE zt2.nombre_zona = p.ciudad AND zt2.activo = 1 LIMIT 1),
+                   (SELECT zt3.tarifa_repartidor FROM zonas_tarifas zt3 WHERE zt3.nombre_zona = p.provincia AND zt3.activo = 1 LIMIT 1)
+               ) as zona_tarifa
+        FROM entregas e
+        INNER JOIN paquetes p ON e.paquete_id = p.id
+        WHERE e.repartidor_id = ? AND e.tipo_entrega = 'exitosa'
+    ) as subquery
+    WHERE zona_encontrada IS NOT NULL
+    GROUP BY zona_encontrada, zona_categoria, zona_tarifa
     ORDER BY total_entregas DESC
     LIMIT 10
 ");

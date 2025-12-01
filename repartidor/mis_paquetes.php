@@ -156,7 +156,8 @@ $pageTitle = "Mis Paquetes";
                                         <th>Destinatario</th>
                                         <th>Dirección</th>
                                         <th>Ciudad</th>
-                                        <th>Prioridad</th>
+                                        <th>Provincia</th>
+                                        <th>Distrito</th>
                                         <th>Estado</th>
                                         <th>Último Intento</th>
                                         <th>Acciones</th>
@@ -172,12 +173,7 @@ $pageTitle = "Mis Paquetes";
                                             'devuelto' => 'danger'
                                         ][$paquete['estado']] ?? 'secondary';
 
-                                        $badgePrioridad = [
-                                            'urgente' => 'danger',
-                                            'alta' => 'warning',
-                                            'media' => 'info',
-                                            'baja' => 'secondary'
-                                        ][$paquete['prioridad']] ?? 'secondary';
+
                                     ?>
                                         <tr data-estado="<?php echo $paquete['estado']; ?>" 
                                             data-prioridad="<?php echo $paquete['prioridad']; ?>"
@@ -195,11 +191,8 @@ $pageTitle = "Mis Paquetes";
                                             </td>
                                             <td><?php echo htmlspecialchars(substr($paquete['direccion_completa'], 0, 50)); ?><?php echo strlen($paquete['direccion_completa']) > 50 ? '...' : ''; ?></td>
                                             <td><?php echo htmlspecialchars($paquete['ciudad'] ?? '-'); ?></td>
-                                            <td>
-                                                <span class="badge bg-<?php echo $badgePrioridad; ?>">
-                                                    <?php echo ucfirst($paquete['prioridad']); ?>
-                                                </span>
-                                            </td>
+                                            <td><?php echo htmlspecialchars($paquete['provincia'] ?? '-'); ?></td>
+                                            <td><?php echo htmlspecialchars($paquete['distrito'] ?? '-'); ?></td>
                                             <td>
                                                 <span class="badge bg-<?php echo $badgeEstado; ?>">
                                                     <?php echo ucfirst($paquete['estado']); ?>

@@ -112,6 +112,10 @@ if (!$paquete) {
                 <td><?php echo $paquete['provincia'] ?: '-'; ?></td>
             </tr>
             <tr>
+                <th>Distrito:</th>
+                <td><?php echo $paquete['distrito'] ?: '-'; ?></td>
+            </tr>
+            <tr>
                 <th>Código Postal:</th>
                 <td><?php echo $paquete['codigo_postal'] ?: '-'; ?></td>
             </tr>

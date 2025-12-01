@@ -263,9 +263,11 @@ $pageTitle = "Registrar Entrega";
                                 </h5>
                             </div>
                             <div class="card-body">
-                                <button type="button" class="btn btn-primary mb-3" onclick="obtenerUbicacion()">
-                                    <i class="bi bi-geo-alt-fill"></i> Obtener Mi Ubicación Actual
-                                </button>
+                                <div class="mb-3">
+                                    <button type="button" class="btn btn-primary" id="btnObtenerUbicacion" onclick="obtenerUbicacion()">
+                                        <i class="bi bi-geo-alt-fill"></i> Obtener Mi Ubicación Actual
+                                    </button>
+                                </div>
                                 
                                 <div id="mapaEntrega" class="map-container mb-3"></div>
                                 
@@ -280,10 +282,13 @@ $pageTitle = "Registrar Entrega";
                                     </div>
                                 </div>
                                 
-                                <div class="alert alert-warning">
+                                <div class="alert alert-info">
                                     <small>
                                         <i class="bi bi-info-circle"></i> 
-                                        La ubicación se captura automáticamente al obtener tu posición actual
+                                        <strong>Instrucciones:</strong><br>
+                                        • Haz clic en "Obtener Mi Ubicación Actual" para usar GPS<br>
+                                        • Puedes arrastrar el marcador en el mapa para ajustar la posición<br>
+                                        • Asegúrate de permitir el acceso a la ubicación cuando te lo solicite el navegador
                                     </small>
                                 </div>
                             </div>
@@ -307,32 +312,65 @@ $pageTitle = "Registrar Entrega";
     </div>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://maps.googleapis.com/maps/api/js?key=<?php echo GOOGLE_MAPS_API_KEY; ?>"></script>
+    <!-- OpenStreetMap con Leaflet como alternativa a Google Maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
     <script>
         let map;
         let marker;
         let stream1;
         
-        // Inicializar mapa
+        // Inicializar mapa con OpenStreetMap
         function initMap(lat = -12.046374, lng = -77.042793) {
-            map = new google.maps.Map(document.getElementById('mapaEntrega'), {
-                center: {lat: lat, lng: lng},
-                zoom: 15
-            });
-            
-            marker = new google.maps.Marker({
-                position: {lat: lat, lng: lng},
-                map: map,
-                draggable: true,
-                title: "Ubicación de entrega"
-            });
-            
-            // Actualizar coordenadas al mover el marcador
-            marker.addListener('dragend', function() {
-                const pos = marker.getPosition();
-                document.getElementById('latitudInput').value = pos.lat();
-                document.getElementById('longitudInput').value = pos.lng();
-            });
+            try {
+                // Si el mapa ya existe, eliminarlo
+                if (map) {
+                    map.remove();
+                }
+                
+                // Verificar si Leaflet está disponible
+                if (typeof L === 'undefined') {
+                    throw new Error('Leaflet no está disponible');
+                }
+                
+                map = L.map('mapaEntrega').setView([lat, lng], 15);
+                
+                // Usar OpenStreetMap tiles (no requiere API key)
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors',
+                    maxZoom: 19,
+                    errorTileUrl: 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjU2IiBoZWlnaHQ9IjI1NiIgZmlsbD0iI2YwZjBmMCIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBmb250LWZhbWlseT0iQXJpYWwiIGZvbnQtc2l6ZT0iMTQiIGZpbGw9IiM5OTkiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGR5PSIuM2VtIj5NYXBhIG5vIGRpc3BvbmlibGU8L3RleHQ+PC9zdmc+'
+                }).addTo(map);
+                
+                // Añadir marcador draggable
+                marker = L.marker([lat, lng], {
+                    draggable: true,
+                    title: "Ubicación de entrega"
+                }).addTo(map);
+                
+                // Actualizar coordenadas al mover el marcador
+                marker.on('dragend', function(e) {
+                    const pos = e.target.getLatLng();
+                    document.getElementById('latitudInput').value = pos.lat.toFixed(6);
+                    document.getElementById('longitudInput').value = pos.lng.toFixed(6);
+                    mostrarNotificacion('📍 Marcador movido a: ' + pos.lat.toFixed(4) + ', ' + pos.lng.toFixed(4), 'success');
+                });
+                
+                // Actualizar inputs con la posición inicial
+                document.getElementById('latitudInput').value = lat.toFixed(6);
+                document.getElementById('longitudInput').value = lng.toFixed(6);
+                
+                // Manejar errores de carga de tiles
+                map.on('tileerror', function(error) {
+                    console.log('Error cargando mapa:', error);
+                    mostrarNotificacion('⚠️ Problemas cargando el mapa. Las coordenadas funcionan normalmente.', 'warning');
+                });
+                
+            } catch (error) {
+                console.error('Error inicializando mapa:', error);
+                modoSoloCoordenas();
+                mostrarNotificacion('⚠️ El mapa no se pudo cargar. Usa los botones para obtener coordenadas.', 'warning');
+            }
         }
         
         // Mostrar notificación emergente
@@ -350,28 +388,104 @@ $pageTitle = "Registrar Entrega";
         
         // Obtener ubicación actual
         function obtenerUbicacion() {
-            if (navigator.geolocation) {
-                navigator.geolocation.getCurrentPosition(function(position) {
+            // Verificar si el navegador soporta geolocalización
+            if (!navigator.geolocation) {
+                mostrarNotificacion('⚠️ Tu navegador no soporta geolocalización', 'warning');
+                return;
+            }
+            
+            // Obtener referencia al botón de forma más segura
+            const btnUbicacion = document.getElementById('btnObtenerUbicacion');
+            if (!btnUbicacion) return;
+            
+            const textoOriginal = btnUbicacion.innerHTML;
+            btnUbicacion.innerHTML = '<i class="bi bi-hourglass-split"></i> Obteniendo ubicación...';
+            btnUbicacion.disabled = true;
+            
+            // Opciones para la geolocalización
+            const opciones = {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 30000
+            };
+            
+            navigator.geolocation.getCurrentPosition(
+                function(position) {
                     const lat = position.coords.latitude;
                     const lng = position.coords.longitude;
+                    const precision = position.coords.accuracy;
                     
-                    document.getElementById('latitudInput').value = lat;
-                    document.getElementById('longitudInput').value = lng;
+                    // Actualizar inputs
+                    document.getElementById('latitudInput').value = lat.toFixed(6);
+                    document.getElementById('longitudInput').value = lng.toFixed(6);
                     
-                    if (map) {
-                        map.setCenter({lat: lat, lng: lng});
-                        marker.setPosition({lat: lat, lng: lng});
-                    } else {
-                        initMap(lat, lng);
+                    // Actualizar mapa
+                    try {
+                        if (map && marker) {
+                            map.setView([lat, lng], 16);
+                            marker.setLatLng([lat, lng]);
+                        } else {
+                            initMap(lat, lng);
+                        }
+                    } catch (error) {
+                        console.log('Error actualizando mapa:', error);
                     }
                     
-                    mostrarNotificacion('✅ Ubicación capturada correctamente. Coordenadas: ' + lat.toFixed(4) + ', ' + lng.toFixed(4), 'success');
-                }, function(error) {
-                    mostrarNotificacion('❌ Error al obtener ubicación: ' + error.message, 'error');
-                });
-            } else {
-                mostrarNotificacion('⚠️ Tu navegador no soporta geolocalización', 'warning');
-            }
+                    // Mostrar notificación
+                    const mensaje = `✅ Ubicación obtenida correctamente: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                    mostrarNotificacion(mensaje, 'success');
+                    
+                    // Restaurar botón
+                    btnUbicacion.innerHTML = textoOriginal;
+                    btnUbicacion.disabled = false;
+                }, 
+                function(error) {
+                    let mensaje = '';
+                    let titulo = '';
+                    
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            titulo = '🔒 Permisos de Ubicación';
+                            mensaje = `
+                                <div class="mb-3">
+                                    <strong>Para usar esta función necesitas permitir el acceso a tu ubicación:</strong>
+                                </div>
+                                <div class="text-start">
+                                    <p><strong>En Chrome/Edge:</strong></p>
+                                    <ol class="small">
+                                        <li>Haz clic en el ícono del candado 🔒 en la barra de direcciones</li>
+                                        <li>Selecciona "Permitir" para Ubicación</li>
+                                        <li>Recarga la página</li>
+                                    </ol>
+                                    <p><strong>En Firefox:</strong></p>
+                                    <ol class="small">
+                                        <li>Haz clic en el ícono de escudo en la barra de direcciones</li>
+                                        <li>Permite el acceso a la ubicación</li>
+                                        <li>Recarga la página</li>
+                                    </ol>
+                                </div>
+                            `;
+                            
+                            // Mostrar modal de ayuda
+                            mostrarModalAyudaUbicacion(titulo, mensaje);
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            mostrarNotificacion('❌ Ubicación no disponible. Verifica que tengas GPS habilitado y conexión a internet.', 'error');
+                            break;
+                        case error.TIMEOUT:
+                            mostrarNotificacion('⏰ Tiempo agotado obteniendo ubicación. Inténtalo de nuevo.', 'error');
+                            break;
+                        default:
+                            mostrarNotificacion('❌ Error desconocido al obtener ubicación. Inténtalo de nuevo.', 'error');
+                            break;
+                    }
+                    
+                    // Restaurar botón
+                    btnUbicacion.innerHTML = textoOriginal;
+                    btnUbicacion.disabled = false;
+                }, 
+                opciones
+            );
         }
         
         // Cargar datos del paquete seleccionado
@@ -457,12 +571,101 @@ $pageTitle = "Registrar Entrega";
             }
         }
         
+        // Función de respaldo sin mapa
+        function modoSoloCoordenas() {
+            document.getElementById('mapaEntrega').innerHTML = `
+                <div class="alert alert-warning text-center">
+                    <i class="bi bi-exclamation-triangle"></i><br>
+                    <strong>Modo Sin Mapa</strong><br>
+                    El mapa no se pudo cargar. Usa el botón "Obtener Mi Ubicación Actual" para capturar coordenadas.
+                </div>
+            `;
+        }
+        
+        // Mostrar modal de ayuda para permisos de ubicación
+        function mostrarModalAyudaUbicacion(titulo, contenido) {
+            // Crear modal dinámicamente si no existe
+            let modal = document.getElementById('modalAyudaUbicacion');
+            if (!modal) {
+                const modalHTML = `
+                    <div class="modal fade" id="modalAyudaUbicacion" tabindex="-1">
+                        <div class="modal-dialog modal-lg">
+                            <div class="modal-content">
+                                <div class="modal-header bg-primary text-white">
+                                    <h5 class="modal-title" id="tituloAyudaUbicacion">${titulo}</h5>
+                                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                                </div>
+                                <div class="modal-body" id="contenidoAyudaUbicacion">
+                                    ${contenido}
+                                </div>
+                                <div class="modal-footer">
+                                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Entendido</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.insertAdjacentHTML('beforeend', modalHTML);
+                modal = document.getElementById('modalAyudaUbicacion');
+            } else {
+                // Actualizar contenido si ya existe
+                document.getElementById('tituloAyudaUbicacion').innerHTML = titulo;
+                document.getElementById('contenidoAyudaUbicacion').innerHTML = contenido;
+            }
+            
+            // Mostrar modal
+            const bsModal = new bootstrap.Modal(modal);
+            bsModal.show();
+        }
+
+        // Verificar si el protocolo es seguro (HTTPS)
+        function verificarProtocolo() {
+            if (location.protocol !== 'https:' && location.hostname !== 'localhost') {
+                mostrarNotificacion('⚠️ La geolocalización requiere HTTPS. Algunas funciones pueden no funcionar correctamente.', 'warning');
+            }
+        }
+        
+        // Detectar y manejar errores de recursos bloqueados
+        window.addEventListener('error', function(e) {
+            if (e.message && e.message.includes('ERR_BLOCKED_BY_CLIENT')) {
+                mostrarNotificacion('⚠️ Algunos recursos están bloqueados. Si tienes AdBlock, considera agregarnos a la lista blanca.', 'warning');
+            }
+        }, true);
+        
         // Inicializar al cargar
-        window.onload = function() {
+        window.addEventListener('DOMContentLoaded', function() {
+            // Verificar protocolo
+            verificarProtocolo();
+            
+            // Inicializar mapa con timeout
+            setTimeout(function() {
+                try {
+                    initMap(-12.046374, -77.042793);
+                } catch (error) {
+                    console.error('Error inicializando mapa:', error);
+                    modoSoloCoordenas();
+                }
+            }, 500);
+            
             <?php if($paquete_seleccionado): ?>
-                cargarDatosPaquete();
+                // Cargar datos del paquete seleccionado
+                setTimeout(cargarDatosPaquete, 100);
             <?php endif; ?>
-        };
+            
+            // Validación del formulario antes de enviar
+            document.getElementById('formEntrega').addEventListener('submit', function(e) {
+                const lat = document.getElementById('latitudInput').value;
+                const lng = document.getElementById('longitudInput').value;
+                
+                if (!lat || !lng || parseFloat(lat) === 0 || parseFloat(lng) === 0) {
+                    e.preventDefault();
+                    mostrarNotificacion('⚠️ Por favor, obtén tu ubicación antes de registrar la entrega', 'warning');
+                    return false;
+                }
+                
+                return true;
+            });
+        });
     </script>
 </body>
 </html>

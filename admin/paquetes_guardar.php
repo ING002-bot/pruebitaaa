@@ -25,9 +25,9 @@ try {
         }
     }
 
-    // Calcular costo de envío basado en distrito y prioridad
+    // Calcular costo de envío basado en distrito (sin prioridad)
     $distrito = sanitize($_POST['distrito'] ?? '');
-    $prioridad = sanitize($_POST['prioridad'] ?? 'normal');
+    $prioridad = 'normal'; // Siempre prioridad normal
     $costo_envio = !empty($_POST['costo_envio']) ? (float)$_POST['costo_envio'] : calcularCostoEnvio($distrito, $prioridad);
     
     // Obtener zona_tarifa_id para vincular con tarifas
@@ -73,7 +73,7 @@ try {
     }
     
     $stmt->bind_param(
-        "sssssssssddsisiii",
+        "sssssssssddsisiiii",
         $data['codigo_seguimiento'],
         $data['codigo_savar'],
         $data['destinatario_nombre'],

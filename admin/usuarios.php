@@ -148,7 +148,13 @@ $usuarios = Database::getInstance()->fetchAll($db->query("SELECT * FROM usuarios
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Contraseña *</label>
-                            <input type="password" name="password" class="form-control" required minlength="6">
+                            <div class="input-group">
+                                <input type="password" name="password" id="passwordNuevo" class="form-control" required minlength="6">
+                                <button class="btn btn-outline-secondary" type="button" id="togglePasswordNuevo">
+                                    <i class="bi bi-eye" id="eyeIconNuevo"></i>
+                                </button>
+                            </div>
+                            <small class="form-text text-muted">Mínimo 6 caracteres</small>
                         </div>
                     </div>
                     <div class="modal-footer">
@@ -253,6 +259,25 @@ $usuarios = Database::getInstance()->fetchAll($db->query("SELECT * FROM usuarios
                 }).then(() => location.reload());
             }
         }
+
+        // Funcionalidad para mostrar/ocultar contraseña
+        document.addEventListener('DOMContentLoaded', function() {
+            const toggleBtn = document.getElementById('togglePasswordNuevo');
+            const passwordInput = document.getElementById('passwordNuevo');
+            const eyeIcon = document.getElementById('eyeIconNuevo');
+
+            if (toggleBtn && passwordInput && eyeIcon) {
+                toggleBtn.addEventListener('click', function() {
+                    if (passwordInput.type === 'password') {
+                        passwordInput.type = 'text';
+                        eyeIcon.className = 'bi bi-eye-slash';
+                    } else {
+                        passwordInput.type = 'password';
+                        eyeIcon.className = 'bi bi-eye';
+                    }
+                });
+            }
+        });
     </script>
     
     <!-- Chatbot Widget -->

@@ -23,13 +23,21 @@ $rezagados = $stmt->get_result()->fetch_assoc()['total'];
 
 // Ingresos del mes - SOLO entregas exitosas
 $stmt = $db->prepare("
-    SELECT SUM(COALESCE(p.costo_envio, 0)) as total_ingresos
-    FROM entregas e
-    INNER JOIN paquetes p ON e.paquete_id = p.id
-    WHERE e.repartidor_id = ? 
-      AND e.tipo_entrega = 'exitosa'
-      AND MONTH(e.fecha_entrega) = MONTH(CURDATE()) 
-      AND YEAR(e.fecha_entrega) = YEAR(CURDATE())
+    SELECT SUM(
+        COALESCE(
+            (SELECT zt1.tarifa_repartidor FROM zonas_tarifas zt1 WHERE zt1.nombre_zona = p.distrito AND zt1.activo = 1 LIMIT 1),
+            (SELECT zt2.tarifa_repartidor FROM zonas_tarifas zt2 WHERE zt2.nombre_zona = p.ciudad AND zt2.activo = 1 LIMIT 1),
+            (SELECT zt3.tarifa_repartidor FROM zonas_tarifas zt3 WHERE zt3.nombre_zona = p.provincia AND zt3.activo = 1 LIMIT 1),
+            0
+        )
+    ) as total_ingresos
+    FROM paquetes p
+    INNER JOIN entregas e ON p.id = e.paquete_id
+    WHERE p.repartidor_id = ? 
+    AND p.estado = 'entregado'
+    AND e.tipo_entrega = 'exitosa'
+    AND MONTH(p.fecha_entrega) = MONTH(CURRENT_DATE()) 
+    AND YEAR(p.fecha_entrega) = YEAR(CURRENT_DATE())
 ");
 $stmt->bind_param("i", $repartidor_id);
 $stmt->execute();
@@ -103,6 +111,10 @@ $pageTitle = "Mi Dashboard";
                 <a href="mis_ingresos.php" class="menu-item">
                     <i class="bi bi-cash-stack"></i>
                     <span>Mis Ingresos</span>
+                </a>
+                <a href="tarifas.php" class="menu-item">
+                    <i class="bi bi-currency-dollar"></i>
+                    <span>Tarifas por Zona</span>
                 </a>
             </div>
             
@@ -229,7 +241,6 @@ $pageTitle = "Mi Dashboard";
                                     <th>Destinatario</th>
                                     <th>Dirección</th>
                                     <th>Teléfono</th>
-                                    <th>Prioridad</th>
                                     <th>Estado</th>
                                     <th>Acciones</th>
                                 </tr>
@@ -242,26 +253,14 @@ $pageTitle = "Mi Dashboard";
                                     <td><small><?php echo substr($paquete['direccion_completa'], 0, 40) . '...'; ?></small></td>
                                     <td><?php echo $paquete['destinatario_telefono']; ?></td>
                                     <td>
-                                        <?php
-                                        $prioridadClass = [
-                                            'normal' => 'bg-secondary',
-                                            'urgente' => 'bg-warning',
-                                            'express' => 'bg-danger'
-                                        ];
-                                        ?>
-                                        <span class="badge <?php echo $prioridadClass[$paquete['prioridad']]; ?>">
-                                            <?php echo ucfirst($paquete['prioridad']); ?>
-                                        </span>
-                                    </td>
-                                    <td>
                                         <span class="badge <?php echo $paquete['estado'] === 'en_ruta' ? 'bg-warning' : 'bg-secondary'; ?>">
                                             <?php echo ucfirst(str_replace('_', ' ', $paquete['estado'])); ?>
                                         </span>
                                     </td>
                                     <td>
                                         <div class="btn-group btn-group-sm">
-                                            <button class="btn btn-info" onclick="verMapa(<?php echo $paquete['direccion_latitud']; ?>, <?php echo $paquete['direccion_longitud']; ?>)">
-                                                <i class="bi bi-geo-alt"></i>
+                                            <button class="btn btn-info" onclick="verDetallesPaquete(<?php echo htmlspecialchars(json_encode($paquete)); ?>)">
+                                                <i class="bi bi-info-circle"></i>
                                             </button>
                                             <a href="entregar.php?paquete=<?php echo $paquete['id']; ?>" class="btn btn-success">
                                                 <i class="bi bi-check-circle"></i>
@@ -283,6 +282,92 @@ $pageTitle = "Mi Dashboard";
             </div>
         </div>
     </div>
+
+    <!-- Modal Detalles del Paquete -->
+    <div class="modal fade" id="modalDetallesPaquete" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        <i class="bi bi-box-seam"></i> Detalles del Paquete
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-3"><i class="bi bi-info-circle"></i> Información del Paquete</h6>
+                            <table class="table table-sm">
+                                <tr>
+                                    <th width="40%">Código de Seguimiento:</th>
+                                    <td id="detalle-codigo"></td>
+                                </tr>
+                                <tr>
+                                    <th>Estado:</th>
+                                    <td><span id="detalle-estado" class="badge"></span></td>
+                                </tr>
+                                <tr>
+                                    <th>Fecha de Creación:</th>
+                                    <td id="detalle-fecha-creacion"></td>
+                                </tr>
+                                <tr>
+                                    <th>Descripción:</th>
+                                    <td id="detalle-descripcion"></td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="col-md-6">
+                            <h6 class="text-muted mb-3"><i class="bi bi-person"></i> Destinatario</h6>
+                            <table class="table table-sm">
+                                <tr>
+                                    <th width="40%">Nombre:</th>
+                                    <td id="detalle-destinatario-nombre"></td>
+                                </tr>
+                                <tr>
+                                    <th>Teléfono:</th>
+                                    <td id="detalle-destinatario-telefono"></td>
+                                </tr>
+                                <tr>
+                                    <th>Email:</th>
+                                    <td id="detalle-destinatario-email"></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                    
+                    <div class="row mt-3">
+                        <div class="col-12">
+                            <h6 class="text-muted mb-3"><i class="bi bi-geo-alt"></i> Dirección de Entrega</h6>
+                            <table class="table table-sm">
+                                <tr>
+                                    <th width="20%">Dirección:</th>
+                                    <td id="detalle-direccion"></td>
+                                </tr>
+                                <tr>
+                                    <th>Ciudad:</th>
+                                    <td id="detalle-ciudad"></td>
+                                </tr>
+                                <tr>
+                                    <th>Provincia:</th>
+                                    <td id="detalle-provincia"></td>
+                                </tr>
+                                <tr>
+                                    <th>Distrito:</th>
+                                    <td id="detalle-distrito"></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cerrar</button>
+                    <a id="btn-entregar-desde-modal" href="#" class="btn btn-success">
+                        <i class="bi bi-check-circle"></i> Proceder a Entrega
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
     
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="../assets/js/dashboard.js"></script>
@@ -292,12 +377,50 @@ $pageTitle = "Mi Dashboard";
             document.getElementById('sidebar').classList.toggle('active');
         }
         
-        function verMapa(lat, lng) {
-            if(lat && lng) {
-                window.open(`https://www.google.com/maps?q=${lat},${lng}`, '_blank');
-            } else {
-                alert('No hay coordenadas disponibles para este paquete');
+        function verDetallesPaquete(paquete) {
+            // Llenar los datos del modal
+            document.getElementById('detalle-codigo').textContent = paquete.codigo_seguimiento;
+            
+            // Estado con badge apropiado
+            const estadoBadge = document.getElementById('detalle-estado');
+            estadoBadge.textContent = paquete.estado.replace('_', ' ').toUpperCase();
+            estadoBadge.className = 'badge ' + (paquete.estado === 'en_ruta' ? 'bg-warning' : 'bg-secondary');
+            
+            // Fechas formateadas
+            let fechaTexto = 'No especificada';
+            if (paquete.fecha_creacion && paquete.fecha_creacion !== null && paquete.fecha_creacion !== '') {
+                // Intentar diferentes formatos de fecha
+                let fecha = new Date(paquete.fecha_creacion);
+                if (isNaN(fecha.getTime())) {
+                    // Si falla, intentar formato MySQL (YYYY-MM-DD HH:mm:ss)
+                    fecha = new Date(paquete.fecha_creacion.replace(/-/g, '/'));
+                }
+                if (!isNaN(fecha.getTime())) {
+                    fechaTexto = fecha.toLocaleDateString('es-ES') + ' ' + fecha.toLocaleTimeString('es-ES', {hour: '2-digit', minute: '2-digit'});
+                }
             }
+            document.getElementById('detalle-fecha-creacion').textContent = fechaTexto;
+            
+            // Información del paquete
+            document.getElementById('detalle-descripcion').textContent = paquete.descripcion || 'Sin descripción';
+            
+            // Información del destinatario
+            document.getElementById('detalle-destinatario-nombre').textContent = paquete.destinatario_nombre;
+            document.getElementById('detalle-destinatario-telefono').textContent = paquete.destinatario_telefono || 'No especificado';
+            document.getElementById('detalle-destinatario-email').textContent = paquete.destinatario_email || 'No especificado';
+            
+            // Dirección de entrega
+            document.getElementById('detalle-direccion').textContent = paquete.direccion_completa;
+            document.getElementById('detalle-ciudad').textContent = paquete.ciudad || 'No especificada';
+            document.getElementById('detalle-provincia').textContent = paquete.provincia || 'No especificada';
+            document.getElementById('detalle-distrito').textContent = paquete.distrito || 'No especificado';
+            
+            // Enlace para proceder a la entrega
+            document.getElementById('btn-entregar-desde-modal').href = 'entregar.php?paquete=' + paquete.id;
+            
+            // Mostrar el modal
+            const modal = new bootstrap.Modal(document.getElementById('modalDetallesPaquete'));
+            modal.show();
         }
     </script>
 </body>

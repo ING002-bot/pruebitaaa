@@ -35,12 +35,9 @@ try {
             direccion_completa = ?,
             ciudad = ?,
             provincia = ?,
-            peso = ?,
             descripcion = ?,
-            valor_declarado = ?,
             costo_envio = ?,
             estado = ?,
-            prioridad = ?,
             repartidor_id = ?,
             notas = ?
         WHERE id = ?
@@ -54,7 +51,7 @@ try {
     $paquete_id = (int)$_POST['id'];
     
     $stmt->bind_param(
-        "sssssssssdddssisi",
+        "sssssssssssii",
         $_POST['codigo_seguimiento'],
         $_POST['codigo_savar'],
         $_POST['destinatario_nombre'],
@@ -63,12 +60,9 @@ try {
         $_POST['direccion_completa'],
         $_POST['ciudad'],
         $_POST['provincia'],
-        $_POST['peso'],
         $_POST['descripcion'],
-        $_POST['valor_declarado'],
         $_POST['costo_envio'],
         $_POST['estado'],
-        $_POST['prioridad'],
         $repartidor_id,
         $_POST['notas'],
         $paquete_id

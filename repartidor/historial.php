@@ -24,7 +24,14 @@ $stmt = $db->prepare("
            p.destinatario_nombre,
            p.direccion_completa,
            p.ciudad,
-           p.costo_envio
+           p.distrito,
+           p.provincia,
+           COALESCE(
+               (SELECT zt1.tarifa_repartidor FROM zonas_tarifas zt1 WHERE zt1.nombre_zona = p.distrito AND zt1.activo = 1 LIMIT 1),
+               (SELECT zt2.tarifa_repartidor FROM zonas_tarifas zt2 WHERE zt2.nombre_zona = p.ciudad AND zt2.activo = 1 LIMIT 1),
+               (SELECT zt3.tarifa_repartidor FROM zonas_tarifas zt3 WHERE zt3.nombre_zona = p.provincia AND zt3.activo = 1 LIMIT 1),
+               0
+           ) as tarifa_repartidor
     FROM entregas e
     INNER JOIN paquetes p ON e.paquete_id = p.id
     WHERE e.repartidor_id = ?
@@ -42,7 +49,14 @@ $stmt = $db->prepare("
         COUNT(CASE WHEN tipo_entrega = 'exitosa' THEN 1 END) as exitosas,
         COUNT(CASE WHEN tipo_entrega = 'rechazada' THEN 1 END) as rechazadas,
         COUNT(CASE WHEN tipo_entrega = 'no_encontrado' THEN 1 END) as no_encontrado,
-        SUM(CASE WHEN tipo_entrega = 'exitosa' THEN p.costo_envio ELSE 0 END) as total_ganado
+        SUM(CASE WHEN tipo_entrega = 'exitosa' THEN 
+            COALESCE(
+                (SELECT zt1.tarifa_repartidor FROM zonas_tarifas zt1 WHERE zt1.nombre_zona = p.distrito AND zt1.activo = 1 LIMIT 1),
+                (SELECT zt2.tarifa_repartidor FROM zonas_tarifas zt2 WHERE zt2.nombre_zona = p.ciudad AND zt2.activo = 1 LIMIT 1),
+                (SELECT zt3.tarifa_repartidor FROM zonas_tarifas zt3 WHERE zt3.nombre_zona = p.provincia AND zt3.activo = 1 LIMIT 1),
+                0
+            )
+        ELSE 0 END) as total_ganado
     FROM entregas e
     INNER JOIN paquetes p ON e.paquete_id = p.id
     WHERE e.repartidor_id = ?
@@ -233,7 +247,7 @@ $pageTitle = "Historial de Entregas";
                                             </td>
                                             <td>
                                                 <?php if ($entrega['tipo_entrega'] === 'exitosa'): ?>
-                                                    <strong class="text-success">S/ <?php echo number_format($entrega['costo_envio'] ?? 0, 2); ?></strong>
+                                                    <strong class="text-success">S/ <?php echo number_format($entrega['tarifa_repartidor'] ?? 0, 2); ?></strong>
                                                 <?php else: ?>
                                                     <span class="text-muted">-</span>
                                                 <?php endif; ?>

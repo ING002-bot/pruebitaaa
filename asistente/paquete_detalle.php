@@ -182,6 +182,12 @@ $pageTitle = 'Detalle del Paquete - ' . $paquete['codigo_seguimiento'];
                                     <td><?php echo $paquete['provincia']; ?></td>
                                 </tr>
                                 <?php endif; ?>
+                                <?php if ($paquete['distrito']): ?>
+                                <tr>
+                                    <th>Distrito:</th>
+                                    <td><?php echo $paquete['distrito']; ?></td>
+                                </tr>
+                                <?php endif; ?>
                             </table>
                         </div>
                     </div>

@@ -20,7 +20,7 @@ if ($_SESSION['rol'] === 'repartidor') {
     $params[] = $_SESSION['usuario_id'];
 }
 
-$sql = "SELECT e.*, p.codigo_seguimiento, p.destinatario_nombre, p.destinatario_telefono, p.direccion_completa,
+$sql = "SELECT e.*, p.codigo_seguimiento, p.destinatario_nombre, p.destinatario_telefono, p.direccion_completa, p.ciudad, p.provincia, p.distrito,
         u.nombre as repartidor_nombre, u.apellido as repartidor_apellido, u.telefono as repartidor_telefono
         FROM entregas e
         LEFT JOIN paquetes p ON e.paquete_id = p.id
@@ -63,6 +63,18 @@ if (!$entrega) {
             <tr>
                 <th>Dirección:</th>
                 <td><?php echo $entrega['direccion_completa']; ?></td>
+            </tr>
+            <tr>
+                <th>Ciudad:</th>
+                <td><?php echo $entrega['ciudad'] ?: '-'; ?></td>
+            </tr>
+            <tr>
+                <th>Provincia:</th>
+                <td><?php echo $entrega['provincia'] ?: '-'; ?></td>
+            </tr>
+            <tr>
+                <th>Distrito:</th>
+                <td><?php echo $entrega['distrito'] ?: '-'; ?></td>
             </tr>
         </table>
 
